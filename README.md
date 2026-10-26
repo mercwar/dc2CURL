@@ -53,7 +53,7 @@ A fully deployed Dark-Com-2 runtime environment consists of the following compon
 | `DarkComHeadless.dll` | Core Engine Library | Manages WebView2 execution, document origin bindings, and asynchronous fetch routing. |
 | `darkcom_browser_profile/` | Persistent Data Store | Automatically provisioned directory maintaining session cookies, cache, and browser state. |
 
-*Note: The target host operating system must have the **Microsoft Edge WebView2 Evergreen Runtime** installed.*
+##### *Note: The target host operating system must have the **Microsoft Edge WebView2 Evergreen Runtime** installed.*
 
 ---
 
