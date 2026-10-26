@@ -2,7 +2,6 @@
   "repo_owner": "mercwar",
   "repo_name": "dc2url",
   "version": "v1.0",
-  "raw_base_url": "https://raw.githubusercontent.com",
   "manifest_layout": {
     "root_files": [
       {"source": "favi-con.ico", "target": "favi-con.ico"},
