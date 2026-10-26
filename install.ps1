@@ -1,42 +1,60 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader (PowerShell irm / iex target)
+    dc2URL Root Staging Loader
+.DESCRIPTION
+    Safely downloads and executes the remote staging bootstrap script with TLS 1.2 enforcement,
+    structured logging, proper exit-code handling, and automatic temporary file cleanup.
 #>
 
+[CmdletBinding()]
+param()
+
+# Strict error handling and security baseline
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# Virtual Terminal Sequence Definitions (TrueColor RGB Match)
-$RST   = "$([char]27)[0m"
-$GRAD1 = "$([char]27)[38;2;255;102;0m"
-$GRAD3 = "$([char]27)[38;2;255;77;166m"
-$GOLD  = "$([char]27)[38;2;255;215;0m"
-$BLUE  = "$([char]27)[38;2;65;175;255m"
-$ICE   = "$([char]27)[38;2;155;225;255m"
-$MUTED = "$([char]27)[38;2;115;125;145m"
-$WHITE = "$([char]27)[38;2;240;240;250m"
+# Configuration
+$RepoUrl        = 'https://raw.githubusercontent.com/mercwar/dc2URL/main/install.bat'
+$TempDir        = [System.IO.Path]::GetTempPath()
+$UniqueId       = [Guid]::NewGuid().ToString('N').Substring(0, 8)
+$TempInstaller  = Join-Path -Path $TempDir -ChildPath "dc2_install_$UniqueId.bat"
 
-$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
-$TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
+function Write-StyledMessage {
+    param (
+        [Parameter(Mandatory)]
+        [string]$Level,
+        [Parameter(Mandatory)]
+        [string]$Message,
+        [ConsoleColor]$Color = 'Cyan'
+    )
+    Write-Host "[$Level] $Message" -ForegroundColor $Color
+}
 
-Clear-Host
-Write-Host ""
-Write-Host "${GRAD1}  ────────────────────────────────────────────────────────────────────────────────────"
-Write-Host "   ${GOLD}// ${WHITE}F I R E G E M   ${MUTED}■   ${GRAD3}D A R K - C O M - 2   ${MUTED}//   ${ICE}B O O T S T R A P   L O A D E R"
-Write-Host "${GRAD1}  ────────────────────────────────────────────────────────────────────────────────────"
-Write-Host "   ${MUTED}» ${BLUE}STAGE: ${WHITE}00 // INITIALIZATION PIPELINE"
-Write-Host "   ${MUTED}» ${GOLD}ACTION: ${WHITE}Downloading staging wrapper engine from GitHub..."
-Write-Host "${GRAD1}  ────────────────────────────────────────────────────────────────────────────────────${RST}"
+try {
+    Write-Host ("=" * 60) -ForegroundColor Cyan
+    Write-StyledMessage -Level "INFO" -Message "dc2URL :: BOOTSTRAP LOADER" -Color Cyan
+    Write-Host ("=" * 60) -ForegroundColor Cyan
 
-Invoke-WebRequest -Uri $RepoUrl -OutFile $TempInstaller
+    Write-StyledMessage -Level "INFO" -Message "Downloading staging wrapper engine from GitHub..." -Color Yellow
 
-Write-Host ""
-Write-Host "   ${MUTED}» ${BLUE}STATUS: ${WHITE}Payload acquired."
-Write-Host "   ${MUTED}» ${GOLD}ACTION: ${WHITE}Handing context over to interactive staging wrapper..."
-Write-Host ""
+    # Use WebRequest with basic parsing for maximum compatibility
+    Invoke-WebRequest -Uri $RepoUrl -OutFile $TempInstaller -UseBasicParsing
 
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`"" -Wait -NoNewWindow
+    Write-StyledMessage -Level "INFO" -Message "Launching interactive staging wrapper..." -Color Green
 
-if (Test-Path $TempInstaller) {
-    Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
+    # Execute cmd.exe safely waiting for completion
+    $Process = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`"" -Wait -NoNewWindow -PassThru
+
+    if ($Process.ExitCode -ne 0) {
+        throw "Installer exited with non-zero error code: $($Process.ExitCode)"
+    }
+}
+catch {
+    Write-StyledMessage -Level "ERROR" -Message $_.Exception.Message -Color Red
+    exit 1
+}
+finally {
+    if (Test-Path -LiteralPath $TempInstaller) {
+        Remove-Item -LiteralPath $TempInstaller -Force -ErrorAction SilentlyContinue
+    }
 }
