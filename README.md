@@ -24,8 +24,9 @@ Instant powershell installer:
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
 
-**Dark-Com-2** is a lightweight, high-performance command-line HTTP client and headless browser engine built on native Win32 API and pure C. 
+**Dark-Com-2** is a lightweight, high-performance command-line HTTP client and headless browser engine .
 
+- Built on native Win32 API and pure C.
 - Powered by the Microsoft Edge WebView2 Evergreen Runtime
 - It bridges standard cURL CLI semantics with a full Chromium execution core
 - Enabling automated telemetry, scriptable API testing 
