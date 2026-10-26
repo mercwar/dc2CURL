@@ -1,4 +1,10 @@
+
+
 # DARK-COM-2 :: High-Performance cURL-Compatible Headless Browser Engine
+
+```bash
+irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
+```
 
 **Dark-Com-2** is a lightweight, high-performance command-line HTTP client and headless browser engine built on native Win32 API and pure C. Powered by the Microsoft Edge WebView2 Evergreen Runtime, it bridges standard cURL CLI semantics with a full Chromium execution core, enabling automated telemetry, scriptable API testing, and persistent session management across local networks and remote hosts.
 
