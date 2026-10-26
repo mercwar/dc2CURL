@@ -52,13 +52,14 @@ echo.
 echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo   %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %GRAD3%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
 echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
-echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
-echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
+echo %GRAD1%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
+echo %GRAD2%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RST%
+echo %GRAD2%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RST%
+echo %GRAD3%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
+echo %GRAD3%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
 echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
+
 
 echo.
 echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3%//%RST% %GOLD%FIREGEM TECHNOLOGY%RST%
@@ -290,30 +291,70 @@ call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
-for /f "usebackq tokens=1,2 delims=|" %%A in ('powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.PSObject.Properties.Value | ForEach-Object { $_ } | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul') do (
+rem echo [INFO] Beginning manifest processing loop...
+rem echo [DEBUG] Reading data from: %OUTPUT_FILE%
+rem echo [DEBUG] Target Directory: %TARGET_DIR%
+rem echo [DEBUG] Selected Downloader: %SELECTED_DL%
+
+set /a "LOOP_COUNT=0"
+
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.PSObject.Properties.Value | ForEach-Object { $_ } | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+    set /a "LOOP_COUNT+=1"
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
-     
-    for %%F in ("%TARGET_DIR%\!TGT_FILE!") do (
-        if not exist "%%~dpF" mkdir "%%~dpF"
+  
+
+    for %%F in ( "%TARGET_DIR%\!TGT_FILE!" ) do (
+        if not exist "%%~dpF" (
+       rem     echo [INFO] Creating missing directory structure: %%~dpF
+            mkdir "%%~dpF"
+        )
     )
 
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/v1.0/!SRC_FILE!"
-     
-    if /i "%SELECTED_DL%"=="powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('!FILE_URL!', '%TARGET_DIR%\!TGT_FILE!')" >nul 2>&1
-    ) else if /i "%SELECTED_DL%"=="bitsadmin" (
-        bitsadmin /transfer FileDownload_!RANDOM! /download /priority normal "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!" >nul 2>&1
-    ) else if /i "%SELECTED_DL%"=="python" (
-        python -c "import urllib.request; urllib.request.urlretrieve('!FILE_URL!', r'%TARGET_DIR%\!TGT_FILE!')" >nul 2>&1
-    ) else if /i "%SELECTED_DL%"=="dc2url" (
-        dc2url "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!" >nul 2>&1
+  rem  echo [DEBUG] Generated Download URL: !FILE_URL!
+  rem  echo [DEBUG] Target Absolute Path: %TARGET_DIR%\!TGT_FILE!
+
+    if /i "%SELECTED_DL%" == "powershell" (
+     rem  echo [INFO] Executing PowerShell WebClient download method...
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile( '!FILE_URL!' , '%TARGET_DIR%\!TGT_FILE!' )"
+    ) else if /i "%SELECTED_DL%" == "bitsadmin" (
+      rem  echo [INFO] Executing BITSAdmin transfer download method...
+        bitsadmin /transfer "FileDownload_!RANDOM!" /download /priority normal "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
+    ) else if /i "%SELECTED_DL%" == "python" (
+     rem   echo [INFO] Executing Python urllib download method...
+        python -c "import urllib.request; urllib.request.urlretrieve( '!FILE_URL!' , r'%TARGET_DIR%\!TGT_FILE!' )"
+    ) else if /i "%SELECTED_DL%" == "dc2url" (
+    rem    echo [INFO] Executing dc2url native module alias download method...
+        dc2url "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
     ) else (
-        curl -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!" 2>nul
+     rem   echo [INFO] Falling back to default cURL engine download method...
+        curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
+    )
+
+    if exist "%TARGET_DIR%\!TGT_FILE!" (
+    rem    echo [SUCCESS] File successfully verified on disk at destination.
+    ) else (
+    rem    echo [ERROR] Destination file missing. Download routine failed or output stream dropped.
     )
 )
 
-move /y "%OUTPUT_FILE%" "%TARGET_DIR%\" >nul 2>&1
+rem echo.
+rem echo ==========================================================
+rem echo [INFO] Loop sequence finished. Total structural records processed: !LOOP_COUNT!
+rem echo [INFO] Relocating operational tracking manifest document...
+
+if exist "%OUTPUT_FILE%" (
+  rem  echo [DEBUG] Moving manifest %OUTPUT_FILE% to %TARGET_DIR%\
+    move /y "%OUTPUT_FILE%" "%TARGET_DIR%\"
+    if !errorlevel! equ 0 (
+     rem    echo [SUCCESS] Manifest successfully archived.
+    ) else (
+     rem    echo [ERROR] Move command failed with errorlevel !errorlevel!
+    )
+) else (
+  rem   echo [WARNING] Manifest file %OUTPUT_FILE% was not found for relocation.
+)
 
 :: ============================================================
 :: PHASE 4: APPLICATION HANDOFF
