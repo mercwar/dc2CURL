@@ -10,7 +10,7 @@
 
 ---
 
-# ✨ dc2URL bY Joe Tron
+# ✨ Dark-Com-2 dc2URL 
 
 # DARK-COM-2 :: High-Performance cURL-Compatible Headless Browser Engine
 
