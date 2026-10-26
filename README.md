@@ -15,6 +15,8 @@
 # DARK-COM-2 :: High-Performance cURL-Compatible Headless Browser Engine
 
 Instant powershell installer:
+Open your MS windows 11 powershell paste the below command in the window press enter and follow the installation steps.
+
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
