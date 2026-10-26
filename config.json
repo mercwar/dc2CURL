@@ -1,0 +1,22 @@
+{
+  "repo_owner": "mercwar",
+  "repo_name": "dc2url",
+  "version": "v1.0",
+  "raw_base_url": "https://raw.githubusercontent.com",
+  "manifest_layout": {
+    "root_files": [
+      {"source": "favi-con.ico", "target": "favi-con.ico"},
+      {"source": "echo.bat", "target": "echo.bat"},
+      {"source": "readme.md", "target": "readme.md"}
+    ],
+    "branch_files": [
+      {"source": "install.bat", "target": "install.bat"},
+      {"source": "uninstall.bat", "target": "uninstall.bat"}
+    ],
+    "binary_exec": [
+      {"source": "exec/dc2url.exe", "target": "exec/dc2url.exe"},
+      {"source": "exec/darkcomheadless.dll", "target": "exec/darkcomheadless.dll"},
+      {"source": "exec/webview2loader.dll", "target": "exec/webview2loader.dll"}
+    ]
+  }
+}
