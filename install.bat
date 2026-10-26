@@ -4,22 +4,30 @@ chcp 65001 >nul 2>&1
 
 :: ============================================================
 :: FIREGEM // DARK-COM-2
-:: GRAPHICS: ORANGE • GOLD • MAGENTA • ELECTRIC BLUE
+:: GRAPHICS: REVERSED GRADIENT (DARK ORANGE TO BRIGHT YELLOW)
 :: DOUBLE-BUFFERED STATE MACHINE ENGINE
 :: ============================================================
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
 
-set "GRAD1=%ESC%[38;2;255;102;0m"
-set "GRAD2=%ESC%[38;2;255;140;26m"
-set "GRAD3=%ESC%[38;2;255;77;166m"
-set "GOLD=%ESC%[38;2;255;215;0m"
-set "BLUE=%ESC%[38;2;65;175;255m"
-set "ICE=%ESC%[38;2;155;225;255m"
-set "GREEN=%ESC%[38;2;80;235;155m"
+:: Smooth 6-Stage Orange-to-Yellow Transitional Profile
+set "GRAD1=%ESC%[38;2;255;90;0m"      :: Deep Flame Orange (Row 1)
+set "GRAD2=%ESC%[38;2;255;125;0m"     :: Burnt Orange      (Row 2)
+set "GRAD3=%ESC%[38;2;255;160;0m"     :: Golden Orange     (Row 3)
+set "GRAD4=%ESC%[38;2;255;195;0m"     :: Amber Gold        (Row 4)
+set "GRAD5=%ESC%[38;2;255;225;0m"     :: Warm Yellow       (Row 5)
+set "GRAD6=%ESC%[38;2;255;255;0m"     :: Bright Yellow     (Row 6)
+
+set "GOLD=%ESC%[38;2;255;210;0m"
+set "BLUE=%ESC%[38;2;255;140;0m"
+set "ICE=%ESC%[38;2;255;230;0m"
+set "GREEN=%ESC%[38;2;255;190;0m"
 set "MUTED=%ESC%[38;2;115;125;145m"
 set "WHITE=%ESC%[38;2;240;240;250m"
 set "RST=%ESC%[0m"
+
+:: Line rule matching the dark orange origin
+set "LINE_COLOR=%ESC%[38;2;255;90;0m"
 
 mode con cols=100 lines=50
 color 00
@@ -38,7 +46,7 @@ if %errorlevel% neq 0 (
 
 set "REPO_OWNER=mercwar"
 set "REPO_NAME=dc2url"
-set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/config.json"
+set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com"
 set "OUTPUT_FILE=config.json"
 
 goto :START_EXECUTION
@@ -49,22 +57,21 @@ goto :START_EXECUTION
 :RENDER_FRAME
 cls
 echo.
-echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo   %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %GRAD3%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
-echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
+echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
+echo   %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
+echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
-echo %GRAD1%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
-echo %GRAD2%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RST%
-echo %GRAD2%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RST%
-echo %GRAD3%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
-echo %GRAD3%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
-echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-
+echo %GRAD2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
+echo %GRAD3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RST%
+echo %GRAD4%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RST%
+echo %GRAD5%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
+echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
+echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 
 echo.
 echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3%//%RST% %GOLD%FIREGEM TECHNOLOGY%RST%
 echo %MUTED%  STATUS: %FRAME_STATUS%%RST%
-echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
+echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo.
 echo %WHITE%%FRAME_BODY_1%%RST%
 echo %WHITE%%FRAME_BODY_2%%RST%
@@ -74,7 +81,7 @@ echo %MUTED%  📊 STAGE:%RST%
 echo   %MUTED%[%RST%%FRAME_BAR_COL%%FRAME_BAR_FILL%%MUTED%%FRAME_BAR_EMPTY%%MUTED%]%RST% %GOLD%%FRAME_PCT%%%%%%RST%
 echo.
 echo   %MUTED%» %BLUE%PHASE: %FRAME_PHASE%%RST%
-echo %GRAD1%  ────────────────────────────────────────────────────────────────────────────────────%RST%
+echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 goto :eof
 
 
