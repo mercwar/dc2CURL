@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Configuration
-$RepoUrl      = 'https://raw.githubusercontent.com/mercwar/dc2url/main/install.bat'
+$RepoUrl      = 'https://raw.githubusercontent.com/mercwar/dc2url/main/launcher.bat'
 $TempDir      = [System.IO.Path]::GetTempPath()
 $UniqueId     = [Guid]::NewGuid().ToString('N').Substring(0, 8)
 $TempInstaller = Join-Path -Path $TempDir -ChildPath "dc2_install_$UniqueId.bat"
