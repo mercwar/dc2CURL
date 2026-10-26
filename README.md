@@ -177,7 +177,7 @@ If you prefer to clone the repository or manage the files manually:
 #### Local Installer Script Source Code
 *(Paste your modified batch code block right below this line)*
 
-
+```
 mercwar/dc2URL/
 └── v1.0/
     ├── install.bat      <-- Unified Master Handoff Wrapper
@@ -210,3 +210,4 @@ mercwar/dc2URL/
         ├── git.bat
         ├── copy.bat
         └── reg.bat
+```
