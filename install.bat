@@ -1,5 +1,23 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal DisableDelayedExpansion
+
+:: Force CMD Code Page to UTF-8 & Default Console Color
+chcp 65001 >nul 2>&1
+color 0E
+
+:: Enable ANSI Virtual Terminal Processing for RGB Colors
+reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: Define ANSI TrueColor Escapes (Fire-Gem Orange to Bright Yellow Gradient)
+for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
+set "RESET=%E%[0m"
+set "BG_GLASS=%E%[48;2;10;10;12m"
+set "O1=%E%[38;2;255;68;0m"
+set "O2=%E%[38;2;255;110;0m"
+set "O3=%E%[38;2;255;153;0m"
+set "Y1=%E%[38;2;255;200;0m"
+set "Y2=%E%[38;2;255;235;0m"
+set "TXT=%E%[38;2;240;240;240m"
 
 :: =========================================================================
 :: CONFIGURATION & MANIFEST DEFINITIONS
@@ -20,25 +38,36 @@ set "FILE_9=shell\menu.bat"
 set "FILE_10=shell\reg.bat"
 set "FILE_COUNT=10"
 
-echo =========================================================================
-echo               dc2CURL Staging Wrapper Engine
-echo =========================================================================
+cls
+echo %BG_GLASS%
+cls
+
+echo.
+echo %O1%    ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
+echo %O2%    ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
+echo %O3%    ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
+echo %Y1%    ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
+echo %Y2%    ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
+echo %Y2%    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+echo %O2%============================================================%RESET%%BG_GLASS%
+echo %Y2%            dc2CURL :: STAGING WRAPPER ENGINE%RESET%%BG_GLASS%
+echo %O2%============================================================%RESET%%BG_GLASS%
 echo.
 
 :: 1. NETWORK CONNECTIVITY CHECK
 for /F %%A in ('%SystemRoot%\System32\ping.exe 1.1.1.1 -n 1 ^| %SystemRoot%\System32\find.exe /C "="') do (set "CONNECTED=%%A")
-if !CONNECTED! LSS 2 (
-    echo [ERROR] No active internet connection detected.
+if %CONNECTED% LSS 2 (
+    echo %O1%[ERROR]%TXT% No active internet connection detected.%RESET%%BG_GLASS%
     goto :BROWSER_FALLBACK
 )
-echo [SUCCESS] Network connectivity verified.
+echo %Y1%[SUCCESS]%TXT% Network connectivity verified.%RESET%%BG_GLASS%
 echo.
 
 :: 2. PROMPT USER FOR TARGET INSTALLATION PATH
 :PROMPT_PATH
-echo Choose your preferred local installation directory:
-echo [1] Install locally to default user directory (%USERPROFILE%\dc2CURL)
-echo [2] Enter a custom absolute file system path
+echo %Y2%Choose your preferred local installation directory:%RESET%%BG_GLASS%
+echo %TXT%[1] Install locally to default user directory (%USERPROFILE%\dc2CURL)%RESET%%BG_GLASS%
+echo %TXT%[2] Enter a custom absolute file system path%RESET%%BG_GLASS%
 echo.
 set "PATH_CHOICE="
 set /p "PATH_CHOICE=Select path option [1-2]: "
@@ -53,7 +82,7 @@ if "%PATH_CHOICE%"=="1" (
 )
 
 set "INSTALL_DIR=%INSTALL_DIR:"=%"
-echo [TARGET] Installation directory set to: %INSTALL_DIR%
+echo %O2%[TARGET]%TXT% Installation directory set to: %INSTALL_DIR%%RESET%%BG_GLASS%
 echo.
 
 :: 3. SCAN SYSTEM FOR EXISTING dc2URL INSTALLATION
@@ -74,6 +103,7 @@ for %%P in (
 
 :: 4. INVENTORY AVAILABLE DOWNLOAD ENGINES & WINDOWS DEPLOYMENT UTILITIES
 :SCAN_ENGINES
+setlocal Enabledelayedexpansion
 set "OPT_COUNT=0"
 
 :: [1] Local dc2URL Installation (if detected)
@@ -139,21 +169,22 @@ set /p "ENGINE_CHOICE=Select a mechanism option index [1-!OPT_COUNT!]: "
 if not defined ENGINE_CHOICE goto :CHOOSE_ENGINE
 
 set "CHOSEN_ENGINE=!OPT_%ENGINE_CHOICE%!"
+endlocal & set "CHOSEN_ENGINE=%CHOSEN_ENGINE%"
 
 if "%CHOSEN_ENGINE%"=="browser" goto :BROWSER_FALLBACK
 
 :: Handle Local dc2URL Selection
 if "%CHOSEN_ENGINE%"=="local_dc2url" (
-    echo [LOCAL] Using existing dc2URL installation at: %FOUND_DC2URL%
+    echo %O2%[LOCAL]%TXT% Using existing dc2URL installation at: %FOUND_DC2URL%%RESET%%BG_GLASS%
     cd /d "%FOUND_DC2URL%"
     if exist "install.bat" (
         echo.
-        echo [LAUNCH] Handing off control execution to %FOUND_DC2URL%\install.bat...
-        echo =========================================================================
+        echo %Y2%[LAUNCH]%TXT% Handing off control execution to %FOUND_DC2URL%\install.bat...%RESET%%BG_GLASS%
+        echo %O2%============================================================%RESET%%BG_GLASS%
         call install.bat
-        exit /b !errorlevel!
+        exit /b %errorlevel%
     ) else (
-        echo [ERROR] Selected local path does not contain install.bat.
+        echo %O1%[ERROR]%TXT% Selected local path does not contain install.bat.%RESET%%BG_GLASS%
         goto :SCAN_ENGINES
     )
 )
@@ -161,7 +192,7 @@ if "%CHOSEN_ENGINE%"=="local_dc2url" (
 :: Handle Winget helper: Install/Update Git, then re-display engine menu
 if "%CHOSEN_ENGINE%"=="winget" (
     call :InstallGitViaWinget
-    echo [RE-SCAN] Environment updated. Returning to download engine selection menu...
+    echo %Y1%[RE-SCAN]%TXT% Environment updated. Returning to download engine selection menu...%RESET%%BG_GLASS%
     echo.
     goto :SCAN_ENGINES
 )
@@ -169,20 +200,20 @@ if "%CHOSEN_ENGINE%"=="winget" (
 :: 5. EXECUTE ISOLATED CONTENT DOWNLOAD PIPELINE
 mkdir "%INSTALL_DIR%" 2>nul
 call :DownloadV10Contents "%CHOSEN_ENGINE%"
-if !errorlevel! neq 0 (
-    echo [WARNING] Chosen download method failed execution.
+if %errorlevel% neq 0 (
+    echo %O1%[WARNING]%TXT% Chosen download method failed execution.%RESET%%BG_GLASS%
     goto :BROWSER_FALLBACK
 )
 
 :: 6. EXECUTE DOWNLOADED CORE INSTALLER
 if not exist "%INSTALL_DIR%\install.bat" (
-    echo [ERROR] Target validation failed. install.bat was not copied over.
+    echo %O1%[ERROR]%TXT% Target validation failed. install.bat was not copied over.%RESET%%BG_GLASS%
     goto :BROWSER_FALLBACK
 )
 
 echo.
-echo [LAUNCH] Handing off control execution to %INSTALL_DIR%\install.bat...
-echo =========================================================================
+echo %Y2%[LAUNCH]%TXT% Handing off control execution to %INSTALL_DIR%\install.bat...%RESET%%BG_GLASS%
+echo %O2%============================================================%RESET%%BG_GLASS%
 cd /d "%INSTALL_DIR%"
 call install.bat
 exit /b %errorlevel%
@@ -193,9 +224,10 @@ exit /b %errorlevel%
 :: =========================================================================
 :DownloadV10Contents
 set "METHOD=%~1"
+setlocal Enabledelayedexpansion
 
 if "%METHOD%"=="dc2url" (
-    echo [EXECUTE] Routing payload through dc2URL WebView2 streaming protocol...
+    echo %Y1%[EXECUTE]%TXT% Routing payload through dc2URL WebView2 streaming protocol...%RESET%%BG_GLASS%
     for /L %%I in (1,1,%FILE_COUNT%) do (
         set "FILE_NAME=!FILE_%%I!"
         set "URL_PATH=!FILE_NAME:\=/!"
@@ -209,7 +241,7 @@ if "%METHOD%"=="dc2url" (
 )
 
 if "%METHOD%"=="git" (
-    echo [EXECUTE] Initiating partial tree sparse-checkout...
+    echo %Y1%[EXECUTE]%TXT% Initiating partial tree sparse-checkout...%RESET%%BG_GLASS%
     set "TEMP_STAGE=%TEMP%\dc2_checkout_%RANDOM%"
     
     rmdir /s /q "!TEMP_STAGE!" >nul 2>&1
@@ -244,7 +276,7 @@ if "%METHOD%"=="git" (
 )
 
 if "%METHOD%"=="curl" (
-    echo [EXECUTE] Mapping file payloads over individual cURL stream sockets...
+    echo %Y1%[EXECUTE]%TXT% Mapping file payloads over individual cURL stream sockets...%RESET%%BG_GLASS%
     for /L %%I in (1,1,%FILE_COUNT%) do (
         set "FILE_NAME=!FILE_%%I!"
         set "URL_PATH=!FILE_NAME:\=/!"
@@ -258,7 +290,7 @@ if "%METHOD%"=="curl" (
 )
 
 if "%METHOD%"=="powershell" (
-    echo [EXECUTE] Mapping file payloads via PowerShell WebRequest pipelines...
+    echo %Y1%[EXECUTE]%TXT% Mapping file payloads via PowerShell WebRequest pipelines...%RESET%%BG_GLASS%
     for /L %%I in (1,1,%FILE_COUNT%) do (
         set "FILE_NAME=!FILE_%%I!"
         set "URL_PATH=!FILE_NAME:\=/!"
@@ -272,7 +304,7 @@ if "%METHOD%"=="powershell" (
 )
 
 if "%METHOD%"=="bitsadmin" (
-    echo [EXECUTE] Provisioning file payloads via BITSAdmin background service...
+    echo %Y1%[EXECUTE]%TXT% Provisioning file payloads via BITSAdmin background service...%RESET%%BG_GLASS%
     for /L %%I in (1,1,%FILE_COUNT%) do (
         set "FILE_NAME=!FILE_%%I!"
         set "URL_PATH=!FILE_NAME:\=/!"
@@ -284,6 +316,7 @@ if "%METHOD%"=="bitsadmin" (
     )
     exit /b 0
 )
+endlocal
 exit /b 1
 
 
@@ -303,7 +336,7 @@ set "BAR="
 for /L %%B in (1,1,!FILLED!) do set "BAR=!BAR!#"
 for /L %%B in (1,1,!EMPTY!) do set "BAR=!BAR!."
 
-<nul set /p "=   [ !BAR! ] !PCT%%! (!CUR!/!MAX!) - !FNAME!                       "
+<nul set /p "=    %Y2%[ !BAR! ]%RESET% %O2%!PCT!%%%RESET% (%CUR%/%MAX%) - !FNAME!                         "
 echo.
 exit /b 0
 
@@ -312,16 +345,16 @@ exit /b 0
 :: FUNCTION SECTION: InstallGitViaWinget
 :: =========================================================================
 :InstallGitViaWinget
-echo [WINGET] Locating Windows Package Manager engine...
+echo %O2%[WINGET]%TXT% Locating Windows Package Manager engine...%RESET%%BG_GLASS%
 where winget >nul 2>nul
-if !errorlevel! neq 0 (
-    echo [ERROR] Winget installer was not found on this version of Windows.
+if %errorlevel% neq 0 (
+    echo %O1%[ERROR]%TXT% Winget installer was not found on this version of Windows.%RESET%%BG_GLASS%
     pause
     exit /b 1
 )
-echo [EXECUTE] Provisioning official Git package layer from community manifests...
+echo %Y1%[EXECUTE]%TXT% Provisioning official Git package layer from community manifests...%RESET%%BG_GLASS%
 winget install --id Git.Git -e --source winget
-echo [SUCCESS] Winget package setup task finished.
+echo %Y2%[SUCCESS]%TXT% Winget package setup task finished.%RESET%%BG_GLASS%
 exit /b 0
 
 
@@ -330,11 +363,11 @@ exit /b 0
 :: =========================================================================
 :BROWSER_FALLBACK
 echo.
-echo =========================================================================
-echo [FALLBACK ROUTE ACTIVATED]
+echo %O2%============================================================%RESET%%BG_GLASS%
+echo %Y2%[FALLBACK ROUTE ACTIVATED]%RESET%%BG_GLASS%
 echo Automated shell installation tools were unable to complete processing.
 echo We will now attempt to open your browser to download manually.
-echo =========================================================================
+echo %O2%============================================================%RESET%%BG_GLASS%
 echo.
 pause
 echo Launching default web browser to repository root index...
