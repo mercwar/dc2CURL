@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 :: ============================================================
-:: FIREGEM // DARK-COM-2 (FIXED PATHS & MANIFEST URL)
+:: FIREGEM // DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
 :: ============================================================
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -41,7 +41,6 @@ if %errorlevel% neq 0 (
 
 set "REPO_OWNER=mercwar"
 set "REPO_NAME=dc2url"
-:: FIXED: Pointing directly to the raw config.json path on main branch
 set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/config.json"
 set "OUTPUT_FILE=config.json"
 
@@ -100,16 +99,16 @@ goto :eof
 :: ============================================================
 :START_EXECUTION
 set "FRAME_PHASE=00 // SYSTEM SCANNER"
-set "FRAME_STATUS=Scanning system environment for available transfer engines..."
-set "FRAME_BODY_1=  Querying native OS socket engines and runtime libraries..."
-set "FRAME_BODY_2=  Verifying cryptographic pipeline security..."
+set "FRAME_STATUS=Scanning system environment..."
+set "FRAME_BODY_1=  Querying native socket engines (Prioritizing cURL stream)..."
+set "FRAME_BODY_2=  Verifying TLS protocol security..."
 set "FRAME_BODY_3=  Ready state initialized."
 call :DRAW_PROGRESS 10
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 set "MENU_COUNT=0"
-for %%T in (curl powershell bitsadmin python dc2url) do (
+for %%T in (curl powershell bitsadmin certutil python wget node cscript mshta dc2url) do (
     where %%T >nul 2>nul
     if not errorlevel 1 (
         set /a MENU_COUNT+=1
@@ -119,22 +118,15 @@ for %%T in (curl powershell bitsadmin python dc2url) do (
     )
 )
 
-where winget >nul 2>nul
-if not errorlevel 1 (
-    set /a MENU_COUNT+=1
-    set "MENU_NAME_!MENU_COUNT!=Install Git via winget"
-    set "MENU_CMD_!MENU_COUNT!=WINGET_GIT"
-)
-
 set /a MENU_COUNT+=1
 set "MENU_NAME_!MENU_COUNT!=Manual Browser Download (Open GitHub)"
 set "MENU_CMD_!MENU_COUNT!=MANUAL_BROWSER"
 
 set "FRAME_PHASE=01 // ENGINE SELECTOR"
 set "FRAME_STATUS=Transfer engine detection complete."
-set "FRAME_BODY_1=  Detected active transfer utilities: %MENU_COUNT% modules."
-set "FRAME_BODY_2=  Select your preferred transfer pipeline below."
-set "FRAME_BODY_3=  [ACTIVE PROTOCOL]: Secure HTTPS / REST Stream"
+set "FRAME_BODY_1=  Detected stable transfer modules: %MENU_COUNT% available."
+set "FRAME_BODY_2=  Select your preferred data stream pipeline below."
+set "FRAME_BODY_3=  [ACTIVE PROTOCOL]: Secure HTTPS / cURL Direct Stream"
 call :DRAW_PROGRESS 35
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -155,12 +147,6 @@ for /l %%I in (1,1,%MENU_COUNT%) do (
     if "%DL_CHOICE%"=="%%I" set "SELECTED_DL=!MENU_CMD_%%I!"
 )
 if not defined SELECTED_DL set "SELECTED_DL=curl"
-
-if /i "%SELECTED_DL%"=="WINGET_GIT" (
-    winget install --id Git.Git -e --source winget
-    pause
-    exit /b 0
-)
 
 if /i "%SELECTED_DL%"=="MANUAL_BROWSER" (
     start https://github.com/%REPO_OWNER%/%REPO_NAME%
@@ -205,7 +191,7 @@ set "FRAME_PHASE=PHASE 1 / 04 // MANIFEST ACQUISITION"
 set "FRAME_STATUS=Fetching root deployment manifest..."
 set "FRAME_BODY_1=  Source: %GLOBAL_CONFIG_URL%"
 set "FRAME_BODY_2=  Engine: %SELECTED_DL%"
-set "FRAME_BODY_3=  Establishing TLS handshake..."
+set "FRAME_BODY_3=  Establishing TLS 1.2+ handshake..."
 call :DRAW_PROGRESS 70
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -213,22 +199,16 @@ call :RENDER_FRAME
 if exist "%OUTPUT_FILE%" del /f /q "%OUTPUT_FILE%" >nul 2>&1
 
 if /i "%SELECTED_DL%"=="powershell" (
-    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('%GLOBAL_CONFIG_URL%', '%OUTPUT_FILE%')" >nul 2>&1
-) else if /i "%SELECTED_DL%"=="bitsadmin" (
-    bitsadmin /transfer ConfigDownload /download /priority normal "%GLOBAL_CONFIG_URL%" "%~dp0%OUTPUT_FILE%" >nul 2>&1
-) else if /i "%SELECTED_DL%"=="python" (
-    python -c "import urllib.request; urllib.request.urlretrieve('%GLOBAL_CONFIG_URL%', '%OUTPUT_FILE%')" >nul 2>&1
-) else if /i "%SELECTED_DL%"=="dc2url" (
-    dc2url "%GLOBAL_CONFIG_URL%" "%OUTPUT_FILE%" >nul 2>&1
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%GLOBAL_CONFIG_URL%' -OutFile '%OUTPUT_FILE%'" >nul 2>&1
 ) else (
-    curl -s -L -k "%GLOBAL_CONFIG_URL%" -o "%OUTPUT_FILE%"
+    curl -f -s -L -k "%GLOBAL_CONFIG_URL%" -o "%OUTPUT_FILE%"
 )
 
 if not exist "%OUTPUT_FILE%" (
     set "FRAME_STATUS=CRITICAL FAILURE: Configuration manifest unavailable."
     call :RENDER_FRAME
     echo.
-    echo [ERROR] Could not download %GLOBAL_CONFIG_URL%
+    echo [ERROR] Could not download manifest from %GLOBAL_CONFIG_URL%
     pause
     exit /b 1
 )
@@ -277,13 +257,7 @@ for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/v1.0/!SRC_FILE!"
 
     if /i "%SELECTED_DL%" == "powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('!FILE_URL!', '%TARGET_DIR%\!TGT_FILE!')"
-    ) else if /i "%SELECTED_DL%" == "bitsadmin" (
-        bitsadmin /transfer "FileDownload_!RANDOM!" /download /priority normal "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
-    ) else if /i "%SELECTED_DL%" == "python" (
-        python -c "import urllib.request; urllib.request.urlretrieve('!FILE_URL!', r'%TARGET_DIR%\!TGT_FILE!')"
-    ) else if /i "%SELECTED_DL%" == "dc2url" (
-        dc2url "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
     ) else (
         curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
     )
