@@ -14,8 +14,8 @@
     ],
     "binary_exec": [
       {"source": "exec/dc2url.exe", "target": "exec/dc2url.exe"},
-      {"source": "exec/DarkComHeadless.dll.dll", "target": "exec/DarkComHeadless.dll.dll"},
-      {"source": "exec/WebView2Loader.dll.dll", "target": "exec/WebView2Loader.dll.dll"}
+      {"source": "exec/DarkComHeadless.dll", "target": "exec/DarkComHeadless.dll"},
+      {"source": "exec/WebView2Loader.dll", "target": "exec/WebView2Loader.dll"}
     ]
   }
 }
