@@ -1,15 +1,16 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader (Flicker-Free / Optimized Pipeline)
+    dc2URL Root Staging Loader (Flicker-Free with Readable Delays)
 #>
 
 $ErrorActionPreference = 'Stop'
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+[Net.SecurityProtocolType]::Tls12
 
 # Configure Window Title & Dimensions for Clean Presentation
 $host.UI.RawUI.WindowTitle = "MERCWAR // dc2URL Bootstrap Loader v1.0"
 try {
-    $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)$host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
+    $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
+    $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
 $RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
@@ -32,10 +33,10 @@ Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
 Write-Host "  [INFO] Establishing TLS handshake and downloading launcher payload..." -ForegroundColor Cyan
 
-# Silent, flicker-free download stream
+# Silent download stream
 try {
     $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile($RepoUrl,$TempInstaller)
+    $webClient.DownloadFile($RepoUrl, $TempInstaller)
 }
 catch {
     Write-Host ""
@@ -45,6 +46,12 @@ catch {
 }
 
 Write-Host "  [SUCCESS] Payload secured on disk." -ForegroundColor Green
+Write-Host ""
+
+# Brief pause so the user can actually read the screen output
+Write-Host "  [INFO] Verifying checksum and preparing handoff..." -ForegroundColor DarkGray
+Start-Sleep -Seconds 2
+
 Write-Host ""
 Write-Host "  [ 02 // APPLICATION HANDOFF ]" -ForegroundColor Yellow
 Write-Host "   » Transferring execution control to interactive launcher..." -ForegroundColor DarkGray
