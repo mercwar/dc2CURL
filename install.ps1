@@ -16,7 +16,7 @@ $ICE   = "$([char]27)[38;2;155;225;255m"
 $MUTED = "$([char]27)[38;2;115;125;145m"
 $WHITE = "$([char]27)[38;2;240;240;250m"
 
-$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.bat"
+$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
 Clear-Host
