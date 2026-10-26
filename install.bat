@@ -22,8 +22,8 @@ set "TXT=%E%[38;2;240;240;240m"
 :: =========================================================================
 :: CONFIGURATION & MANIFEST DEFINITIONS
 :: =========================================================================
-set "REPO_BROWSER_URL=https://github.com/mercwar/dc2URL"
-set "RAW_BASE_URL=https://raw.githubusercontent.com/mercwar/dc2URL/main/v1.0"
+set "REPO_BROWSER_URL=https://github.com/mercwar/dc2url"
+set "RAW_BASE_URL=https://raw.githubusercontent.com/mercwar/dc2url/main"
 
 :: Complete repository file manifest mapped to actual directory structure
 set "FILE_1=favi-con.ico"
