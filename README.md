@@ -10,7 +10,7 @@
 
 ---
 
-# ✨ Dark-Com-2 dc2URL 
+# ✨ Dark-Com-2 dc2url
 
 # DARK-COM-2 :: High-Performance cURL-Compatible Headless Browser Engine
 
