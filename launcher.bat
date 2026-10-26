@@ -3,20 +3,17 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 :: ============================================================
-:: FIREGEM // DARK-COM-2
-:: GRAPHICS: REVERSED GRADIENT (DARK ORANGE TO BRIGHT YELLOW)
-:: DOUBLE-BUFFERED STATE MACHINE ENGINE
+:: FIREGEM // DARK-COM-2 (FIXED PATHS & MANIFEST URL)
 :: ============================================================
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
 
-:: Smooth 6-Stage Orange-to-Yellow Transitional Profile
-set "GRAD1=%ESC%[38;2;255;90;0m"      :: Deep Flame Orange (Row 1)
-set "GRAD2=%ESC%[38;2;255;125;0m"     :: Burnt Orange      (Row 2)
-set "GRAD3=%ESC%[38;2;255;160;0m"     :: Golden Orange     (Row 3)
-set "GRAD4=%ESC%[38;2;255;195;0m"     :: Amber Gold        (Row 4)
-set "GRAD5=%ESC%[38;2;255;225;0m"     :: Warm Yellow       (Row 5)
-set "GRAD6=%ESC%[38;2;255;255;0m"     :: Bright Yellow     (Row 6)
+set "GRAD1=%ESC%[38;2;255;90;0m"
+set "GRAD2=%ESC%[38;2;255;125;0m"
+set "GRAD3=%ESC%[38;2;255;160;0m"
+set "GRAD4=%ESC%[38;2;255;195;0m"
+set "GRAD5=%ESC%[38;2;255;225;0m"
+set "GRAD6=%ESC%[38;2;255;255;0m"
 
 set "GOLD=%ESC%[38;2;255;210;0m"
 set "BLUE=%ESC%[38;2;255;140;0m"
@@ -25,18 +22,16 @@ set "GREEN=%ESC%[38;2;255;190;0m"
 set "MUTED=%ESC%[38;2;115;125;145m"
 set "WHITE=%ESC%[38;2;240;240;250m"
 set "RST=%ESC%[0m"
-
-:: Line rule matching the dark orange origin
 set "LINE_COLOR=%ESC%[38;2;255;90;0m"
 
 mode con cols=100 lines=50
 color 00
-title  DARK-COM-2 DYNAMIC dc2url KERNEL v1.0
+title DARK-COM-2 DYNAMIC dc2url KERNEL v1.0
 
 cd /d "%~dp0"
 
 :: ============================================================
-:: NOTEPAD++ ROBUST SELF-ELEVATION PIPELINE
+:: SELF-ELEVATION PIPELINE
 :: ============================================================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -46,13 +41,14 @@ if %errorlevel% neq 0 (
 
 set "REPO_OWNER=mercwar"
 set "REPO_NAME=dc2url"
-set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com"
+:: FIXED: Pointing directly to the raw config.json path on main branch
+set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/config.json"
 set "OUTPUT_FILE=config.json"
 
 goto :START_EXECUTION
 
 :: ============================================================
-:: FRAME BUFFER SUBROUTINE (CLEARS SCREEN & REDRAWS TOP BANNER)
+:: FRAME BUFFER SUBROUTINE
 :: ============================================================
 :RENDER_FRAME
 cls
@@ -67,7 +63,6 @@ echo %GRAD4%        ██║  ██║██╔══██║██╔══�
 echo %GRAD5%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
 echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-
 echo.
 echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3%//%RST% %GOLD%FIREGEM TECHNOLOGY%RST%
 echo %MUTED%  STATUS: %FRAME_STATUS%%RST%
@@ -84,7 +79,6 @@ echo   %MUTED%» %BLUE%PHASE: %FRAME_PHASE%%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 goto :eof
 
-
 :DRAW_PROGRESS
 set /a "NUM_BLOCKS=%1 / 5"
 set "FRAME_BAR_FILL="
@@ -100,7 +94,6 @@ set "FRAME_PCT=%1"
 if %1 lss 10 set "FRAME_PCT=  %1"
 if %1 geq 10 if %1 lss 100 set "FRAME_PCT= %1"
 goto :eof
-
 
 :: ============================================================
 :: START_EXECUTION
@@ -137,7 +130,6 @@ set /a MENU_COUNT+=1
 set "MENU_NAME_!MENU_COUNT!=Manual Browser Download (Open GitHub)"
 set "MENU_CMD_!MENU_COUNT!=MANUAL_BROWSER"
 
-:: Phase 1: Engine Selector Frame
 set "FRAME_PHASE=01 // ENGINE SELECTOR"
 set "FRAME_STATUS=Transfer engine detection complete."
 set "FRAME_BODY_1=  Detected active transfer utilities: %MENU_COUNT% modules."
@@ -165,30 +157,12 @@ for /l %%I in (1,1,%MENU_COUNT%) do (
 if not defined SELECTED_DL set "SELECTED_DL=curl"
 
 if /i "%SELECTED_DL%"=="WINGET_GIT" (
-    set "FRAME_PHASE=WINGET // INSTALLATION"
-    set "FRAME_STATUS=Executing package deployment..."
-    set "FRAME_BODY_1=  Target: Git for Windows"
-    set "FRAME_BODY_2=  Initiating silent winget installer..."
-    set "FRAME_BODY_3=  Please follow external prompts if required."
-    call :DRAW_PROGRESS 100
-    set "FRAME_BAR_COL=%GREEN%"
-    call :RENDER_FRAME
     winget install --id Git.Git -e --source winget
-    echo.
-    echo %GREEN%  [ COMPLETE ]%RST% %WHITE%Git installation command issued. Restart after finish.%RST%
     pause
     exit /b 0
 )
 
 if /i "%SELECTED_DL%"=="MANUAL_BROWSER" (
-    set "FRAME_PHASE=BROWSER // DEPLOYMENT"
-    set "FRAME_STATUS=Opening browser context..."
-    set "FRAME_BODY_1=  Target URL: https://github.com/%REPO_OWNER%/%REPO_NAME%"
-    set "FRAME_BODY_2=  Launching default system browser..."
-    set "FRAME_BODY_3=  Manual override active."
-    call :DRAW_PROGRESS 100
-    set "FRAME_BAR_COL=%GREEN%"
-    call :RENDER_FRAME
     start https://github.com/%REPO_OWNER%/%REPO_NAME%
     pause
     exit /b 0
@@ -210,11 +184,6 @@ echo.
 set /p "PATH_CHOICE=%GOLD%  >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
 
 if "%PATH_CHOICE%"=="2" (
-    set "FRAME_STATUS=Opening Windows Folder Browser Dialog..."
-    set "FRAME_BODY_1=  Awaiting user directory selection..."
-    set "FRAME_BODY_2=  UI thread spawned."
-    set "FRAME_BODY_3=  Please select target folder."
-    call :RENDER_FRAME
     for /f "delims=" %%D in ('powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description = 'Select dc2url Installation Directory'; if ($f.ShowDialog() -eq 'OK') { $f.SelectedPath }"') do (
         set "CUSTOM_DIR=%%D"
     )
@@ -258,6 +227,8 @@ if /i "%SELECTED_DL%"=="powershell" (
 if not exist "%OUTPUT_FILE%" (
     set "FRAME_STATUS=CRITICAL FAILURE: Configuration manifest unavailable."
     call :RENDER_FRAME
+    echo.
+    echo [ERROR] Could not download %GLOBAL_CONFIG_URL%
     pause
     exit /b 1
 )
@@ -267,9 +238,6 @@ if not exist "%OUTPUT_FILE%" (
 :: ============================================================
 set "FRAME_PHASE=PHASE 2 / 04 // VERSION RESOLUTION"
 set "FRAME_STATUS=Parsing deployment version definitions..."
-set "FRAME_BODY_1=  Decoding JSON metadata schema..."
-set "FRAME_BODY_2=  Validating release payload integrity..."
-set "FRAME_BODY_3=  Parsing semantic version tags..."
 call :DRAW_PROGRESS 85
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -298,79 +266,36 @@ call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
-rem echo [INFO] Beginning manifest processing loop...
-rem echo [DEBUG] Reading data from: %OUTPUT_FILE%
-rem echo [DEBUG] Target Directory: %TARGET_DIR%
-rem echo [DEBUG] Selected Downloader: %SELECTED_DL%
-
-set /a "LOOP_COUNT=0"
-
 for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.PSObject.Properties.Value | ForEach-Object { $_ } | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
-    set /a "LOOP_COUNT+=1"
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
-  
 
     for %%F in ( "%TARGET_DIR%\!TGT_FILE!" ) do (
-        if not exist "%%~dpF" (
-       rem     echo [INFO] Creating missing directory structure: %%~dpF
-            mkdir "%%~dpF"
-        )
+        if not exist "%%~dpF" mkdir "%%~dpF"
     )
 
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/v1.0/!SRC_FILE!"
-  rem  echo [DEBUG] Generated Download URL: !FILE_URL!
-  rem  echo [DEBUG] Target Absolute Path: %TARGET_DIR%\!TGT_FILE!
 
     if /i "%SELECTED_DL%" == "powershell" (
-     rem  echo [INFO] Executing PowerShell WebClient download method...
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile( '!FILE_URL!' , '%TARGET_DIR%\!TGT_FILE!' )"
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('!FILE_URL!', '%TARGET_DIR%\!TGT_FILE!')"
     ) else if /i "%SELECTED_DL%" == "bitsadmin" (
-      rem  echo [INFO] Executing BITSAdmin transfer download method...
         bitsadmin /transfer "FileDownload_!RANDOM!" /download /priority normal "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
     ) else if /i "%SELECTED_DL%" == "python" (
-     rem   echo [INFO] Executing Python urllib download method...
-        python -c "import urllib.request; urllib.request.urlretrieve( '!FILE_URL!' , r'%TARGET_DIR%\!TGT_FILE!' )"
+        python -c "import urllib.request; urllib.request.urlretrieve('!FILE_URL!', r'%TARGET_DIR%\!TGT_FILE!')"
     ) else if /i "%SELECTED_DL%" == "dc2url" (
-    rem    echo [INFO] Executing dc2url native module alias download method...
         dc2url "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
     ) else (
-     rem   echo [INFO] Falling back to default cURL engine download method...
         curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
     )
-
-    if exist "%TARGET_DIR%\!TGT_FILE!" (
-    rem    echo [SUCCESS] File successfully verified on disk at destination.
-    ) else (
-    rem    echo [ERROR] Destination file missing. Download routine failed or output stream dropped.
-    )
 )
 
-rem echo.
-rem echo ==========================================================
-rem echo [INFO] Loop sequence finished. Total structural records processed: !LOOP_COUNT!
-rem echo [INFO] Relocating operational tracking manifest document...
-
-if exist "%OUTPUT_FILE%" (
-  rem  echo [DEBUG] Moving manifest %OUTPUT_FILE% to %TARGET_DIR%\
-    move /y "%OUTPUT_FILE%" "%TARGET_DIR%\"
-    if !errorlevel! equ 0 (
-     rem    echo [SUCCESS] Manifest successfully archived.
-    ) else (
-     rem    echo [ERROR] Move command failed with errorlevel !errorlevel!
-    )
-) else (
-  rem   echo [WARNING] Manifest file %OUTPUT_FILE% was not found for relocation.
-)
+if exist "%OUTPUT_FILE%" move /y "%OUTPUT_FILE%" "%TARGET_DIR%\" >nul 2>&1
 
 :: ============================================================
 :: PHASE 4: APPLICATION HANDOFF
 :: ============================================================
 set "FRAME_PHASE=PHASE 4 / 04 // APPLICATION HANDOFF"
 set "FRAME_STATUS=Deployment sequence complete."
-set "FRAME_BODY_1=  All assets successfully verified and synchronized."
-set "FRAME_BODY_2=  Relocating context to installation directory..."
-set "FRAME_BODY_3=  Executing entrypoint..."
 call :DRAW_PROGRESS 100
 set "FRAME_BAR_COL=%GREEN%"
 call :RENDER_FRAME
@@ -392,8 +317,8 @@ if exist "install.bat" (
 echo.
 echo %GRAD1%  ====================================================================================%RST%
 echo %GRAD2%  ╔══════════════════════════════════════════════════════════════════════════════════╗%RST%
-echo %GRAD2%  ║%GOLD%                     dc2URL // DEPLOYMENT SEQUENCE ENDED                   ║%RST%
-echo %GRAD2%  ║%BLUE%                       MERCWAR SYSTEMS • DARK-COM-2                         ║%RST%
+echo %GRAD2%  ║%GOLD%                    dc2URL // DEPLOYMENT SEQUENCE ENDED                     ║%RST%
+echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                          ║%RST%
 echo %GRAD2%  ╚══════════════════════════════════════════════════════════════════════════════════╝%RST%
 echo %GRAD1%  ====================================================================================%RST%
 echo.
