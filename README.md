@@ -14,6 +14,7 @@
 
 # DARK-COM-2 :: High-Performance cURL-Compatible Headless Browser Engine
 
+Instant powershell installer:
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
