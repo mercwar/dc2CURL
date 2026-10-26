@@ -50,7 +50,7 @@ Write-Host ""
 
 # Brief pause so the user can actually read the screen output
 Write-Host "  [INFO] Verifying checksum and preparing handoff..." -ForegroundColor DarkGray
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 5
 
 Write-Host ""
 Write-Host "  [ 02 // APPLICATION HANDOFF ]" -ForegroundColor Yellow
