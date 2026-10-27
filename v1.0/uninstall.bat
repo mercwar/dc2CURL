@@ -11,7 +11,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstall )
 :ExecuteUninstall
 setlocal DisableDelayedExpansion
 
-:: Force working directory to the explicit folder location of this script file (e.g., Program Files\dc2url\v1.0)
+:: Force working directory to the explicit folder location of this script file
 cd /d "%~dp0"
 
 :: InstallShield Configuration Properties: Title Block & Bounds
@@ -64,46 +64,39 @@ echo %O2%        [*] Isolated Version Target Directory: %VERSION_DIR%%RESET%%BG_
 echo %O2%        [*] Terminating active background processes...%RESET%%BG_GLASS%
 taskkill /f /im dc2url.exe >nul 2>&1
 taskkill /f /im darkcom2.exe >nul 2>&1
-                 [CLEANED] Active file hooks dropped.
+echo                  [CLEANED] Active file hooks dropped.
 
 :: 3. UNREGISTER COM OBJECT LAYERS FROM SYSTEM OLE
 echo %O2%        [*] Unregistering COM components from System OLE Registry...%RESET%%BG_GLASS%
 if exist "%TARGET_EXEC%\DarkComHeadless.dll" (
     regsvr32.exe /u /s "%TARGET_EXEC%\DarkComHeadless.dll" >nul 2>&1
-                 [UNREGISTERED] DarkComHeadless.dll severed from registry tree.
+    echo                  [UNREGISTERED] DarkComHeadless.dll severed from registry tree.
 )
 
 :: 4. SCRUB ALL STRICT LOWERCASE ENVIRONMENT & MULTI-ARCH APPLICATION REGISTRIES
 echo %O2%        [*] Scrubbing Windows Registry and Environment Blocks...%RESET%%BG_GLASS%
 
-:: Clean target application file router schemas across native and redirector system architectures
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
-:: Clean application visibility nodes from Windows Installed Programs list completely
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-:: Drop active environment variable paths and flush volatile blocks
 reg delete "HKCU\Environment" /v "dc2url_path" /f >nul 2>&1
 reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
-reg delete "HKCU\Volatile Environment" /v "PATH" /f >nul 2>&1
 
-:: Safely filter target deployment variables out from user and machine environment blocks
 powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p){$arr=($p -split ';') | Where-Object {$_ -and $_ -notlike '*dc2url*' -and $_ -ne '%TARGET_EXEC%'}; [System.Environment]::SetEnvironmentVariable('PATH',($arr -join ';'),'User')}" >nul 2>&1
 powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($p){$arr=($p -split ';') | Where-Object {$_ -and $_ -notlike '*dc2url*' -and $_ -ne '%TARGET_EXEC%'}; [System.Environment]::SetEnvironmentVariable('PATH',($arr -join ';'),'Machine')}" >nul 2>&1
 
-:: Fire global system notification windows message broadcast to flush cache entries instantly
 powershell -Command "$advapi = '[DllImport(''user32.dll'',SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $result = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$result)" >nul 2>&1
 
-                 [SUCCESS] System environmental blocks and shell nodes cleared.
+echo                  [SUCCESS] System environmental blocks and shell nodes cleared.
 
 :: 5. PURGE EXCLUSIVELY THE VERSION DIRECTORY AND ITS CONTENTS
 if not exist "%VERSION_DIR%" goto :finish_uninstall
 
-:: Safety Check: Stop immediately if the code somehow attempts to point to root or system drive
 if "%VERSION_DIR%"=="C:\" if "%VERSION_DIR%"=="%BASE_DIR%" (
     echo %O1%        [SAFETY ABORT] Execution path matched root directory. Skipping file purge loop.%RESET%%BG_GLASS%
     goto :finish_uninstall
@@ -111,10 +104,7 @@ if "%VERSION_DIR%"=="C:\" if "%VERSION_DIR%"=="%BASE_DIR%" (
 
 echo %O2%        [*] Purging version deployment directory contents safely: %VERSION_DIR%%RESET%%BG_GLASS%
 
-:: Strip restrictive layout file attributes down to prevent permission removal locks
 attrib -r -h -s "%VERSION_DIR%\*.*" /s /d >nul 2>&1
-
-:: Safely remove files and subdirectories inside the version folder
 rmdir /s /q "%VERSION_DIR%" >nul 2>&1
 
 if exist "%VERSION_DIR%" (
@@ -122,9 +112,9 @@ if exist "%VERSION_DIR%" (
 )
 
 if not exist "%VERSION_DIR%" (
-                 [PURGED] Version directory successfully scrubbed from system context.
+    echo                  [PURGED] Version directory successfully scrubbed from system context.
 ) else (
-                 [WARNING] Access lock encountered modifying destination: %VERSION_DIR%.
+    echo                  [WARNING] Access lock encountered modifying destination: %VERSION_DIR%.
 )
 
 :finish_uninstall
