@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 [Net.SecurityProtocolType]::Tls12
 
 # Configure Window Title & Dimensions for Clean Presentation
-$host.UI.RawUI.WindowTitle = "MERCWAR // dc2URL Bootstrap Loader v1.0"
+$host.UI.RawUI.WindowTitle = "MERCWAR dc2URL Launcer v1.0"
 try {
     $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
