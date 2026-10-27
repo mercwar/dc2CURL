@@ -566,21 +566,26 @@ exit /b 0
 
 
 ```
-
+ 
 mercwar/dc2URL/
-└── v1.0/
-    ├── launcher.bat      <-- Master Orchestrator (Root level)
-    ├── uninstall.bat    <-- Master Uninstaller (Root level)
-    ├── install.ps1      <-- Web IRM Script (Root level)
-    ├── echo.bat         <-- Validation Utility
+    ├── launcher.bat     <-- Installation Downloader (copy and paste compatable)
+    ├── install.ps1      <-- IRM - Net Installer (Windows 11 home PowerShell or Higher)
+    ├── echo.bat         <-- Validation Utility (local and private host)
     ├── favi-con.ico     <-- Root Icon Asset
-    ├── readme.MD        <-- Documentation Frame
-    ├── exec/            <-- Executable Binaries Subfolder
-    │   ├── darkcom2.exe
-    │   ├── DarkComHeadless.dll
-    │   └── WebView2Loader.dll
+    ├── readme.MD        <-- User and Developer Reference
+    └── v1.0/
+        ├── install.bat      <-- Windows 11 Installer  (Root level)
+        ├── uninstall.bat    <-- Windows 11 Uninstaller (Root level)
+            ├── exec/            <-- Executable Binaries Subfolder
+            │   ├── darkcom2.exe
+            │   ├── DarkComHeadless.dll
+            │   └── WebView2Loader.dll
     ├── images/          <-- Documentation Graphics Subfolder
-        └── cmd-src.png
+       ├── cmd-src.png
+       ├── dc2.png
+       ├── dc2rm.png
+       ├── dc2url.png
+       └── ss-dc2i.png
 
 ```
 
