@@ -593,7 +593,7 @@ mercwar/dc2URL/
 
 ## ⚖️ Legal, License & Copyright (CR)
 
-**Copyright © 2026 Joseph Michael Catalano (Robo Rook). All Rights Reserved.**
+**Copyright © 2026 Joseph Michael Catalano Mercwar AI. All Rights Reserved.**
 
 ### 📄 Licensing Terms
 This software, protocol architecture, and its associated documentation are proprietary works. Unauthorized copying, distribution, modification, or commercial exploitation of the source binaries (`darkcom2.exe`, DLL libraries) or deployment scripts (`install.bat`, `uninstall.bat`) without express written consent from the author is strictly prohibited.
