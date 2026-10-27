@@ -11,7 +11,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstall )
 :ExecuteUninstall
 setlocal DisableDelayedExpansion
 
-:: Force working directory to the explicit folder location of this script file
+:: Force working directory to the explicit folder location of this script file (e.g., Program Files\dc2url\v1.0)
 cd /d "%~dp0"
 
 :: InstallShield Configuration Properties: Title Block & Bounds
@@ -44,39 +44,33 @@ echo %O3%        ██║  ██║███████║██████�
 echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
-echo %O2%    =====================================================================================%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                InstallShield (R) Setup Engine Uninstaller Block (Precise Mode)%RESET%%BG_GLASS%
-echo %O2%    =====================================================================================%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. TARGET EXCLUSIVELY THE SUBSYSTEM EXEC SUBFOLDER LAYER
-set "BASE_DIR=%~dp0"
-if "%BASE_DIR:~-1%"=="\" set "BASE_DIR=%BASE_DIR:~0,-1%"
+:: 1. TARGET EXCLUSIVELY THE VERSIONED DIRECTORY LAYER (%~dp0)
+set "VERSION_DIR=%~dp0"
+if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
-if exist "%BASE_DIR%\exec\" (
-    set "TARGET_EXEC=%BASE_DIR%\exec"
-) else (
-    echo "%BASE_DIR%" | find /i "\exec" >nul 2>&1
-    if %errorlevel% equ 0 (
-        set "TARGET_EXEC=%BASE_DIR%"
-    ) else (
-        set "TARGET_EXEC=%BASE_DIR%\exec"
-    )
-)
+for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
+for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-echo %O2%        [*] Isolated Payload Target Directory: %TARGET_EXEC%%RESET%%BG_GLASS%
+set "TARGET_EXEC=%VERSION_DIR%\exec"
+
+echo %O2%        [*] Isolated Version Target Directory: %VERSION_DIR%%RESET%%BG_GLASS%
 
 :: 2. TERMINATE BACKGROUND PROCESS HANDLES BEFORE SCRUBBING
 echo %O2%        [*] Terminating active background processes...%RESET%%BG_GLASS%
 taskkill /f /im dc2url.exe >nul 2>&1
 taskkill /f /im darkcom2.exe >nul 2>&1
-echo                 [CLEANED] Active file hooks dropped.
+                 [CLEANED] Active file hooks dropped.
 
 :: 3. UNREGISTER COM OBJECT LAYERS FROM SYSTEM OLE
 echo %O2%        [*] Unregistering COM components from System OLE Registry...%RESET%%BG_GLASS%
 if exist "%TARGET_EXEC%\DarkComHeadless.dll" (
     regsvr32.exe /u /s "%TARGET_EXEC%\DarkComHeadless.dll" >nul 2>&1
-    echo                 [UNREGISTERED] DarkComHeadless.dll severed from registry tree.
+                 [UNREGISTERED] DarkComHeadless.dll severed from registry tree.
 )
 
 :: 4. SCRUB ALL STRICT LOWERCASE ENVIRONMENT & MULTI-ARCH APPLICATION REGISTRIES
@@ -104,39 +98,33 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Mac
 :: Fire global system notification windows message broadcast to flush cache entries instantly
 powershell -Command "$advapi = '[DllImport(''user32.dll'',SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $result = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$result)" >nul 2>&1
 
-echo                 [SUCCESS] System environmental blocks and shell nodes cleared.
+                 [SUCCESS] System environmental blocks and shell nodes cleared.
 
-:: 5. PURGE EXCLUSIVELY THE TARGET EXEC SUBFOLDER CONTEXT LAYERS
-if not exist "%TARGET_EXEC%" goto :finish_uninstall
+:: 5. PURGE EXCLUSIVELY THE VERSION DIRECTORY AND ITS CONTENTS
+if not exist "%VERSION_DIR%" goto :finish_uninstall
 
-:: Safety Check: Stop immediately if the code somehow attempts to point to the root directory
-if "%TARGET_EXEC%"=="%BASE_DIR%" (
+:: Safety Check: Stop immediately if the code somehow attempts to point to root or system drive
+if "%VERSION_DIR%"=="C:\" if "%VERSION_DIR%"=="%BASE_DIR%" (
     echo %O1%        [SAFETY ABORT] Execution path matched root directory. Skipping file purge loop.%RESET%%BG_GLASS%
     goto :finish_uninstall
 )
 
-echo %O2%        [*] Purging binary execution subfolder contents safely...%RESET%%BG_GLASS%
+echo %O2%        [*] Purging version deployment directory contents safely: %VERSION_DIR%%RESET%%BG_GLASS%
 
 :: Strip restrictive layout file attributes down to prevent permission removal locks
-attrib -r -h -s "%TARGET_EXEC%\*.*" /s /d >nul 2>&1
+attrib -r -h -s "%VERSION_DIR%\*.*" /s /d >nul 2>&1
 
-:: Safely remove only the files inside target exec folder 
-del /f /q /a "%TARGET_EXEC%\*.*" >nul 2>&1
+:: Safely remove files and subdirectories inside the version folder
+rmdir /s /q "%VERSION_DIR%" >nul 2>&1
 
-:: Safely drop child folder trees inside target exec folder if any exist
-for /d %%p in ("%TARGET_EXEC%\*") do rmdir /s /q "%%p" >nul 2>&1
-
-:: Remove the target exec directory container itself
-rmdir /s /q "%TARGET_EXEC%" >nul 2>&1
-
-if exist "%TARGET_EXEC%" (
-    powershell -Command "Remove-Item -Path '%TARGET_EXEC%' -Recurse -Force" >nul 2>&1
+if exist "%VERSION_DIR%" (
+    powershell -Command "Remove-Item -Path '%VERSION_DIR%' -Recurse -Force" >nul 2>&1
 )
 
-if not exist "%TARGET_EXEC%" (
-    echo                 [PURGED] Binaries subfolder successfully scrubbed from system context.
+if not exist "%VERSION_DIR%" (
+                 [PURGED] Version directory successfully scrubbed from system context.
 ) else (
-    echo                 [WARNING] Access lock encountered modifying destination: %TARGET_EXEC%.
+                 [WARNING] Access lock encountered modifying destination: %VERSION_DIR%.
 )
 
 :finish_uninstall

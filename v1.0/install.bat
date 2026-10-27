@@ -11,7 +11,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 :ExecuteSetup
 setlocal DisableDelayedExpansion
 
-:: Force the working directory to match the actual folder location of this script file.
+:: Force the working directory to match the actual folder location of this script file (e.g., Program Files\dc2url\v1.0).
 cd /d "%~dp0"
 
 :: InstallShield Configuration Properties: Title Block & Bounds
@@ -44,30 +44,25 @@ echo %O3%        ██║  ██║███████║██████�
 echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
-echo %O2%    =====================================================================================%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================_%RESET%%BG_GLASS%
 echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
-echo %O2%    =====================================================================================%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================_%RESET%%BG_GLASS%
 echo.
 
-:: 1. HARDCODED PROGRAM FILES DEPLOYMENT PATH TARGETING
-set "BASE_DIR=C:\Program Files\dc2url"
-set "FINAL_EXEC_DIR=%BASE_DIR%\exec"
+:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points directly to C:\Program Files\dc2url\v1.0\)
+set "VERSION_DIR=%~dp0"
+rem Strip trailing backslash if present
+if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
-:: Ensure Program Files target hierarchy exists
-if not exist "%BASE_DIR%" mkdir "%BASE_DIR%" >nul 2>&1
-if not exist "%FINAL_EXEC_DIR%" mkdir "%FINAL_EXEC_DIR%" >nul 2>&1
+for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
+for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-:: Copy current local build artifacts into Program Files execution directory if running from staging
-if exist "dc2url.exe" copy /Y "dc2url.exe" "%FINAL_EXEC_DIR%\" >nul 2>&1
-if exist "DarkComHeadless.dll" copy /Y "DarkComHeadless.dll" "%FINAL_EXEC_DIR%\" >nul 2>&1
-if exist "WebView2Loader.dll" copy /Y "WebView2Loader.dll" "%FINAL_EXEC_DIR%\" >nul 2>&1
-if exist "favi-con.ico" copy /Y "favi-con.ico" "%BASE_DIR%\" >nul 2>&1
-
+set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
 
-:: 2. VERIFY DISCOVERED FILE ASSETS IN PROGRAM FILES
+:: 2. VERIFY DISCOVERED FILE ASSETS IN VERSION DIRECTORY
 if not exist "%FINAL_EXE_PATH%" (
-    echo %O1%        [AVIS FAILED] Installtion files are missing: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
+    echo %O1%        [AVIS FAILED] Installation files are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
     goto :finish
 )
 
@@ -75,19 +70,19 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                [SUCCESS] DarkComHeadless.dll registration .
+                [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                [SUCCESS] WebView2Loader.dll registration.
+                [SUCCESS] WebView2Loader.dll registration.
 )
 
 :: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                [SUCCESS] installed 'dc2url.bat' successfully .
+                [SUCCESS] installed 'dc2url.bat' successfully.
 
-:: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS (FORCED STRICT LOWERCASE)
+:: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS
 echo %O2%        [*] Auto Configuring dc2url for windows...%RESET%%BG_GLASS%
 
 :: --- Standard Native 64-bit Application Paths Integration ---
@@ -102,25 +97,25 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (FORCED STRICT LOWERCASE UNINSTALL KEYS)
+:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (POINTS TO VERSION UNINSTALLER)
 echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
 
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%BASE_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "1.0" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%VERSION_DIR%\favi-con.ico" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
-:: Double mirror registry visibility configuration to WoW6432Node space using strict lowercase key tags
+:: Double mirror registry visibility configuration to WoW6432Node space
 set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%BASE_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "1.0" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%VERSION_DIR%\favi-con.ico" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
@@ -144,7 +139,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 :: Synchronize path variables onto the running terminal session instance context immediately
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                [SUCCESS] dc2url is now fully installed and at your command !
+echo                 [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
 echo.
