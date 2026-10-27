@@ -64,7 +64,7 @@ Start-Sleep -Seconds 5
 
 Write-Host ""
 Write-Host "  [AVIS] Calling Portal Installer" -ForegroundColor Yellow
-Write-Host "   » [ECLIPSE] AVIS REPORTED SUCCESS..." -ForegroundColor DarkGray
+Write-Host "  [ECLIPSE] » AVIS REPORTED SUCCESS..." -ForegroundColor DarkGray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
@@ -100,9 +100,9 @@ Write-Host "====================================================================
 Write-Host ""
 
 Write-Host "  [AVIS] Searching for installtion gateway" -ForegroundColor Yellow
-Write-Host "   » Target Source : " -NoNewline -ForegroundColor DarkGray
+Write-Host "  [AVIS] » Target Source : " -NoNewline -ForegroundColor DarkGray
 Write-Host "$RepoUrl" -ForegroundColor White
-Write-Host "   » Target Output : " -NoNewline -ForegroundColor DarkGray
+Write-Host "  [AVIS] » Target Output : " -NoNewline -ForegroundColor DarkGray
 Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
 Write-Host "  [AVIS] Connecting to gateway..." -ForegroundColor Cyan
@@ -128,7 +128,7 @@ Start-Sleep -Seconds 5
 
 Write-Host ""
 Write-Host "  [AVIS] Calling Portal Installer" -ForegroundColor Yellow
-Write-Host "   » [ECLIPSE] AVIS REPORTED SUCCESS..." -ForegroundColor DarkGray
+Write-Host "  [ECLIPSE] »  AVIS REPORTED SUCCESS..." -ForegroundColor DarkGray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
