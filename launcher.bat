@@ -241,7 +241,7 @@ set "FRAME_PHASE=[AVIS] Collecting files..."
 set "FRAME_STATUS=[AVIS] Finding v1.0..."
 set "FRAME_BODY_1=  Target Repository: %REPO_OWNER%/%REPO_NAME%"
 set "FRAME_BODY_2=  Destination: %TARGET_DIR%"
-set "FRAME_BODY_3=       [AVIS] Writing files..."
+set "FRAME_BODY_3=        [AVIS] Writing files..."
 call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
@@ -282,7 +282,7 @@ if exist "install.bat" (
     echo %BLUE%  [AVIS EXEC]%RST% %GOLD%Running installer...%RST%
     echo.
     timeout /t 2 >nul
-    call install.bat
+    cmd /c install.bat
 ) else (
     echo %GRAD3%  [AVIS FAILURE]%RST% %WHITE%The installer files are missing install.bat%RST%
     pause
@@ -297,6 +297,8 @@ echo %GRAD2%  ╚═════════════════════
 echo %GRAD1%  ====================================================================================%RST%
 echo.
 
+echo %WHITE%  Installation sequence finished. Press any key to exit...%RST%
+pause >nul
+
 endlocal
-exit /b 0
 exit /b 0
