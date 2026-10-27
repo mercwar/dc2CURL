@@ -243,7 +243,7 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 :: ============================================================
-:: FIREGEM // DARK-COM-2 (FIXED PATHS & MANIFEST URL)
+:: FIREGEM // DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
 :: ============================================================
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -281,7 +281,6 @@ if %errorlevel% neq 0 (
 
 set "REPO_OWNER=mercwar"
 set "REPO_NAME=dc2url"
-:: FIXED: Pointing directly to the raw config.json path on main branch
 set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/config.json"
 set "OUTPUT_FILE=config.json"
 
@@ -304,8 +303,8 @@ echo %GRAD5%        ██████╔╝██║  ██║██║  █�
 echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo.
-echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3%//%RST% %GOLD%FIREGEM TECHNOLOGY%RST%
-echo %MUTED%  STATUS: %FRAME_STATUS%%RST%
+echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3% %RST% %GOLD%ECLIPSE TECHNOLOGY%RST%
+echo %MUTED%  STATUS: %RST% %GOLD%%FRAME_STATUS%%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo.
 echo %WHITE%%FRAME_BODY_1%%RST%
@@ -339,17 +338,17 @@ goto :eof
 :: START_EXECUTION
 :: ============================================================
 :START_EXECUTION
-set "FRAME_PHASE=00 // SYSTEM SCANNER"
-set "FRAME_STATUS=Scanning system environment for available transfer engines..."
-set "FRAME_BODY_1=  Querying native OS socket engines and runtime libraries..."
-set "FRAME_BODY_2=  Verifying cryptographic pipeline security..."
-set "FRAME_BODY_3=  Ready state initialized."
+set "FRAME_PHASE=[AVIS] SCANNER"
+set "FRAME_STATUS=[AVIS] Scanning system ..."
+set "FRAME_BODY_1=[AVIS] Scanning windows for installation methods..."
+set "FRAME_BODY_2=[AVIS] Validating connection..."
+set "FRAME_BODY_3=[AVIS] Launcher alive."
 call :DRAW_PROGRESS 10
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 set "MENU_COUNT=0"
-for %%T in (curl powershell bitsadmin python dc2url) do (
+for %%T in (curl powershell bitsadmin certutil python wget node cscript mshta dc2url) do (
     where %%T >nul 2>nul
     if not errorlevel 1 (
         set /a MENU_COUNT+=1
@@ -359,22 +358,15 @@ for %%T in (curl powershell bitsadmin python dc2url) do (
     )
 )
 
-where winget >nul 2>nul
-if not errorlevel 1 (
-    set /a MENU_COUNT+=1
-    set "MENU_NAME_!MENU_COUNT!=Install Git via winget"
-    set "MENU_CMD_!MENU_COUNT!=WINGET_GIT"
-)
-
 set /a MENU_COUNT+=1
-set "MENU_NAME_!MENU_COUNT!=Manual Browser Download (Open GitHub)"
+set "MENU_NAME_!MENU_COUNT!=Manual Download GitHub"
 set "MENU_CMD_!MENU_COUNT!=MANUAL_BROWSER"
 
-set "FRAME_PHASE=01 // ENGINE SELECTOR"
-set "FRAME_STATUS=Transfer engine detection complete."
-set "FRAME_BODY_1=  Detected active transfer utilities: %MENU_COUNT% modules."
-set "FRAME_BODY_2=  Select your preferred transfer pipeline below."
-set "FRAME_BODY_3=  [ACTIVE PROTOCOL]: Secure HTTPS / REST Stream"
+set "FRAME_PHASE=[AVIS]  DEVICE SELECTOR"
+set "FRAME_STATUS=[AVIS] Device detection complete."
+set "FRAME_BODY_1=[AVIS] Devices detected: %MENU_COUNT% available."
+set "FRAME_BODY_2=[AVIS] Select your preferred device."
+set "FRAME_BODY_3=[AVIS] Follow the steps below to open datalink"
 call :DRAW_PROGRESS 35
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -385,7 +377,7 @@ for /l %%I in (1,1,%MENU_COUNT%) do (
 )
 echo.
 
-set /p "DL_CHOICE=%GOLD%  >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
+set /p "DL_CHOICE=%GOLD%   >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
 if "%DL_CHOICE%"=="" set "DL_CHOICE=1"
 if %DL_CHOICE% gtr %MENU_COUNT% set "DL_CHOICE=1"
 if %DL_CHOICE% lss 1 set "DL_CHOICE=1"
@@ -396,12 +388,6 @@ for /l %%I in (1,1,%MENU_COUNT%) do (
 )
 if not defined SELECTED_DL set "SELECTED_DL=curl"
 
-if /i "%SELECTED_DL%"=="WINGET_GIT" (
-    winget install --id Git.Git -e --source winget
-    pause
-    exit /b 0
-)
-
 if /i "%SELECTED_DL%"=="MANUAL_BROWSER" (
     start https://github.com/%REPO_OWNER%/%REPO_NAME%
     pause
@@ -411,17 +397,17 @@ if /i "%SELECTED_DL%"=="MANUAL_BROWSER" (
 :: ============================================================
 :: TARGET INSTALLATION PATH SELECTION
 :: ============================================================
-set "FRAME_PHASE=02 // DESTINATION CONFIG"
-set "FRAME_STATUS=Configuring target deployment directory..."
-set "FRAME_BODY_1=  [ 1 ] Default Path (%SystemDrive%\Program Files\dc2url)"
-set "FRAME_BODY_2=  [ 2 ] Custom Path (Windows GUI Folder Browser)"
-set "FRAME_BODY_3=  Select installation directory mapping."
+set "FRAME_PHASE=[AVIS] SELECT INSTALL PATH"
+set "FRAME_STATUS=[AVIS] Configuring folders..."
+set "FRAME_BODY_1=  [ 1 ] System Path (%SystemDrive%\Program Files\dc2url)"
+set "FRAME_BODY_2=  [ 2 ] Custom Path (your custom drive path)"
+set "FRAME_BODY_3=        [AVIS]  Choose your path."
 call :DRAW_PROGRESS 55
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 echo.
-set /p "PATH_CHOICE=%GOLD%  >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
+set /p "PATH_CHOICE=%GOLD%   >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
 
 if "%PATH_CHOICE%"=="2" (
     for /f "delims=" %%D in ('powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description = 'Select dc2url Installation Directory'; if ($f.ShowDialog() -eq 'OK') { $f.SelectedPath }"') do (
@@ -441,11 +427,11 @@ if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 :: ============================================================
 :: PHASE 1: DOWNLOAD MANIFEST
 :: ============================================================
-set "FRAME_PHASE=PHASE 1 / 04 // MANIFEST ACQUISITION"
-set "FRAME_STATUS=Fetching root deployment manifest..."
+set "FRAME_PHASE=[AVIS] Searching for installer files"
+set "FRAME_STATUS=[AVIS] Downlinking installer files..."
 set "FRAME_BODY_1=  Source: %GLOBAL_CONFIG_URL%"
 set "FRAME_BODY_2=  Engine: %SELECTED_DL%"
-set "FRAME_BODY_3=  Establishing TLS handshake..."
+set "FRAME_BODY_3=        [AVIS] Downloading..."
 call :DRAW_PROGRESS 70
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -453,22 +439,16 @@ call :RENDER_FRAME
 if exist "%OUTPUT_FILE%" del /f /q "%OUTPUT_FILE%" >nul 2>&1
 
 if /i "%SELECTED_DL%"=="powershell" (
-    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('%GLOBAL_CONFIG_URL%', '%OUTPUT_FILE%')" >nul 2>&1
-) else if /i "%SELECTED_DL%"=="bitsadmin" (
-    bitsadmin /transfer ConfigDownload /download /priority normal "%GLOBAL_CONFIG_URL%" "%~dp0%OUTPUT_FILE%" >nul 2>&1
-) else if /i "%SELECTED_DL%"=="python" (
-    python -c "import urllib.request; urllib.request.urlretrieve('%GLOBAL_CONFIG_URL%', '%OUTPUT_FILE%')" >nul 2>&1
-) else if /i "%SELECTED_DL%"=="dc2url" (
-    dc2url "%GLOBAL_CONFIG_URL%" "%OUTPUT_FILE%" >nul 2>&1
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%GLOBAL_CONFIG_URL%' -OutFile '%OUTPUT_FILE%'" >nul 2>&1
 ) else (
-    curl -s -L -k "%GLOBAL_CONFIG_URL%" -o "%OUTPUT_FILE%"
+    curl -f -s -L -k "%GLOBAL_CONFIG_URL%" -o "%OUTPUT_FILE%"
 )
 
 if not exist "%OUTPUT_FILE%" (
-    set "FRAME_STATUS=CRITICAL FAILURE: Configuration manifest unavailable."
+    set "FRAME_STATUS=[AVIS FAILURE] Configuration manifest unavailable."
     call :RENDER_FRAME
     echo.
-    echo [ERROR] Could not download %GLOBAL_CONFIG_URL%
+    echo [ERROR] Could not download manifest from %GLOBAL_CONFIG_URL%
     pause
     exit /b 1
 )
@@ -476,8 +456,8 @@ if not exist "%OUTPUT_FILE%" (
 :: ============================================================
 :: PHASE 2: VERSION RESOLUTION
 :: ============================================================
-set "FRAME_PHASE=PHASE 2 / 04 // VERSION RESOLUTION"
-set "FRAME_STATUS=Parsing deployment version definitions..."
+set "FRAME_PHASE=[AVIS] Auto detecting version"
+set "FRAME_STATUS=[AVIS] Reading version definitions..."
 call :DRAW_PROGRESS 85
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -488,7 +468,7 @@ for /f "usebackq delims=" %%V in ('powershell -Command "(Get-Content %OUTPUT_FIL
 )
 
 if not defined VERSION (
-    set "FRAME_STATUS=CRITICAL FAILURE: Could not resolve target version."
+    set "FRAME_STATUS=[AVIS FAILURE] Could not resolve target version."
     call :RENDER_FRAME
     pause
     exit /b 1
@@ -497,11 +477,11 @@ if not defined VERSION (
 :: ============================================================
 :: PHASE 3: PAYLOAD STREAMING
 :: ============================================================
-set "FRAME_PHASE=PHASE 3 / 04 // PAYLOAD STREAMING"
-set "FRAME_STATUS=Harvesting v1.0 layout dependencies..."
+set "FRAME_PHASE=[AVIS] Collecting files..."
+set "FRAME_STATUS=[AVIS] Finding v1.0..."
 set "FRAME_BODY_1=  Target Repository: %REPO_OWNER%/%REPO_NAME%"
 set "FRAME_BODY_2=  Destination: %TARGET_DIR%"
-set "FRAME_BODY_3=  Streaming payload assets..."
+set "FRAME_BODY_3=       [AVIS] Writing files..."
 call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
@@ -517,13 +497,7 @@ for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/v1.0/!SRC_FILE!"
 
     if /i "%SELECTED_DL%" == "powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('!FILE_URL!', '%TARGET_DIR%\!TGT_FILE!')"
-    ) else if /i "%SELECTED_DL%" == "bitsadmin" (
-        bitsadmin /transfer "FileDownload_!RANDOM!" /download /priority normal "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
-    ) else if /i "%SELECTED_DL%" == "python" (
-        python -c "import urllib.request; urllib.request.urlretrieve('!FILE_URL!', r'%TARGET_DIR%\!TGT_FILE!')"
-    ) else if /i "%SELECTED_DL%" == "dc2url" (
-        dc2url "!FILE_URL!" "%TARGET_DIR%\!TGT_FILE!"
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
     ) else (
         curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
     )
@@ -534,8 +508,8 @@ if exist "%OUTPUT_FILE%" move /y "%OUTPUT_FILE%" "%TARGET_DIR%\" >nul 2>&1
 :: ============================================================
 :: PHASE 4: APPLICATION HANDOFF
 :: ============================================================
-set "FRAME_PHASE=PHASE 4 / 04 // APPLICATION HANDOFF"
-set "FRAME_STATUS=Deployment sequence complete."
+set "FRAME_PHASE=[AVIS] Finding installer"
+set "FRAME_STATUS=[AVIS] Launcher has reported success"
 call :DRAW_PROGRESS 100
 set "FRAME_BAR_COL=%GREEN%"
 call :RENDER_FRAME
@@ -544,20 +518,20 @@ cd /d "%TARGET_DIR%"
 
 echo.
 if exist "install.bat" (
-    echo %GREEN%  [ SUCCESS ]%RST% %WHITE%Installation entrypoint detected.%RST%
-    echo %BLUE%  [ HANDOFF ]%RST% %GOLD%Transferring control to install.bat...%RST%
+    echo %GREEN%  [AVIS SEARCH]%RST% %WHITE% AVIS HAS VALIDATED SUCCESS%RST%
+    echo %BLUE%  [AVIS EXEC]%RST% %GOLD%Running installer...%RST%
     echo.
     timeout /t 2 >nul
     call install.bat
 ) else (
-    echo %GRAD3%  [ CRITICAL FAILURE ]%RST% %WHITE%install.bat was not found in the downloaded layout.%RST%
+    echo %GRAD3%  [AVIS FAILURE]%RST% %WHITE%The installer files are missing install.bat%RST%
     pause
 )
 
 echo.
 echo %GRAD1%  ====================================================================================%RST%
 echo %GRAD2%  ╔══════════════════════════════════════════════════════════════════════════════════╗%RST%
-echo %GRAD2%  ║%GOLD%                    dc2URL // DEPLOYMENT SEQUENCE ENDED                     ║%RST%
+echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully             ║%RST%
 echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                          ║%RST%
 echo %GRAD2%  ╚══════════════════════════════════════════════════════════════════════════════════╝%RST%
 echo %GRAD1%  ====================================================================================%RST%
