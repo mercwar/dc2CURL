@@ -144,7 +144,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 :: Synchronize path variables onto the running terminal session instance context immediately
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                [SUCCESS] dc2url is not fully installed and at your command !
+echo                [SUCCESS] dc2url is now fully installed and at your command !
 echo.
 echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
 echo.
