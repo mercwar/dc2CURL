@@ -291,8 +291,8 @@ if exist "install.bat" (
 echo.
 echo %GRAD1%  ====================================================================================%RST%
 echo %GRAD2%  ╔══════════════════════════════════════════════════════════════════════════════════╗%RST%
-echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully             ║%RST%
-echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                          ║%RST%
+echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully                   ║%RST%
+echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                              ║%RST%
 echo %GRAD2%  ╚══════════════════════════════════════════════════════════════════════════════════╝%RST%
 echo %GRAD1%  ====================================================================================%RST%
 echo.
