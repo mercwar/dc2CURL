@@ -73,7 +73,7 @@ A fully deployed Dark-Com-2 runtime environment consists of the following compon
 ## 💻 Command-Line Reference & Usage
 
 ```cmd
-darkcom2.exe [options] <url>
+darkcom2.exe <url> [options] 
 
 ```
 
