@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 :: ============================================================
-:: FIREGEM DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
+:: FIREGEM // DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
 :: ============================================================
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -53,7 +53,7 @@ goto :START_EXECUTION
 cls
 echo.
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo    %GOLD% %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%   %ICE%M O D E R N   K E R N E L%RST%
+echo    %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
 echo %GRAD2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
@@ -193,15 +193,13 @@ if "%PATH_CHOICE%"=="2" (
         set "CUSTOM_DIR=%%D"
     )
     if defined CUSTOM_DIR (
-        set "TARGET_DIR=!CUSTOM_DIR!"
+        set "BASE_DIR=!CUSTOM_DIR!"
     ) else (
-        set "TARGET_DIR=%SystemDrive%\Program Files\dc2url"
+        set "BASE_DIR=%SystemDrive%\Program Files\dc2url"
     )
 ) else (
-    set "TARGET_DIR=%SystemDrive%\Program Files\dc2url"
+    set "BASE_DIR=%SystemDrive%\Program Files\dc2url"
 )
-
-if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
 :: ============================================================
 :: PHASE 1: DOWNLOAD MANIFEST
@@ -233,7 +231,7 @@ if not exist "%OUTPUT_FILE%" (
 )
 
 :: ============================================================
-:: PHASE 2: VERSION RESOLUTION
+:: PHASE 2: VERSION RESOLUTION & TARGET DIR SETUP
 :: ============================================================
 set "FRAME_PHASE=[AVIS] Auto detecting version"
 set "FRAME_STATUS=[AVIS] Reading version definitions..."
@@ -253,11 +251,15 @@ if not defined VERSION (
     exit /b 1
 )
 
+:: Set final target directory including the version folder (e.g. Program Files\dc2url\v1.0)
+set "TARGET_DIR=%BASE_DIR%\%VERSION%"
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
 :: ============================================================
 :: PHASE 3: PAYLOAD STREAMING
 :: ============================================================
 set "FRAME_PHASE=[AVIS] Collecting files..."
-set "FRAME_STATUS=[AVIS] Finding v1.0..."
+set "FRAME_STATUS=[AVIS] Finding %VERSION%..."
 set "FRAME_BODY_1=  Target Repository: %REPO_OWNER%/%REPO_NAME%"
 set "FRAME_BODY_2=  Destination: %TARGET_DIR%"
 set "FRAME_BODY_3=        [AVIS] Writing files..."
@@ -265,7 +267,36 @@ call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.PSObject.Properties.Value | ForEach-Object { $_ } | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+:: Process root_files (placed directly in TARGET_DIR)
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.root_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+    set "SRC_FILE=%%A"
+    set "TGT_FILE=%%B"
+    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/!SRC_FILE!"
+    
+    echo [AVIS URL DEBUG] !FILE_URL!
+    if /i "%SELECTED_DL%" == "powershell" (
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
+    ) else (
+        curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
+    )
+)
+
+:: Process branch_files (placed directly in TARGET_DIR)
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.branch_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+    set "SRC_FILE=%%A"
+    set "TGT_FILE=%%B"
+    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/%VERSION%/!SRC_FILE!"
+    
+    echo [AVIS URL DEBUG] !FILE_URL!
+    if /i "%SELECTED_DL%" == "powershell" (
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
+    ) else (
+        curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
+    )
+)
+
+:: Process binary_exec (subdirectories mirrored inside TARGET_DIR)
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.binary_exec | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
 
@@ -273,8 +304,9 @@ for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-
         if not exist "%%~dpF" mkdir "%%~dpF"
     )
 
-    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/v1.0/!SRC_FILE!"
-
+    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/%VERSION%/!SRC_FILE!"
+    
+    echo [AVIS URL DEBUG] !FILE_URL!
     if /i "%SELECTED_DL%" == "powershell" (
         powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
     ) else (
@@ -320,5 +352,4 @@ echo %WHITE%  Installation sequence finished. Continuing to persistent prompt...
 echo.
 
 endlocal
-:: Forces the command-line session to persist instead of closing the terminal window
 exit /b 0
