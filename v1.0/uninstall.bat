@@ -5,17 +5,17 @@
 if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstall )
 
 :RequestUAC
-    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
+    powershell -Command "Start-Process '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
     exit /b
 
 :ExecuteUninstall
 setlocal DisableDelayedExpansion
 
-:: Force working directory to the explicit folder location of this script file
+:: Force working directory context
 cd /d "%~dp0"
 
 :: InstallShield Configuration Properties: Title Block & Bounds
-title InstallShield (R) Setup Launcher v1.0 :: dc2url Precise Subsystem Uninstaller
+title InstallShield (R) Uninstaller v1.0 :: dc2url Master Deployment Engine
 mode con: cols=120 lines=34
 
 chcp 65001 >nul 2>&1
@@ -23,7 +23,7 @@ color 0E
 
 :: Force TrueColor Console Canvas Context Allocation
 reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
-for /f "tokens=*" %%a in ('echo prompt $E^|cmd') do set "E=%%a"
+for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
 set "RESET=%E%[0m"
 set "BG_GLASS=%E%[48;2;10;10;12m"
 set "O1=%E%[38;2;255;68;0m"
@@ -42,40 +42,35 @@ echo %O1%        ██████╗  █████╗ ██████╗
 echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
 echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
 echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
+echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                InstallShield (R) Setup Engine Uninstaller Block (Precise Mode)%RESET%%BG_GLASS%
+echo %Y2%                dc2url Core Cyborg Ecosystem Uninstaller%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. TARGET EXCLUSIVELY THE VERSIONED DIRECTORY LAYER (%~dp0)
+:: 1. PATH RESOLUTION
 set "VERSION_DIR=%~dp0"
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
 for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
 for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-set "TARGET_EXEC=%VERSION_DIR%\exec"
+set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 
-echo %O2%        [*] Isolated Version Target Directory: %VERSION_DIR%%RESET%%BG_GLASS%
-
-:: 2. TERMINATE BACKGROUND PROCESS HANDLES BEFORE SCRUBBING
-echo %O2%        [*] Terminating active background processes...%RESET%%BG_GLASS%
-taskkill /f /im dc2url.exe >nul 2>&1
-taskkill /f /im darkcom2.exe >nul 2>&1
-echo                  [CLEANED] Active file hooks dropped.
-
-:: 3. UNREGISTER COM OBJECT LAYERS FROM SYSTEM OLE
-echo %O2%        [*] Unregistering COM components from System OLE Registry...%RESET%%BG_GLASS%
-if exist "%TARGET_EXEC%\DarkComHeadless.dll" (
-    regsvr32.exe /u /s "%TARGET_EXEC%\DarkComHeadless.dll" >nul 2>&1
-    echo                  [UNREGISTERED] DarkComHeadless.dll severed from registry tree.
+:: 2. OLE/COM UNREGISTRATION PIPELINE
+echo %O2%        [*] Unregistering OLE/COM Components...%RESET%%BG_GLASS%
+if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
+    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
+    echo                  [SUCCESS] DarkComHeadless.dll unregistered.
+)
+if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
+    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
+    echo                  [SUCCESS] WebView2Loader.dll unregistered.
 )
 
-:: 4. SCRUB ALL STRICT LOWERCASE ENVIRONMENT & MULTI-ARCH APPLICATION REGISTRIES
-echo %O2%        [*] Scrubbing Windows Registry and Environment Blocks...%RESET%%BG_GLASS%
-
+:: 3. REMOVE REGISTRY APP PATHS & UNINSTALL ENTRIES
+echo %O2%        [*] Cleaning Windows App Paths and Registries...%RESET%%BG_GLASS%
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
@@ -84,44 +79,21 @@ reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-reg delete "HKCU\Environment" /v "dc2url_path" /f >nul 2>&1
+:: 4. CLEAN SYSTEM ENVIRONMENT VARIABLES & PATHS
+echo %O2%        [*] Purging Environment Pointers and Machine PATH...%RESET%%BG_GLASS%
 reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
 
-powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p){$arr=($p -split ';') | Where-Object {$_ -and $_ -notlike '*dc2url*' -and $_ -ne '%TARGET_EXEC%'}; [System.Environment]::SetEnvironmentVariable('PATH',($arr -join ';'),'User')}" >nul 2>&1
-powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($p){$arr=($p -split ';') | Where-Object {$_ -and $_ -notlike '*dc2url*' -and $_ -ne '%TARGET_EXEC%'}; [System.Environment]::SetEnvironmentVariable('PATH',($arr -join ';'),'Machine')}" >nul 2>&1
+:: Safely remove entry from Machine and User PATH variables via single-line PowerShell commands
+powershell -Command "$m = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine'); if ($m) { $p = ($m -split ';' | Where-Object { $_ -and $_ -notlike '*dc2url*' }) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH', $p, 'Machine') }" >nul 2>&1
+powershell -Command "$u = [System.Environment]::GetEnvironmentVariable('PATH', 'User'); if ($u) { $p = ($u -split ';' | Where-Object { $_ -and $_ -notlike '*dc2url*' }) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH', $p, 'User') }" >nul 2>&1
 
-powershell -Command "$advapi = '[DllImport(''user32.dll'',SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $result = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$result)" >nul 2>&1
-
-echo                  [SUCCESS] System environmental blocks and shell nodes cleared.
-
-:: 5. PURGE EXCLUSIVELY THE VERSION DIRECTORY AND ITS CONTENTS
-if not exist "%VERSION_DIR%" goto :finish_uninstall
-
-if "%VERSION_DIR%"=="C:\" if "%VERSION_DIR%"=="%BASE_DIR%" (
-    echo %O1%        [SAFETY ABORT] Execution path matched root directory. Skipping file purge loop.%RESET%%BG_GLASS%
-    goto :finish_uninstall
-)
-
-echo %O2%        [*] Purging version deployment directory contents safely: %VERSION_DIR%%RESET%%BG_GLASS%
-
-attrib -r -h -s "%VERSION_DIR%\*.*" /s /d >nul 2>&1
-rmdir /s /q "%VERSION_DIR%" >nul 2>&1
-
-if exist "%VERSION_DIR%" (
-    powershell -Command "Remove-Item -Path '%VERSION_DIR%' -Recurse -Force" >nul 2>&1
-)
-
-if not exist "%VERSION_DIR%" (
-    echo                  [PURGED] Version directory successfully scrubbed from system context.
-) else (
-    echo                  [WARNING] Access lock encountered modifying destination: %VERSION_DIR%.
-)
-
-:finish_uninstall
+echo                  [SUCCESS] dc2url successfully uninstalled from system registers!
 echo.
-echo %Y2%        [UNINSTALLATION COMPLETED - UTILITY DETACHED SUCCESSFULLY]%RESET%
+echo %Y2%        [Note: Installation directory files can be safely deleted from: %BASE_DIR%]%RESET%%BG_GLASS%
 echo.
 
-echo %TXT%        Press any key to close uninstaller suite...%RESET%
+:finish
+echo %TXT%        Uninstallation sequence complete. Press any key to exit...%RESET%
 pause >nul
+
 exit /b 0
