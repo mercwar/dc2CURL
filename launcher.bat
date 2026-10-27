@@ -126,7 +126,7 @@ set "FRAME_PHASE=[AVIS] // DEVICE SELECTOR"
 set "FRAME_STATUS=[AVIS] Device detection complete."
 set "FRAME_BODY_1=[AVIS] Devices detected: %MENU_COUNT% available."
 set "FRAME_BODY_2=[AVIS] Select your preferred device."
-set "FRAME_BODY_3=[AVIS ACTIVE PROTOCOL]: Secure HTTPS / cURL Direct Stream"
+set "FRAME_BODY_3=[AVIS] Follow the steps below to open datalink"
 call :DRAW_PROGRESS 35
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -299,4 +299,3 @@ echo.
 
 endlocal
 exit /b 0
-
