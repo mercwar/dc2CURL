@@ -6,7 +6,7 @@
     "root_files": [
       {"source": "favi-con.ico", "target": "favi-con.ico"},
       {"source": "echo.bat", "target": "echo.bat"},
-      {"source": "readme.md", "target": "readme.md"}
+      {"source": "README.md", "target": "README.md"}
     ],
     "branch_files": [
       {"source": "install.bat", "target": "install.bat"},
