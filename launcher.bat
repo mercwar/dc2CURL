@@ -292,13 +292,15 @@ echo.
 echo %GRAD1%  ====================================================================================%RST%
 echo %GRAD2%  ╔══════════════════════════════════════════════════════════════════════════════════╗%RST%
 echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully                   %GRAD2%║%RST%
-echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                              %RST%%GRAD2%║%RST%
+echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                              %GRAD2%║%RST%
 echo %GRAD2%  ╚══════════════════════════════════════════════════════════════════════════════════╝%RST%
 echo %GRAD1%  ====================================================================================%RST%
 echo.
 
-echo %WHITE%  Installation sequence finished. Press any key to exit...%RST%
-pause >nul
+echo %WHITE%  Installation sequence finished. Continuing to persistent prompt...%RST%
+echo.
 
 endlocal
-exit /b 0
+:: Forces the command-line session to persist instead of closing the terminal window
+cmd /k
+
