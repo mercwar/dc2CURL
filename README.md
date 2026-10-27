@@ -596,7 +596,7 @@ mercwar/dc2URL/
 **Copyright © 2026 Joseph Michael Catalano Mercwar AI. All Rights Reserved.**
 
 ### 📄 Licensing Terms
-This software, protocol architecture, and its associated documentation are proprietary works. Unauthorized copying, distribution, modification, or commercial exploitation of the source binaries (`darkcom2.exe`, DLL libraries) or deployment scripts (`install.bat`, `uninstall.bat`) without express written consent from the author is strictly prohibited.
+This software, protocol architecture, and its associated documentation are proprietary works. Unauthorized copying, distribution, modification, or commercial exploitation of the source binaries (`dc2url.exe`, DLL libraries) or deployment scripts (`launcher.bat`, ,`install.bat`,`uninstall.bat`) without express written consent from the author is strictly prohibited.
 
 ### 🛡️ Disclaimer of Warranty
 The software is provided **"as is", without warranty of any kind**, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
