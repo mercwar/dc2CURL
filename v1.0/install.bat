@@ -45,7 +45,7 @@ echo %Y1%        ██║  ██║██╔══██║██╔══█�
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    =====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                dc2url Core Production Environment Installation Engine%RESET%%BG_GLASS%
+echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    =====================================================================================%RESET%%BG_GLASS%
 echo.
 
