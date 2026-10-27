@@ -201,6 +201,8 @@ if "%PATH_CHOICE%"=="2" (
     set "BASE_DIR=%SystemDrive%\Program Files\dc2url"
 )
 
+if not exist "%BASE_DIR%" mkdir "%BASE_DIR%"
+
 :: ============================================================
 :: PHASE 1: DOWNLOAD MANIFEST
 :: ============================================================
@@ -239,7 +241,6 @@ call :DRAW_PROGRESS 85
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
 
-set "VERSION="
 for /f "usebackq delims=" %%V in ('powershell -Command "(Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json).version" 2^>nul') do (
     set "VERSION=%%V"
 )
@@ -251,68 +252,54 @@ if not defined VERSION (
     exit /b 1
 )
 
-if not exist "%BASE_DIR%" mkdir "%BASE_DIR%"
 set "TARGET_DIR=%BASE_DIR%\%VERSION%"
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
 :: ============================================================
-:: PHASE 3: PAYLOAD STREAMING
+:: PHASE 3: ROBUST POWERSHELL PAYLOAD STREAMING PIPELINE
 :: ============================================================
 set "FRAME_PHASE=[AVIS] Collecting files..."
 set "FRAME_STATUS=[AVIS] Finding %VERSION%..."
 set "FRAME_BODY_1=  Target Repository: %REPO_OWNER%/%REPO_NAME%"
-set "FRAME_BODY_2=  Destination: %TARGET_DIR%"
+set "FRAME_BODY_2=  Destination Root: %BASE_DIR%"
 set "FRAME_BODY_3=        [AVIS] Writing files..."
 call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
-:: 1. Process root_files -> Placed directly in BASE_DIR (e.g., Program Files\dc2url\)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json; foreach($f in $json.manifest_layout.root_files){Write-Output ('{0}|{1}' -f $f.source, $f.target)}" 2^>nul`) do (
-    set "SRC_FILE=%%A"
-    set "TGT_FILE=%%B"
-    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/!SRC_FILE!"
-    
-    echo [AVIS URL DEBUG] !FILE_URL!
-    if /i "%SELECTED_DL%" == "powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%BASE_DIR%\!TGT_FILE!'"
-    ) else (
-        curl -f -s -L -k "!FILE_URL!" -o "%BASE_DIR%\!TGT_FILE!"
-    )
-)
-
-:: 2. Process branch_files -> Placed inside TARGET_DIR (e.g., Program Files\dc2url\v1.0\)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json; foreach($f in $json.manifest_layout.branch_files){Write-Output ('{0}|{1}' -f $f.source, $f.target)}" 2^>nul`) do (
-    set "SRC_FILE=%%A"
-    set "TGT_FILE=%%B"
-    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/%VERSION%/!SRC_FILE!"
-    
-    echo [AVIS URL DEBUG] !FILE_URL!
-    if /i "%SELECTED_DL%" == "powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
-    ) else (
-        curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
-    )
-)
-
-:: 3. Process binary_exec -> Subdirectories mirrored inside TARGET_DIR (e.g., Program Files\dc2url\v1.0\exec\)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json; foreach($f in $json.manifest_layout.binary_exec){Write-Output ('{0}|{1}' -f $f.source, $f.target)}" 2^>nul`) do (
-    set "SRC_FILE=%%A"
-    set "TGT_FILE=%%B"
-
-    for %%F in ( "%TARGET_DIR%\!TGT_FILE!" ) do (
-        if not exist "%%~dpF" mkdir "%%~dpF"
-    )
-
-    set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/%VERSION%/!SRC_FILE!"
-    
-    echo [AVIS URL DEBUG] !FILE_URL!
-    if /i "%SELECTED_DL%" == "powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
-    ) else (
-        curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
-    )
-)
+powershell -NoProfile -Command ^
+    "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json;" ^
+    "$owner = '%REPO_OWNER%';" ^
+    "$repo = '%REPO_NAME%';" ^
+    "$version = '%VERSION%';" ^
+    "$baseDir = '%BASE_DIR%';" ^
+    "$targetDir = '%TARGET_DIR%';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "" ^
+    "function Download-File($url, $outFile) {" ^
+    "    $dir = Split-Path $outFile -Parent;" ^
+    "    if (!(Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }" ^
+    "    Write-Host \"[AVIS DL] $url -> $outFile\";" ^
+    "    Invoke-WebRequest -Uri $url -OutFile $outFile;" ^
+    "}" ^
+    "" ^
+    "foreach ($f in $json.manifest_layout.root_files) {" ^
+    "    $url = \"https://raw.githubusercontent.com/$owner/$repo/main/$($f.source)\";" ^
+    "    $out = Join-Path $baseDir $f.target;" ^
+    "    Download-File $url $out;" ^
+    "}" ^
+    "" ^
+    "foreach ($f in $json.manifest_layout.branch_files) {" ^
+    "    $url = \"https://raw.githubusercontent.com/$owner/$repo/main/$version/$($f.source)\";" ^
+    "    $out = Join-Path $targetDir $f.target;" ^
+    "    Download-File $url $out;" ^
+    "}" ^
+    "" ^
+    "foreach ($f in $json.manifest_layout.binary_exec) {" ^
+    "    $url = \"https://raw.githubusercontent.com/$owner/$repo/main/$version/$($f.source)\";" ^
+    "    $out = Join-Path $targetDir $f.target;" ^
+    "    Download-File $url $out;" ^
+    "}"
 
 if exist "%OUTPUT_FILE%" move /y "%OUTPUT_FILE%" "%TARGET_DIR%\" >nul 2>&1
 
