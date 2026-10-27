@@ -21,7 +21,9 @@
 - Open your MS windows 11 powershell
 - Paste the below command in the window
 - Press enter and follow the installation steps
-
+- Your command line now has access to your private hosted php and web apps 😲️
+- Your command line will no longer be rejected by javascript enabled warnings 😜️
+  
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
@@ -40,6 +42,7 @@ irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 
 ![dc23](./images/dc2rm.png)
 
+###### *"<i>I am CVBGOD, and I have given it to you</i>!"*
 
 ### 🗝️ Key Features
 * **Full cURL CLI Parity:** Supports standard command-line argument ordering (URL first, flags first, and long-flag formats) for seamless integration into existing shell scripts and automation workflows.
