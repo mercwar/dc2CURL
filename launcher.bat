@@ -137,7 +137,7 @@ for /l %%I in (1,1,%MENU_COUNT%) do (
 )
 echo.
 
-set /p "DL_CHOICE=%GOLD%  >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
+set /p "DL_CHOICE=%GOLD%   >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
 if "%DL_CHOICE%"=="" set "DL_CHOICE=1"
 if %DL_CHOICE% gtr %MENU_COUNT% set "DL_CHOICE=1"
 if %DL_CHOICE% lss 1 set "DL_CHOICE=1"
@@ -167,7 +167,7 @@ set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 echo.
-set /p "PATH_CHOICE=%GOLD%  >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
+set /p "PATH_CHOICE=%GOLD%   >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
 
 if "%PATH_CHOICE%"=="2" (
     for /f "delims=" %%D in ('powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description = 'Select dc2url Installation Directory'; if ($f.ShowDialog() -eq 'OK') { $f.SelectedPath }"') do (
@@ -191,7 +191,7 @@ set "FRAME_PHASE=[AVIS] Searching for installer files"
 set "FRAME_STATUS=[AVIS] Downlinking installer files..."
 set "FRAME_BODY_1=  Source: %GLOBAL_CONFIG_URL%"
 set "FRAME_BODY_2=  Engine: %SELECTED_DL%"
-set "FRAME_BODY_3=[AVIS] Downloading..."
+set "FRAME_BODY_3=        [AVIS] Downloading..."
 call :DRAW_PROGRESS 70
 set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
@@ -241,7 +241,7 @@ set "FRAME_PHASE=[AVIS] Collecting files..."
 set "FRAME_STATUS=[AVIS] Finding v1.0..."
 set "FRAME_BODY_1=  Target Repository: %REPO_OWNER%/%REPO_NAME%"
 set "FRAME_BODY_2=  Destination: %TARGET_DIR%"
-set "FRAME_BODY_3=  [AVIS] Writing files..."
+set "FRAME_BODY_3=       [AVIS] Writing files..."
 call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
@@ -298,4 +298,5 @@ echo %GRAD1%  ==================================================================
 echo.
 
 endlocal
+exit /b 0
 exit /b 0
