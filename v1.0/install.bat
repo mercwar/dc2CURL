@@ -49,26 +49,25 @@ echo %Y2%                dc2url Core Production Environment Installation Engine%
 echo %O2%    =====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. STRICT LOWERCASE PATH RESOLUTION & VERIFICATION
-set "BASE_DIR=%~dp0"
-if "%BASE_DIR:~-1%"=="\" set "BASE_DIR=%BASE_DIR:~0,-1%"
+:: 1. HARDCODED PROGRAM FILES DEPLOYMENT PATH TARGETING
+set "BASE_DIR=C:\Program Files\dc2url"
+set "FINAL_EXEC_DIR=%BASE_DIR%\exec"
 
-:: Evaluate folder layout context safely
-echo "%BASE_DIR%" | find /i "\exec" >nul 2>&1
-if %errorlevel% equ 0 (
-    set "FINAL_EXEC_DIR=%BASE_DIR%"
-) else (
-    if exist "%BASE_DIR%\exec\" (
-        set "FINAL_EXEC_DIR=%BASE_DIR%\exec"
-    ) else (
-        set "FINAL_EXEC_DIR=%BASE_DIR%"
-    )
-)
+:: Ensure Program Files target hierarchy exists
+if not exist "%BASE_DIR%" mkdir "%BASE_DIR%" >nul 2>&1
+if not exist "%FINAL_EXEC_DIR%" mkdir "%FINAL_EXEC_DIR%" >nul 2>&1
+
+:: Copy current local build artifacts into Program Files execution directory if running from staging
+if exist "dc2url.exe" copy /Y "dc2url.exe" "%FINAL_EXEC_DIR%\" >nul 2>&1
+if exist "DarkComHeadless.dll" copy /Y "DarkComHeadless.dll" "%FINAL_EXEC_DIR%\" >nul 2>&1
+if exist "WebView2Loader.dll" copy /Y "WebView2Loader.dll" "%FINAL_EXEC_DIR%\" >nul 2>&1
+if exist "favi-con.ico" copy /Y "favi-con.ico" "%BASE_DIR%\" >nul 2>&1
+
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
 
-:: 2. VERIFY DISCOVERED FILE ASSETS
+:: 2. VERIFY DISCOVERED FILE ASSETS IN PROGRAM FILES
 if not exist "%FINAL_EXE_PATH%" (
-    echo %O1%        [CRITICAL ERROR] Execution assets missing from folder: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
+    echo %O1%        [CRITICAL ERROR] Execution assets missing from Program Files path: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
     goto :finish
 )
 
@@ -76,17 +75,17 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Server Component Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                [SUCCESS] DarkComHeadless.dll mapped into target engine space.
+                [SUCCESS] DarkComHeadless.dll mapped into target engine space.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                [SUCCESS] WebView2Loader.dll mapped into target engine space.
+                [SUCCESS] WebView2Loader.dll mapped into target engine space.
 )
 
 :: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                [SUCCESS] Command routing wrapper 'dc2url.bat' successfully initialized.
+                [SUCCESS] Command routing wrapper 'dc2url.bat' successfully initialized.
 
 :: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS (FORCED STRICT LOWERCASE)
 echo %O2%        [*] Writing Multi-Architecture Application Routing Nodes...%RESET%%BG_GLASS%
@@ -145,7 +144,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 :: Synchronize path variables onto the running terminal session instance context immediately
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                [SUCCESS] Environment update complete. Lookups refreshed across architectures.
+                [SUCCESS] Environment update complete. Lookups refreshed across architectures.
 echo.
 echo %Y2%        [DEPLOYMENT COMPLETED - ENGINE ONLINE AND VISIBLE]%RESET%%BG_GLASS%
 echo.
