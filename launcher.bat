@@ -240,7 +240,7 @@ set "FRAME_BAR_COL=%GOLD%"
 call :RENDER_FRAME
 
 set "VERSION="
-for /f "usebackq delims=" %%V in ('powershell -Command "(Get-Content %OUTPUT_FILE% | ConvertFrom-Json).version" 2^>nul') do (
+for /f "usebackq delims=" %%V in ('powershell -Command "(Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json).version" 2^>nul') do (
     set "VERSION=%%V"
 )
 
@@ -251,7 +251,6 @@ if not defined VERSION (
     exit /b 1
 )
 
-:: Base directory (e.g. Program Files\dc2url) and Version directory (e.g. Program Files\dc2url\v1.0)
 if not exist "%BASE_DIR%" mkdir "%BASE_DIR%"
 set "TARGET_DIR=%BASE_DIR%\%VERSION%"
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
@@ -269,7 +268,7 @@ set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 :: 1. Process root_files -> Placed directly in BASE_DIR (e.g., Program Files\dc2url\)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE% -Raw' | ConvertFrom-Json; $json.manifest_layout.root_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json; foreach($f in $json.manifest_layout.root_files){Write-Output ('{0}|{1}' -f $f.source, $f.target)}" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/!SRC_FILE!"
@@ -283,7 +282,7 @@ for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-
 )
 
 :: 2. Process branch_files -> Placed inside TARGET_DIR (e.g., Program Files\dc2url\v1.0\)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE% -Raw' | ConvertFrom-Json; $json.manifest_layout.branch_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json; foreach($f in $json.manifest_layout.branch_files){Write-Output ('{0}|{1}' -f $f.source, $f.target)}" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/%VERSION%/!SRC_FILE!"
@@ -297,7 +296,7 @@ for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-
 )
 
 :: 3. Process binary_exec -> Subdirectories mirrored inside TARGET_DIR (e.g., Program Files\dc2url\v1.0\exec\)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE% -Raw' | ConvertFrom-Json; $json.manifest_layout.binary_exec | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json; foreach($f in $json.manifest_layout.binary_exec){Write-Output ('{0}|{1}' -f $f.source, $f.target)}" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
 
