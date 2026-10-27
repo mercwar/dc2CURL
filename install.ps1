@@ -50,7 +50,7 @@ Write-Host ""
 
 # Brief pause so the user can actually read the screen output
 Write-Host "  [AVIS SCAN] Verifying files..." -ForegroundColor DarkGray
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 3
 
 Write-Host ""
 Write-Host "  [AVIS] Installing dc2url" -ForegroundColor Yellow
