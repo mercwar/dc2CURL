@@ -18,11 +18,13 @@
 ###  💥 cURL-Compatible Headless Browser Engine
 
 💫 Instant powershell installer:  
+
 - Open your MS windows 11 powershell
 - Paste the below command in the window
 - Press enter and follow the installation steps
-- Your command line now has access to your private hosted php and web apps 😲️
-- Your command line will no longer be rejected by javascript enabled warnings 😜️
+  
+😲️ Your command line now has access to your private hosted php and web apps 
+😜️ Your command line will no longer be rejected by javascript enabled warnings 
   
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
