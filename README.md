@@ -23,8 +23,8 @@
 - Paste the below command in the window
 - Press enter and follow the installation steps
   
-😲️ Your command line now has access to your private host's php and web app cgi/uri/api 
-😜️ Your command line will no longer be rejected by javascript enabled warnings 
+😲️ Your command line now has access to your private host's php and web app cgi/uri/api  
+😜️ Your command line will no longer be rejected by javascript enabled warnings you get with cURL
   
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
