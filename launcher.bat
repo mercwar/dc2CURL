@@ -302,5 +302,5 @@ echo.
 
 endlocal
 :: Forces the command-line session to persist instead of closing the terminal window
-cmd /k
+exit /b 0
 
