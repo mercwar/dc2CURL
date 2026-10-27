@@ -44,13 +44,14 @@ echo %O3%        ██║  ██║███████║██████�
 echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
-echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================_%RESET%%BG_GLASS%
 echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
-echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================_%RESET%%BG_GLASS%
 echo.
 
-:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points to C:\Program Files\dc2url\v1.0\)
+:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points directly to C:\Program Files\dc2url\v1.0\)
 set "VERSION_DIR=%~dp0"
+rem Strip trailing backslash if present
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
 for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
@@ -69,17 +70,17 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                 [SUCCESS] DarkComHeadless.dll registration.
+                [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                 [SUCCESS] WebView2Loader.dll registration.
+                [SUCCESS] WebView2Loader.dll registration.
 )
 
 :: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                 [SUCCESS] installed 'dc2url.bat' successfully.
+                [SUCCESS] installed 'dc2url.bat' successfully.
 
 :: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS
 echo %O2%        [*] Auto Configuring dc2url for windows...%RESET%%BG_GLASS%
@@ -96,13 +97,13 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (Icon points to base dir root file)
+:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (POINTS TO VERSION UNINSTALLER)
 echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
 
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%VERSION_DIR%\favi-con.ico" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
@@ -113,7 +114,7 @@ reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%VERSION_DIR%\favi-con.ico" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
