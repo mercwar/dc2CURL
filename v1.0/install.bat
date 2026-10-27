@@ -96,7 +96,7 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (Icon points to base dir root file)
+:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (Icon correctly points to BASE_DIR root)
 echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
 
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
