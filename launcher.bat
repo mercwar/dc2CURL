@@ -108,7 +108,7 @@ set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 set "MENU_COUNT=0"
-for %%T in (curl powershell bitsadmin certutil python wget node cscript mshta dc2url winget) do (
+for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin wget node winget) do (
     where %%T >nul 2>nul
     if not errorlevel 1 (
         set /a MENU_COUNT+=1
