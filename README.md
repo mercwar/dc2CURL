@@ -196,8 +196,13 @@ You can install `dc2URL` on Windows using either a quick single-line command or 
 The fastest way to install is to copy and paste the single-line command below into an open **Command Prompt** or **PowerShell** window. This downloads and executes the deployment script directly in memory:
 
 ```cmd
-powershell -Command "irm https://githubusercontent.com | iex"
+powershell -Command "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1 | iex"
 ```
+
+
+###
+- You can always download the [launcher](https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/launcher.bat) and double click it from your desktop  
+- You can also copy it from the next section and paste it into notepad, then save the file as launcher.bat and double click the file  
 
 ---
 
