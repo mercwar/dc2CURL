@@ -73,4 +73,4 @@ Write-Host "  [ECLIPSE] dc2url will be visible in your add/remove programs after
 Write-Host "  [ECLIPSE] Auto updates are not supported at this time, you may run this irm or launcher at any time to update dc2url." -ForegroundColor Green
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 
-
+exit
