@@ -211,7 +211,7 @@ If you prefer to clone the repository or manage the files manually:
 
 1. Clone the repository to your machine:
    ```bash
-   git clone https://github.com
+   git clone https://github.com/mercwar/dc2url
    ```
 2. Navigate into the version directory:
    ```bash
