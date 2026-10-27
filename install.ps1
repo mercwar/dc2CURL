@@ -20,18 +20,18 @@ Clear-Host
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "  // F I R E G E M   ■   D A R K - C O M - 2   //   M O D E R N   K E R N E L" -ForegroundColor Cyan
 Write-Host "====================================================================================" -ForegroundColor DarkGray
-Write-Host "  MERCWAR SYSTEMS // FIREGEM TECHNOLOGY" -ForegroundColor DarkYellow
-Write-Host "  STATUS: Initializing secure download stream..." -ForegroundColor Gray
+Write-Host "  MERCWAR SYSTEMS // ECLIPSE TECHNOLOGY" -ForegroundColor DarkYellow
+Write-Host "  STATUS: Searching for Installer..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
-Write-Host "  [ 01 // MANIFEST ACQUISITION ]" -ForegroundColor Yellow
+Write-Host "  [ Cyborg Data uplink ]" -ForegroundColor Yellow
 Write-Host "   » Target Source : " -NoNewline -ForegroundColor DarkGray
 Write-Host "$RepoUrl" -ForegroundColor White
 Write-Host "   » Target Output : " -NoNewline -ForegroundColor DarkGray
 Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
-Write-Host "  [INFO] Establishing TLS handshake and downloading launcher payload..." -ForegroundColor Cyan
+Write-Host "  [Cyborg Data downlink] Establishing TLS handshake and downloading launcher payload..." -ForegroundColor Cyan
 
 # Silent download stream
 try {
@@ -40,21 +40,21 @@ try {
 }
 catch {
     Write-Host ""
-    Write-Host "  [CRITICAL ERROR] Download failed: $_" -ForegroundColor Red
+    Write-Host "  [AVIS ERROR] Downlink failed: $_" -ForegroundColor Red
     Pause
     exit 1
 }
 
-Write-Host "  [SUCCESS] Payload secured on disk." -ForegroundColor Green
+Write-Host "  [AVIS SUCCESS] Gatway Alive." -ForegroundColor Green
 Write-Host ""
 
 # Brief pause so the user can actually read the screen output
-Write-Host "  [INFO] Verifying checksum and preparing handoff..." -ForegroundColor DarkGray
+Write-Host "  [AVIS SCAN] Verifying files..." -ForegroundColor DarkGray
 Start-Sleep -Seconds 5
 
 Write-Host ""
-Write-Host "  [ 02 // APPLICATION HANDOFF ]" -ForegroundColor Yellow
-Write-Host "   » Transferring execution control to interactive launcher..." -ForegroundColor DarkGray
+Write-Host "  [AVIS] Installing dc2url" -ForegroundColor Yellow
+Write-Host "   » Loading Registry..." -ForegroundColor DarkGray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
@@ -69,5 +69,7 @@ if (Test-Path $TempInstaller) {
 }
 
 Write-Host ""
-Write-Host "  [COMPLETE] Deployment sequence finished." -ForegroundColor Green
+Write-Host "  [AVIS] dc2url is installed and visible in your add/remove programs." -ForegroundColor Green
+Write-Host "  [AVIS] You can update dc2url by running this irm or launcher.bat again." -ForegroundColor Green
+Write-Host "  [AVIS] Automatic updates hare not yet available, feel free to run the irm and launcher at any time." -ForegroundColor Green
 Write-Host "====================================================================================" -ForegroundColor DarkGray
