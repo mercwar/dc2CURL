@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 :: ============================================================
-:: FIREGEM // DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
+:: FIREGEM DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
 :: ============================================================
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -53,7 +53,7 @@ goto :START_EXECUTION
 cls
 echo.
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo   %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
+echo    %GOLD% %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%   %ICE%M O D E R N   K E R N E L%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
 echo %GRAD2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
@@ -72,9 +72,9 @@ echo %WHITE%%FRAME_BODY_2%%RST%
 echo %WHITE%%FRAME_BODY_3%%RST%
 echo.
 echo %MUTED%  📊 STAGE:%RST%
-echo   %MUTED%[%RST%%FRAME_BAR_COL%%FRAME_BAR_FILL%%MUTED%%FRAME_BAR_EMPTY%%MUTED%]%RST% %GOLD%%FRAME_PCT%%%%%%RST%
+echo    %MUTED%[%RST%%FRAME_BAR_COL%%FRAME_BAR_FILL%%MUTED%%FRAME_BAR_EMPTY%%MUTED%]%RST% %GOLD%%FRAME_PCT%%%%%%RST%
 echo.
-echo   %MUTED%» %BLUE%PHASE: %FRAME_PHASE%%RST%
+echo    %MUTED%» %BLUE%PHASE: %FRAME_PHASE%%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 goto :eof
 
@@ -108,7 +108,7 @@ set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 set "MENU_COUNT=0"
-for %%T in (curl powershell bitsadmin certutil python wget node cscript mshta dc2url) do (
+for %%T in (curl powershell bitsadmin certutil python wget node cscript mshta dc2url winget) do (
     where %%T >nul 2>nul
     if not errorlevel 1 (
         set /a MENU_COUNT+=1
@@ -133,11 +133,11 @@ call :RENDER_FRAME
 
 echo.
 for /l %%I in (1,1,%MENU_COUNT%) do (
-    echo %GRAD2%        ╔═[%GOLD% %%I %GRAD2%]══%RST% %WHITE%!MENU_NAME_%%I!%RST%
+    echo %GRAD2%     ╔═[%GOLD% %%I %GRAD2%]══%RST% %WHITE%!MENU_NAME_%%I!%RST%
 )
 echo.
 
-set /p "DL_CHOICE=%GOLD%   >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
+set /p "DL_CHOICE=%GOLD%    >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
 if "%DL_CHOICE%"=="" set "DL_CHOICE=1"
 if %DL_CHOICE% gtr %MENU_COUNT% set "DL_CHOICE=1"
 if %DL_CHOICE% lss 1 set "DL_CHOICE=1"
@@ -155,6 +155,25 @@ if /i "%SELECTED_DL%"=="MANUAL_BROWSER" (
 )
 
 :: ============================================================
+:: WINGET / GIT VERIFICATION & INSTALLATION PIPELINE
+:: ============================================================
+if /i "%SELECTED_DL%"=="winget" (
+    echo.
+    echo %BLUE%  [AVIS GIT CHECK]%RST% %GOLD%Checking Git installation via winget...%RST%
+    winget --version >nul 2>&1
+    if not errorlevel 1 (
+        winget list --id Git.Git >nul 2>&1
+        if errorlevel 1 (
+            echo %GREEN%  [AVIS INSTALL]%RST% %WHITE%Git not found. Installing Git via winget...%RST%
+            winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
+        ) else (
+            echo %GREEN%  [AVIS STATUS]%RST% %WHITE%Git is already installed and up to date.%RST%
+        )
+    )
+    timeout /t 2 >nul
+)
+
+:: ============================================================
 :: TARGET INSTALLATION PATH SELECTION
 :: ============================================================
 set "FRAME_PHASE=[AVIS] SELECT INSTALL PATH"
@@ -167,7 +186,7 @@ set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
 echo.
-set /p "PATH_CHOICE=%GOLD%   >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
+set /p "PATH_CHOICE=%GOLD%    >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
 
 if "%PATH_CHOICE%"=="2" (
     for /f "delims=" %%D in ('powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description = 'Select dc2url Installation Directory'; if ($f.ShowDialog() -eq 'OK') { $f.SelectedPath }"') do (
@@ -291,8 +310,8 @@ if exist "install.bat" (
 echo.
 echo %GRAD1%  ====================================================================================%RST%
 echo %GRAD2%  ╔══════════════════════════════════════════════════════════════════════════════════╗%RST%
-echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully                   %GRAD2%║%RST%
-echo %GRAD2%  ║%BLUE%                        MERCWAR SYSTEMS • DARK-COM-2                              %GRAD2%║%RST%
+echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully                 %GRAD2%║%RST%
+echo %GRAD2%  ║%BLUE%                    MERCWAR SYSTEMS • DARK-COM-2                              %GRAD2%║%RST%
 echo %GRAD2%  ╚══════════════════════════════════════════════════════════════════════════════════╝%RST%
 echo %GRAD1%  ====================================================================================%RST%
 echo.
@@ -303,4 +322,3 @@ echo.
 endlocal
 :: Forces the command-line session to persist instead of closing the terminal window
 exit /b 0
-
