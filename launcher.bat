@@ -1,342 +1,150 @@
 @echo off
-setlocal EnableDelayedExpansion
-chcp 65001 >nul 2>&1
+:: InstallShield Subsystem: Force Elevated Administrative Token Context
+:: -----------------------------------------------------------------------------
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 
-:: ============================================================
-:: FIREGEM // DARK-COM-2 (OPTIMIZED & STABLE CURL PIPELINE)
-:: ============================================================
+:RequestUAC
+    powershell -Command "Start-Process '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
+    exit /b
 
-for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
+:ExecuteSetup
+setlocal DisableDelayedExpansion
 
-set "GRAD1=%ESC%[38;2;255;90;0m"
-set "GRAD2=%ESC%[38;2;255;125;0m"
-set "GRAD3=%ESC%[38;2;255;160;0m"
-set "GRAD4=%ESC%[38;2;255;195;0m"
-set "GRAD5=%ESC%[38;2;255;225;0m"
-set "GRAD6=%ESC%[38;2;255;255;0m"
-
-set "GOLD=%ESC%[38;2;255;210;0m"
-set "BLUE=%ESC%[38;2;255;140;0m"
-set "ICE=%ESC%[38;2;255;230;0m"
-set "GREEN=%ESC%[38;2;255;190;0m"
-set "MUTED=%ESC%[38;2;115;125;145m"
-set "WHITE=%ESC%[38;2;240;240;250m"
-set "RST=%ESC%[0m"
-set "LINE_COLOR=%ESC%[38;2;255;90;0m"
-
-mode con cols=100 lines=50
-color 00
-title DARK-COM-2 DYNAMIC dc2url KERNEL v1.0
-
+:: Force the working directory to match the actual folder location of this script file (e.g., Program Files\dc2url\v1.0).
 cd /d "%~dp0"
 
-:: ============================================================
-:: SELF-ELEVATION PIPELINE
-:: ============================================================
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    powershell -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', 'cd /d ""%~dp0"" && ""%~f0""' -Verb RunAs"
-    exit /b
-)
+:: InstallShield Configuration Properties: Title Block & Bounds
+title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Deployment Engine
+mode con: cols=120 lines=34
 
-set "REPO_OWNER=mercwar"
-set "REPO_NAME=dc2url"
-set "GLOBAL_CONFIG_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/config.json"
-set "OUTPUT_FILE=config.json"
+chcp 65001 >nul 2>&1
+color 0E
 
-goto :START_EXECUTION
+:: Force TrueColor Console Canvas Context Allocation
+reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
+set "RESET=%E%[0m"
+set "BG_GLASS=%E%[48;2;10;10;12m"
+set "O1=%E%[38;2;255;68;0m"
+set "O2=%E%[38;2;255;110;0m"
+set "O3=%E%[38;2;255;153;0m"
+set "Y1=%E%[38;2;255;200;0m"
+set "Y2=%E%[38;2;255;235;0m"
+set "TXT=%E%[38;2;240;240;240m"
 
-:: ============================================================
-:: FRAME BUFFER SUBROUTINE
-:: ============================================================
-:RENDER_FRAME
 cls
-echo.
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo    %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
-echo %GRAD2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
-echo %GRAD3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RST%
-echo %GRAD4%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RST%
-echo %GRAD5%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
-echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo.
-echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3% %RST% %GOLD%ECLIPSE TECHNOLOGY%RST%
-echo %MUTED%  STATUS: %RST% %GOLD%%FRAME_STATUS%%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo.
-echo %WHITE%%FRAME_BODY_1%%RST%
-echo %WHITE%%FRAME_BODY_2%%RST%
-echo %WHITE%%FRAME_BODY_3%%RST%
-echo.
-echo %MUTED%  📊 STAGE:%RST%
-echo    %MUTED%[%RST%%FRAME_BAR_COL%%FRAME_BAR_FILL%%MUTED%%FRAME_BAR_EMPTY%%MUTED%]%RST% %GOLD%%FRAME_PCT%%%%%%RST%
-echo.
-echo    %MUTED%» %BLUE%PHASE: %FRAME_PHASE%%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-goto :eof
-
-:DRAW_PROGRESS
-set /a "NUM_BLOCKS=%1 / 5"
-set "FRAME_BAR_FILL="
-set "FRAME_BAR_EMPTY="
-for /l %%B in (1,1,20) do (
-    if %%B leq !NUM_BLOCKS! (
-        set "FRAME_BAR_FILL=!FRAME_BAR_FILL!█"
-    ) else (
-        set "FRAME_BAR_EMPTY=!FRAME_BAR_EMPTY!░"
-    )
-)
-set "FRAME_PCT=%1"
-if %1 lss 10 set "FRAME_PCT=  %1"
-if %1 geq 10 if %1 lss 100 set "FRAME_PCT= %1"
-goto :eof
-
-:: ============================================================
-:: START_EXECUTION
-:: ============================================================
-:START_EXECUTION
-set "FRAME_PHASE=[AVIS] SCANNER"
-set "FRAME_STATUS=[AVIS] Scanning system ..."
-set "FRAME_BODY_1=[AVIS] Scanning windows for installation methods..."
-set "FRAME_BODY_2=[AVIS] Validating connection..."
-set "FRAME_BODY_3=[AVIS] Launcher alive."
-call :DRAW_PROGRESS 10
-set "FRAME_BAR_COL=%BLUE%"
-call :RENDER_FRAME
-
-set "MENU_COUNT=0"
-for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin wget node winget) do (
-    where %%T >nul 2>nul
-    if not errorlevel 1 (
-        set /a MENU_COUNT+=1
-        set "MENU_NAME_!MENU_COUNT!=%%T"
-        set "MENU_CMD_!MENU_COUNT!=%%T"
-        for /f "delims=" %%P in ('where %%T 2^>nul') do set "MENU_PATH_!MENU_COUNT!=%%P"
-    )
-)
-
-set /a MENU_COUNT+=1
-set "MENU_NAME_!MENU_COUNT!=Manual Download GitHub"
-set "MENU_CMD_!MENU_COUNT!=MANUAL_BROWSER"
-
-set "FRAME_PHASE=[AVIS]  DEVICE SELECTOR"
-set "FRAME_STATUS=[AVIS] Device detection complete."
-set "FRAME_BODY_1=[AVIS] Devices detected: %MENU_COUNT% available."
-set "FRAME_BODY_2=[AVIS] Select your preferred device."
-set "FRAME_BODY_3=[AVIS] Follow the steps below to open datalink"
-call :DRAW_PROGRESS 35
-set "FRAME_BAR_COL=%GOLD%"
-call :RENDER_FRAME
+echo %BG_GLASS%
+cls
 
 echo.
-for /l %%I in (1,1,%MENU_COUNT%) do (
-    echo %GRAD2%     ╔═[%GOLD% %%I %GRAD2%]══%RST% %WHITE%!MENU_NAME_%%I!%RST%
-)
+echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
+echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
+echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
+echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
+echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
+echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-set /p "DL_CHOICE=%GOLD%    >>> SELECT ENGINE [1-%MENU_COUNT%]: %RST%"
-if "%DL_CHOICE%"=="" set "DL_CHOICE=1"
-if %DL_CHOICE% gtr %MENU_COUNT% set "DL_CHOICE=1"
-if %DL_CHOICE% lss 1 set "DL_CHOICE=1"
+:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points to C:\Program Files\dc2url\v1.0\)
+set "VERSION_DIR=%~dp0"
+if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
-set "SELECTED_DL="
-for /l %%I in (1,1,%MENU_COUNT%) do (
-    if "%DL_CHOICE%"=="%%I" set "SELECTED_DL=!MENU_CMD_%%I!"
-)
-if not defined SELECTED_DL set "SELECTED_DL=curl"
+for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
+for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-if /i "%SELECTED_DL%"=="MANUAL_BROWSER" (
-    start https://github.com/%REPO_OWNER%/%REPO_NAME%
-    pause
-    exit /b 0
-)
+set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
 
-:: ============================================================
-:: WINGET / GIT VERIFICATION & INSTALLATION PIPELINE
-:: ============================================================
-if /i "%SELECTED_DL%"=="winget" (
-    echo.
-    echo %BLUE%  [AVIS GIT CHECK]%RST% %GOLD%Checking Git installation via winget...%RST%
-    winget --version >nul 2>&1
-    if not errorlevel 1 (
-        winget list --id Git.Git >nul 2>&1
-        if errorlevel 1 (
-            echo %GREEN%  [AVIS INSTALL]%RST% %WHITE%Git not found. Installing Git via winget...%RST%
-            winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
-        ) else (
-            echo %GREEN%  [AVIS STATUS]%RST% %WHITE%Git is already installed and up to date.%RST%
-        )
-    )
-    timeout /t 2 >nul
+:: 2. VERIFY DISCOVERED FILE ASSETS IN VERSION DIRECTORY
+if not exist "%FINAL_EXE_PATH%" (
+    echo %O1%        [AVIS FAILED] Installation files are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
+    goto :finish
 )
 
-:: ============================================================
-:: TARGET INSTALLATION PATH SELECTION
-:: ============================================================
-set "FRAME_PHASE=[AVIS] SELECT INSTALL PATH"
-set "FRAME_STATUS=[AVIS] Configuring folders..."
-set "FRAME_BODY_1=  [ 1 ] System Path (%SystemDrive%\Program Files\dc2url)"
-set "FRAME_BODY_2=  [ 2 ] Custom Path (your custom drive path)"
-set "FRAME_BODY_3=        [AVIS]  Choose your path."
-call :DRAW_PROGRESS 55
-set "FRAME_BAR_COL=%BLUE%"
-call :RENDER_FRAME
+:: 3. COM SUBSYSTEM SELF-REGISTRATION PIPELINE
+echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
+if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
+    regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
+    echo                 [SUCCESS] DarkComHeadless.dll registration.
+)
+if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
+    regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
+    echo                 [SUCCESS] WebView2Loader.dll registration.
+)
 
+:: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
+echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
+echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
+echo                 [SUCCESS] installed 'dc2url.bat' successfully.
+
+:: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS
+echo %O2%        [*] Auto Configuring dc2url for windows...%RESET%%BG_GLASS%
+
+:: --- Standard Native 64-bit Application Paths Integration ---
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+
+:: --- Explicit WoW6432Node Redirector Registry Mappings ---
+reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+
+:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (Icon correctly points to BASE_DIR root)
+echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
+
+set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: Double mirror registry visibility configuration to WoW6432Node space
+set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: 7. MASTER SYSTEM ENVIRONMENT VARIABLE & MACHINE PATH INJECTION
+echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
+
+:: Set persistent machine environment variable pointer
+setx /M dc2url_path "%FINAL_EXEC_DIR%" >nul 2>&1
+
+:: Forcefully prepend target directory to the Machine (System) PATH registry safely without duplicates
+powershell -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($m -split ';' -notcontains '%FINAL_EXEC_DIR%'){[System.Environment]::SetEnvironmentVariable('PATH',('%FINAL_EXEC_DIR%;'+$m),'Machine')}" >nul 2>&1
+
+:: Prepend to User PATH block as a fallback layer
+powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p -split ';' -notcontains '%FINAL_EXEC_DIR%'){[System.Environment]::SetEnvironmentVariable('PATH',('%FINAL_EXEC_DIR%;'+$p),'User')}" >nul 2>&1
+
+:: Broadcast environment changes globally to invalidate stale Win32 process caches
+powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
+
+:: Synchronize path variables onto the running terminal session instance context immediately
+set "PATH=%FINAL_EXEC_DIR%;%PATH%"
+
+echo                 [SUCCESS] dc2url is now fully installed and at your command!
 echo.
-set /p "PATH_CHOICE=%GOLD%    >>> SELECT DESTINATION [1-2, DEFAULT 1]: %RST%"
-
-if "%PATH_CHOICE%"=="2" (
-    for /f "delims=" %%D in ('powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description = 'Select dc2url Installation Directory'; if ($f.ShowDialog() -eq 'OK') { $f.SelectedPath }"') do (
-        set "CUSTOM_DIR=%%D"
-    )
-    if defined CUSTOM_DIR (
-        set "BASE_DIR=!CUSTOM_DIR!"
-    ) else (
-        set "BASE_DIR=%SystemDrive%\Program Files\dc2url"
-    )
-) else (
-    set "BASE_DIR=%SystemDrive%\Program Files\dc2url"
-)
-
-if not exist "%BASE_DIR%" mkdir "%BASE_DIR%"
-
-:: ============================================================
-:: PHASE 1: DOWNLOAD MANIFEST
-:: ============================================================
-set "FRAME_PHASE=[AVIS] Searching for installer files"
-set "FRAME_STATUS=[AVIS] Downlinking installer files..."
-set "FRAME_BODY_1=  Source: %GLOBAL_CONFIG_URL%"
-set "FRAME_BODY_2=  Engine: %SELECTED_DL%"
-set "FRAME_BODY_3=        [AVIS] Downloading..."
-call :DRAW_PROGRESS 70
-set "FRAME_BAR_COL=%GOLD%"
-call :RENDER_FRAME
-
-if exist "%OUTPUT_FILE%" del /f /q "%OUTPUT_FILE%" >nul 2>&1
-
-if /i "%SELECTED_DL%"=="powershell" (
-    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%GLOBAL_CONFIG_URL%' -OutFile '%OUTPUT_FILE%'" >nul 2>&1
-) else (
-    curl -f -s -L -k "%GLOBAL_CONFIG_URL%" -o "%OUTPUT_FILE%"
-)
-
-if not exist "%OUTPUT_FILE%" (
-    set "FRAME_STATUS=[AVIS FAILURE] Configuration manifest unavailable."
-    call :RENDER_FRAME
-    echo.
-    echo [ERROR] Could not download manifest from %GLOBAL_CONFIG_URL%
-    pause
-    exit /b 1
-)
-
-:: ============================================================
-:: PHASE 2: VERSION RESOLUTION & TARGET DIR SETUP
-:: ============================================================
-set "FRAME_PHASE=[AVIS] Auto detecting version"
-set "FRAME_STATUS=[AVIS] Reading version definitions..."
-call :DRAW_PROGRESS 85
-set "FRAME_BAR_COL=%GOLD%"
-call :RENDER_FRAME
-
-for /f "usebackq delims=" %%V in ('powershell -Command "(Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json).version" 2^>nul') do (
-    set "VERSION=%%V"
-)
-
-if not defined VERSION (
-    set "FRAME_STATUS=[AVIS FAILURE] Could not resolve target version."
-    call :RENDER_FRAME
-    pause
-    exit /b 1
-)
-
-set "TARGET_DIR=%BASE_DIR%\%VERSION%"
-if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
-
-:: ============================================================
-:: PHASE 3: ROBUST POWERSHELL PAYLOAD STREAMING PIPELINE
-:: ============================================================
-set "FRAME_PHASE=[AVIS] Collecting files..."
-set "FRAME_STATUS=[AVIS] Finding %VERSION%..."
-set "FRAME_BODY_1=  Target Repository: %REPO_OWNER%/%REPO_NAME%"
-set "FRAME_BODY_2=  Destination Root: %BASE_DIR%"
-set "FRAME_BODY_3=        [AVIS] Writing files..."
-call :DRAW_PROGRESS 95
-set "FRAME_BAR_COL=%BLUE%"
-call :RENDER_FRAME
-
-powershell -NoProfile -Command ^
-    "$json = Get-Content '%OUTPUT_FILE%' -Raw | ConvertFrom-Json;" ^
-    "$owner = '%REPO_OWNER%';" ^
-    "$repo = '%REPO_NAME%';" ^
-    "$version = '%VERSION%';" ^
-    "$baseDir = '%BASE_DIR%';" ^
-    "$targetDir = '%TARGET_DIR%';" ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "" ^
-    "function Download-File($url, $outFile) {" ^
-    "    $dir = Split-Path $outFile -Parent;" ^
-    "    if (!(Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }" ^
-    "    Write-Host \"[AVIS DL] $url -> $outFile\";" ^
-    "    Invoke-WebRequest -Uri $url -OutFile $outFile;" ^
-    "}" ^
-    "" ^
-    "foreach ($f in $json.manifest_layout.root_files) {" ^
-    "    $url = \"https://raw.githubusercontent.com/$owner/$repo/main/$($f.source)\";" ^
-    "    $out = Join-Path $baseDir $f.target;" ^
-    "    Download-File $url $out;" ^
-    "}" ^
-    "" ^
-    "foreach ($f in $json.manifest_layout.branch_files) {" ^
-    "    $url = \"https://raw.githubusercontent.com/$owner/$repo/main/$version/$($f.source)\";" ^
-    "    $out = Join-Path $targetDir $f.target;" ^
-    "    Download-File $url $out;" ^
-    "}" ^
-    "" ^
-    "foreach ($f in $json.manifest_layout.binary_exec) {" ^
-    "    $url = \"https://raw.githubusercontent.com/$owner/$repo/main/$version/$($f.source)\";" ^
-    "    $out = Join-Path $targetDir $f.target;" ^
-    "    Download-File $url $out;" ^
-    "}"
-
-if exist "%OUTPUT_FILE%" move /y "%OUTPUT_FILE%" "%TARGET_DIR%\" >nul 2>&1
-
-:: ============================================================
-:: PHASE 4: APPLICATION HANDOFF
-:: ============================================================
-set "FRAME_PHASE=[AVIS] Finding installer"
-set "FRAME_STATUS=[AVIS] Launcher has reported success"
-call :DRAW_PROGRESS 100
-set "FRAME_BAR_COL=%GREEN%"
-call :RENDER_FRAME
-
-cd /d "%TARGET_DIR%"
-
-echo.
-if exist "install.bat" (
-    echo %GREEN%  [AVIS SEARCH]%RST% %WHITE% AVIS HAS VALIDATED SUCCESS%RST%
-    echo %BLUE%  [AVIS EXEC]%RST% %GOLD%Running installer...%RST%
-    echo.
-    timeout /t 2 >nul
-    cmd /c install.bat
-) else (
-    echo %GRAD3%  [AVIS FAILURE]%RST% %WHITE%The installer files are missing install.bat%RST%
-    pause
-)
-
-echo.
-echo %GRAD1%  ====================================================================================%RST%
-echo %GRAD2%  ╔══════════════════════════════════════════════════════════════════════════════════╗%RST%
-echo %GRAD2%  ║%GOLD%            The eclipse is here, Program installed successfully                 %GRAD2%║%RST%
-echo %GRAD2%  ║%BLUE%                    MERCWAR SYSTEMS • DARK-COM-2                              %GRAD2%║%RST%
-echo %GRAD2%  ╚══════════════════════════════════════════════════════════════════════════════════╝%RST%
-echo %GRAD1%  ====================================================================================%RST%
+echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
 echo.
 
-echo %WHITE%  Installation sequence finished. Continuing to persistent prompt...%RST%
-echo.
+:finish
+echo %TXT%        Please Restart your command window to begin to use dc2url...%RESET%
+pause >nul
 
-endlocal
 exit /b 0
