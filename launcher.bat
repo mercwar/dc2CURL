@@ -251,7 +251,8 @@ if not defined VERSION (
     exit /b 1
 )
 
-:: Set final target directory including the version folder (e.g. Program Files\dc2url\v1.0)
+:: Base directory (e.g. Program Files\dc2url) and Version directory (e.g. Program Files\dc2url\v1.0)
+if not exist "%BASE_DIR%" mkdir "%BASE_DIR%"
 set "TARGET_DIR=%BASE_DIR%\%VERSION%"
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
@@ -267,22 +268,22 @@ call :DRAW_PROGRESS 95
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
 
-:: Process root_files (placed directly in TARGET_DIR)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.root_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+:: 1. Process root_files -> Placed directly in BASE_DIR (e.g., Program Files\dc2url\)
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE% -Raw' | ConvertFrom-Json; $json.manifest_layout.root_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/!SRC_FILE!"
     
     echo [AVIS URL DEBUG] !FILE_URL!
     if /i "%SELECTED_DL%" == "powershell" (
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%TARGET_DIR%\!TGT_FILE!'"
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!FILE_URL!' -OutFile '%BASE_DIR%\!TGT_FILE!'"
     ) else (
-        curl -f -s -L -k "!FILE_URL!" -o "%TARGET_DIR%\!TGT_FILE!"
+        curl -f -s -L -k "!FILE_URL!" -o "%BASE_DIR%\!TGT_FILE!"
     )
 )
 
-:: Process branch_files (placed directly in TARGET_DIR)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.branch_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+:: 2. Process branch_files -> Placed inside TARGET_DIR (e.g., Program Files\dc2url\v1.0\)
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE% -Raw' | ConvertFrom-Json; $json.manifest_layout.branch_files | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
     set "FILE_URL=https://raw.githubusercontent.com/%REPO_OWNER%/%REPO_NAME%/main/%VERSION%/!SRC_FILE!"
@@ -295,8 +296,8 @@ for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-
     )
 )
 
-:: Process binary_exec (subdirectories mirrored inside TARGET_DIR)
-for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE%' | ConvertFrom-Json; $json.manifest_layout.binary_exec | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
+:: 3. Process binary_exec -> Subdirectories mirrored inside TARGET_DIR (e.g., Program Files\dc2url\v1.0\exec\)
+for /f "usebackq tokens=1,2 delims=|" %%A in (`powershell -Command "$json = Get-Content '%OUTPUT_FILE% -Raw' | ConvertFrom-Json; $json.manifest_layout.binary_exec | ForEach-Object { $_.source + '|' + $_.target }" 2^>nul`) do (
     set "SRC_FILE=%%A"
     set "TGT_FILE=%%B"
 
