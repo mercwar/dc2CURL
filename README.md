@@ -30,6 +30,12 @@
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
 
+then
+
+```bash
+dc2url -v "http://mercwar01.byethost3.com/darkcom2/echo.php"
+```
+
 ##### 🌈 **Dark-Com-2** is a lightweight, high-performance command-line HTTP client and headless browser engine .
 
 - Built on native Win32 API and pure C.
