@@ -42,14 +42,14 @@ echo %O1%        ██████╗  █████╗ ██████╗
 echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
 echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
 echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
+echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points to C:\Program Files\dc2url\v1.0\)
+:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points to C:\...\v1.0\)
 set "VERSION_DIR=%~dp0"
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
@@ -69,17 +69,17 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                 [SUCCESS] DarkComHeadless.dll registration.
+    echo                  [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                 [SUCCESS] WebView2Loader.dll registration.
+    echo                  [SUCCESS] WebView2Loader.dll registration.
 )
 
 :: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                 [SUCCESS] installed 'dc2url.bat' successfully.
+echo                  [SUCCESS] installed 'dc2url.bat' successfully.
 
 :: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS
 echo %O2%        [*] Auto Configuring dc2url for windows...%RESET%%BG_GLASS%
@@ -138,7 +138,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 :: Synchronize path variables onto the running terminal session instance context immediately
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                 [SUCCESS] dc2url is now fully installed and at your command!
+echo                  [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
 echo.
