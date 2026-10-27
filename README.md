@@ -22,8 +22,6 @@
 - Paste the below command in the window
 - Press enter and follow the installation steps
 
-![dc22](./images/dc2.png)
-
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
@@ -108,6 +106,9 @@ darkcom2.exe --request POST --data "{\"action\":\"test_long_flags\"}" http://loc
 
 ## 🛠️ System Requirements & Deployment
 
+
+![dc22](./images/ss-dc2i.png)
+
 * **Operating System:** Windows 10 or Windows 11 (64-bit x64 architecture).
 * **Runtime Dependency:** Microsoft Edge WebView2 Evergreen Runtime.
 * **Permissions:** Read/write access in the execution directory for automated profile persistence and session caching.
@@ -181,6 +182,8 @@ Deploying the Dark-Com-2 runtime environment to target workstations or productio
 
 
 ## 🏅️ Installation
+
+![dc22](./images/dc2.png)
 
 You can install `dc2URL` on Windows using either a quick single-line command or by running the script locally from a cloned repository.
 
