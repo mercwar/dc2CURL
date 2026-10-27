@@ -1,23 +1,39 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Dynamically capture the directory where this batch file lives
-set "ROOT_DIR=%~dp0"
- set "TARGET_URL=http://mercwar01.byethost3.com/darkcom2/echo.php"
-rem set "TARGET_URL=http://localhost:8080/CL2/repositories/mercwar/Dark-Com-2/echo.php"
+:: Dynamically look up the script location
+set "REPO_DIR=%~dp0"
+set "GLOBAL_DIR=C:\Program Files\dc2url\"
+set "TARGET_URL=http://byethost3.com"
+
+:: Determine which directory contains the compiled executable
+set "EXE_PATH="
+if exist "!REPO_DIR!dc2url.exe" (
+    set "EXE_PATH=!REPO_DIR!dc2url.exe"
+) else if exist "!GLOBAL_DIR!dc2url.exe" (
+    set "EXE_PATH=!GLOBAL_DIR!dc2url.exe"
+) else (
+    :: Fallback to searching the system PATH environment variable
+    where dc2url.exe >nul 2>nul
+    if !errorlevel! equ 0 (
+        set "EXE_PATH=dc2url.exe"
+    )
+)
 
 echo ============================================================
 echo  DARK-COM-2 :: CURL-COMPATIBLE VERIFICATION SUITE
 echo ============================================================
+if defined EXE_PATH (
+    echo [FOUND] Using utility instance at: "!EXE_PATH!"
+) else (
+    echo [ERROR] dc2url.exe was not detected in local repo, Program Files, or PATH.
+    goto end
+)
 echo.
 
 echo [TEST 1] URL First (Standard Curl Style)
 echo ------------------------------------------------------------
-if exist "!ROOT_DIR!darkcom2.exe" (
-    "!ROOT_DIR!darkcom2.exe" "%TARGET_URL%" -X POST -d "{\"action\":\"test_url_first\"}" -v
-) else (
-    echo [ERROR] darkcom2.exe not found in "!ROOT_DIR!"
-)
+"!EXE_PATH!" -v "%TARGET_URL%" -m POST -d "{\"action\":\"test_url_first\"}"
 
 echo.
 echo ============================================================
@@ -25,9 +41,7 @@ echo.
 
 echo [TEST 2] Flags First (Alternative Curl Style)
 echo ------------------------------------------------------------
-if exist "!ROOT_DIR!darkcom2.exe" (
-    "!ROOT_DIR!darkcom2.exe" -X POST -d "{\"action\":\"test_flags_first\"}" "%TARGET_URL%" --verbose
-)
+"!EXE_PATH!" -v -m POST -d "{\"action\":\"test_flags_first\"}" "%TARGET_URL%"
 
 echo.
 echo ============================================================
@@ -35,9 +49,7 @@ echo.
 
 echo [TEST 3] Long Flags Style
 echo ------------------------------------------------------------
-if exist "!ROOT_DIR!darkcom2.exe" (
-    "!ROOT_DIR!darkcom2.exe" --request POST --data "{\"action\":\"test_long_flags\"}" "%TARGET_URL%" --verbose
-)
+"!EXE_PATH!" -v --method POST --data "{\"action\":\"test_long_flags\"}" "%TARGET_URL%"
 
 echo.
 echo ============================================================
@@ -48,18 +60,16 @@ echo Running back-to-back iterations to verify system variable increments...
 echo.
 
 echo Iteration #1: Sending payload...
-if exist "!ROOT_DIR!darkcom2.exe" (
-    "!ROOT_DIR!darkcom2.exe" --request POST --data "{\"iteration\":1}" "%TARGET_URL%" -v
-)
+"!EXE_PATH!" -v --method POST --data "{\"iteration\":1}" "%TARGET_URL%"
 echo.
 
 echo Iteration #2: Testing value increment updates...
-if exist "!ROOT_DIR!darkcom2.exe" (
-    "!ROOT_DIR!darkcom2.exe" --request POST --data "{\"iteration\":2}" "%TARGET_URL%" -v
-)
+"!EXE_PATH!" -v --method POST --data "{\"iteration\":2}" "%TARGET_URL%"
 echo.
 
 echo ============================================================
 echo  ALL DIAGNOSTIC AND PERSISTENCE TESTS COMPLETED
 echo ============================================================
+
+:end
 pause
