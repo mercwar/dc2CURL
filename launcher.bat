@@ -63,8 +63,8 @@ echo %GRAD5%        ██████╔╝██║  ██║██║  █�
 echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo.
-echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3%//%RST% %GOLD%ECLIPSE TECHNOLOGY%RST%
-echo %MUTED%  STATUS: %FRAME_STATUS%%RST%
+echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3% %RST% %GOLD%ECLIPSE TECHNOLOGY%RST%
+echo %MUTED%  STATUS: %RST% %GOLD%%FRAME_STATUS%%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo.
 echo %WHITE%%FRAME_BODY_1%%RST%
@@ -122,7 +122,7 @@ set /a MENU_COUNT+=1
 set "MENU_NAME_!MENU_COUNT!=Manual Download GitHub"
 set "MENU_CMD_!MENU_COUNT!=MANUAL_BROWSER"
 
-set "FRAME_PHASE=[AVIS] // DEVICE SELECTOR"
+set "FRAME_PHASE=[AVIS]  DEVICE SELECTOR"
 set "FRAME_STATUS=[AVIS] Device detection complete."
 set "FRAME_BODY_1=[AVIS] Devices detected: %MENU_COUNT% available."
 set "FRAME_BODY_2=[AVIS] Select your preferred device."
@@ -161,7 +161,7 @@ set "FRAME_PHASE=[AVIS] SELECT INSTALL PATH"
 set "FRAME_STATUS=[AVIS] Configuring folders..."
 set "FRAME_BODY_1=  [ 1 ] System Path (%SystemDrive%\Program Files\dc2url)"
 set "FRAME_BODY_2=  [ 2 ] Custom Path (your custom drive path)"
-set "FRAME_BODY_3=[AVIS]  Choose your path."
+set "FRAME_BODY_3=        [AVIS]  Choose your path."
 call :DRAW_PROGRESS 55
 set "FRAME_BAR_COL=%BLUE%"
 call :RENDER_FRAME
