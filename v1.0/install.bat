@@ -75,17 +75,17 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Server Component Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-                [SUCCESS] DarkComHeadless.dll mapped into target engine space.
+    echo                [SUCCESS] DarkComHeadless.dll mapped into target engine space.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-                [SUCCESS] WebView2Loader.dll mapped into target engine space.
+    echo                [SUCCESS] WebView2Loader.dll mapped into target engine space.
 )
 
 :: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-                [SUCCESS] Command routing wrapper 'dc2url.bat' successfully initialized.
+echo                [SUCCESS] Command routing wrapper 'dc2url.bat' successfully initialized.
 
 :: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS (FORCED STRICT LOWERCASE)
 echo %O2%        [*] Writing Multi-Architecture Application Routing Nodes...%RESET%%BG_GLASS%
@@ -144,7 +144,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 :: Synchronize path variables onto the running terminal session instance context immediately
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-                [SUCCESS] Environment update complete. Lookups refreshed across architectures.
+echo                [SUCCESS] Environment update complete. Lookups refreshed across architectures.
 echo.
 echo %Y2%        [DEPLOYMENT COMPLETED - ENGINE ONLINE AND VISIBLE]%RESET%%BG_GLASS%
 echo.
