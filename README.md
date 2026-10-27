@@ -212,18 +212,25 @@ If you prefer to clone the repository or manage the files manually:
 1. Clone the repository to your machine:
    ```bash
    git clone https://github.com/mercwar/dc2url
+   cd dc2url
+   launcher.bat
    ```
 2. Navigate into the version directory:
    ```bash
-   cd <path/to/clone or downloaded files>/dc2URL
-   ./launcher.bat
+   cd <path/to/clone or downloaded files>/dc2url
+   cd dc2url
+   launcher.bat
    ```
 3. Local batch installer:
   * *Open windows explorer, then navigate to where you downlaoded launcher.bat*
   * **Double-click** the ` launcher.bat` file inside the directory.
 
-or ...
+or 
+
+
+
 Save this as launcher.bat and double click it :
+
 ```
 @echo off
 setlocal EnableDelayedExpansion
