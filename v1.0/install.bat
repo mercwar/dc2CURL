@@ -100,7 +100,7 @@ reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
 
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
@@ -111,7 +111,7 @@ reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
 :: Double mirror registry visibility configuration to WoW6432Node space
 set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url (%VERSION_NAME%)" >nul 2>&1
+reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
