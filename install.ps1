@@ -9,18 +9,18 @@ param (
 $ErrorActionPreference = 'Stop'
 [Net.SecurityProtocolType]::Tls12
 
-# Resolve sound status from either parameter block input or global session context variable fallback
-$sound = "off"
-if ($sound -eq "on" -or $global:sound -eq "on") { $sound = "on" }
+# Resolve sound status safely without overwriting the parameter block input
+$SoundVal = "off"
+if ($sound -eq "on" -or $global:sound -eq "on") { $SoundVal = "on" }
 
 # Configure Window Title & Dimensions for Clean Presentation
-$host.UI.RawUI.WindowTitle = "MERCWAR dc2URL Launcer v1.0"
+$host.UI.RawUI.WindowTitle = "MERCWAR dc2URL Launcher v1.0"
 try {
     $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
-$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
+$RepoUrl = "https://githubusercontent.com"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
 Clear-Host
@@ -67,8 +67,8 @@ Write-Host ""
 
 Start-Sleep -Milliseconds 600
 
-# Execute the launcher interactively and explicitly forward the sound parameter
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`" $sound" -Wait -NoNewWindow
+# Execute the launcher interactively and explicitly forward the correct sound parameter
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"`"$TempInstaller`"`" $SoundVal" -Wait -NoNewWindow
 
 # Cleanup
 if (Test-Path $TempInstaller) {
