@@ -87,44 +87,44 @@ echo  %GREEN%POST Complete. Booting dc2url Software Environment Engine...%RESET%
 echo %GRAY%--------------------------------------------------------------------------------%RESET%
 echo.
 REM =============================================================================
-REM SOUND SYSTEM
+REM SOUND SYSTEM (Registry-Backed Check)
 REM =============================================================================
 
-echo [DEBUG] Received parameter 1: [%~1]
+set "SOUND_REG=off"
+for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v sound 2^>nul') do set "SOUND_REG=%%B"
+
+echo [DEBUG] Registry Sound Setting: [%SOUND_REG%]
 timeout /t 3 >nul
 
-if "%~1"=="" goto sound_off
-if /i "%~1"=="on" goto sound_on
+if /i "%SOUND_REG%"=="on" goto sound_on
 goto sound_off
 
 :sound_on
-
 echo.
 echo [SYSTEM] Initializing audio portal...
 
-set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2URL/main/sound/transformers.mid"
+set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transformers.mid"
 set "MIDI_FILE=%TEMP%\transformers.mid"
 
-curl -L -s "%MIDI_URL%" -o "%MIDI_FILE%"
+curl -L -s -f "%MIDI_URL%" -o "%MIDI_FILE%"
 
 if exist "%MIDI_FILE%" (
     echo [SYSTEM] Playing Transformers theme...
     start "" "%MIDI_FILE%"
 ) else (
-    echo [WARNING] MIDI download failed.
+    echo [WARNING] MIDI download failed or resource unreachable.
 )
-
 goto after_sound
 
 :sound_off
-
 echo.
 echo [SYSTEM] Audio disabled.
 
 :after_sound
-
 timeout /t 2 >nul
 goto :START_EXECUTION
+
+
 
 :: ============================================================
 :: FRAME BUFFER SUBROUTINE
