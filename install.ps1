@@ -10,7 +10,7 @@ $ErrorActionPreference = 'Stop'
 [Net.SecurityProtocolType]::Tls12
 
 # Resolve sound status from either parameter block input or global session context variable fallback
-$SoundVal = "off"
+$Sound = "off"
 if ($sound -eq "on" -or $global:sound -eq "on") { $SoundVal = "on" }
 
 # Configure Window Title & Dimensions for Clean Presentation
