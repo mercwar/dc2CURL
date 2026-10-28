@@ -47,7 +47,8 @@ catch {
 # configuration
 # ============================================================================
 
-$repourl = "https://byethost3.com"
+
+$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
 
 $tempinstaller = join-path `
     $env:temp `
