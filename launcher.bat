@@ -26,7 +26,7 @@ set "LINE_COLOR=%ESC%[38;2;255;90;0m"
 
 mode con cols=100 lines=50
 color 00
-title DC2URL v1.0 STARGATE 2 QUASAR 1
+title DC2URL v1.0 STARGATE 2 QUASAR 2
 
 cd /d "%~dp0"
 
@@ -86,27 +86,41 @@ echo %GRAY%---------------------------------------------------------------------
 echo  %GREEN%POST Complete. Booting dc2url Software Environment Engine...%RESET%
 echo %GRAY%--------------------------------------------------------------------------------%RESET%
 echo.
+REM =============================================================================
+REM SOUND SYSTEM
+REM =============================================================================
 
-:: Check for the switch parameter (case-insensitive) or missing arguments
-if "%~1"=="" goto :sound_off
-if /i "%~1"=="on" goto :sound_on
-if /i "%~1"=="off" goto :sound_off
-
+if "%~1"=="" goto sound_off
+if /i "%~1"=="on" goto sound_on
+goto sound_off
 
 :sound_on
-echo %CYAN%[SYSTEM]%RESET% Turning network subsystem stream sound ON...
-set "MIDI_URL=https://github.com/mercwar/dc2url/raw/refs/heads/main/sound/transformers.mid"
 
+echo.
+echo [SYSTEM] Initializing audio portal...
 
-:: Download the file using dc2url case-sensitive pipeline
-curl -sL "%MIDI_URL%" -o "%TEMP%\transformers.mid"
+set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2URL/main/sound/transformers.mid"
+set "MIDI_FILE=%TEMP%\transformers.mid"
 
-:: Play the file using Windows Media Player engine
-start "" wmplayer "%TEMP%\transformers.mid"
+curl -L -s "%MIDI_URL%" -o "%MIDI_FILE%"
+
+if exist "%MIDI_FILE%" (
+    echo [SYSTEM] Playing Transformers theme...
+    start "" "%MIDI_FILE%"
+) else (
+    echo [WARNING] MIDI download failed.
+)
+
+goto after_sound
 
 :sound_off
-timeout /t 3 >nul
 
+echo.
+echo [SYSTEM] Audio disabled.
+
+:after_sound
+
+timeout /t 2 >nul
 goto :START_EXECUTION
 
 :: ============================================================
