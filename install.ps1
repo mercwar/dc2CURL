@@ -17,19 +17,20 @@ if ($sound -eq "on" -or $global:sound -eq "on" -or $env:SOUND_MODE -eq "on") {
 }
 
 # Configure Window Title & Dimensions for Clean Presentation
-$host.UI.RawUI.WindowTitle = "dc2URL Launcher v1.0"
+$host.UI.RawUI.WindowTitle = "dc2url Launcher v1.0"
 try {
     $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
+# Strictly lowercase URL for Linux/Apache case-sensitivity compliance
 $RepoUrl = "https://mercwar01.byethost3.com/darkcom2/launcher.bat"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
 Clear-Host
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "     E C L I P S E    I N S T A L L E R    ■    D C 2 U R L    K E R N E L" -ForegroundColor Cyan
-Write-Host "     Stargate 1 Quasar 1" -ForegroundColor Cyan
+Write-Host "     Stargate 2 Quasar 2" -ForegroundColor Cyan
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "  Mercwar Stargate  technology" -ForegroundColor DarkYellow
 Write-Host "  Status: Contacting server..." -ForegroundColor Gray
@@ -39,7 +40,7 @@ Write-Host ""
 # TRIGGER SOUND DIRECTLY IN POWERSHELL IF ENABLED
 if ($SoundVal -eq "on") {
     Write-Host "  [SYSTEM] Turning network subsystem stream sound ON..." -ForegroundColor Cyan
-    $MidiUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/sound/transformers.mid"
+    $MidiUrl = "https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transformers.mid"
     $MidiFile = "$env:TEMP\transformers.mid"
     try {
         $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
@@ -68,7 +69,7 @@ Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
 Write-Host "  [AVIS] Connecting to gateway via dc2url..." -ForegroundColor Cyan
 
-# Fetch payload using dc2url output flag (-o) or standard WebClient fallback from byethost3
+# Fetch payload using lowercase dc2url output flag (-o) or standard WebClient fallback
 try {
     $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
     if ($dc2check) {
