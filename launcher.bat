@@ -26,7 +26,7 @@ set "LINE_COLOR=%ESC%[38;2;255;90;0m"
 
 mode con cols=100 lines=50
 color 00
-title DC2URL STARGATE v1.0 QUASAR 3
+title DC2URL v1.0 STARGATE 2 QUASAR 1
 
 cd /d "%~dp0"
 
@@ -88,7 +88,7 @@ echo %GRAY%---------------------------------------------------------------------
 echo.
 
 :: Check for the switch parameter (case-insensitive) or missing arguments
-if "%~1"=="" goto :sound_on
+if "%~1"=="" goto :sound_off
 if /i "%~1"=="on" goto :sound_on
 if /i "%~1"=="off" goto :sound_off
 
