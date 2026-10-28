@@ -1,195 +1,127 @@
 <#
-.synopsis
-    dc2url root staging loader
-    aifvs-artifact
+.SYNOPSIS
+    dc2URL Root Staging Loader (Registry-Backed Persistence)
 #>
-
-[cmdletbinding()]
-param(
+[CmdletBinding()]
+param (
     [string]$sound = ""
 )
 
-$erroractionpreference = "stop"
+$ErrorActionPreference = 'Stop'
+[Net.SecurityProtocolType]::Tls12
 
+# Fallback to environment variable if parameter was dropped by iex pipeline execution
+if ([string]::IsNullOrEmpty($sound) -and -not [string]::IsNullOrEmpty($env:sound)) {
+    $sound = $env:sound
+}
+
+# Clean, single lowercase sound validation
+$SoundVal = "off"
+if ($sound -eq "on") { 
+    $SoundVal = "on" 
+}
+
+# --- REGISTER SOUND PREFERENCE IN WINDOWS REGISTRY ---
+$RegPath = "HKCU:\Software\Eclipse\Launcher"
 try {
-    [net.servicepointmanager]::securityprotocol = [net.securityprotocoltype]::tls12
-}
-catch {
-}
-
-# ============================================================================
-# sound processing
-# ============================================================================
-
-$soundval = "off"
-
-if ($sound -ceq "on") {
-    $soundval = "on"
+    if (-not (Test-Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegPath -Name "sound" -Value $SoundVal -Type String
+} catch {
+    # Fallback to reg.exe if PowerShell provider fails
+    cmd.exe /c "reg add "HKCU\Software\Eclipse\Launcher" /v sound /t REG_SZ /d "$SoundVal" /f >nul 2>&1"
 }
 
-# ============================================================================
-# console setup
-# ============================================================================
-
+# Configure Window Title & Dimensions for Clean Presentation
+$host.UI.RawUI.WindowTitle = "dc2URL Launcher v1.0"
 try {
-    $host.ui.rawui.windowtitle = "dc2url launcher v1.0"
+    $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
+    $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
+} catch {}
 
-    $host.ui.rawui.buffersize = `
-        new-object system.management.automation.host.size(100,40)
+# Routed through PHP downlink handler to securely bypass extension blocking
+# $RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
+$RepoUrl = "https://github.com/mercwar/dc2url/raw/refs/heads/main/launcher.bat"
 
-    $host.ui.rawui.windowsize = `
-        new-object system.management.automation.host.size(100,40)
+$TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
+
+Clear-Host
+Write-Host "====================================================================================" -ForegroundColor DarkGray
+Write-Host "     E C L I P S E    I N S T A L L E R    ■    D C 2 U R L    K E R N E L" -ForegroundColor Cyan
+Write-Host "     Stargate 2 Quasar 4" -ForegroundColor Cyan
+Write-Host "====================================================================================" -ForegroundColor DarkGray
+Write-Host "  Mercwar Stargate  technology" -ForegroundColor DarkYellow
+Write-Host "  Status: Contacting server..." -ForegroundColor Gray
+Write-Host "====================================================================================" -ForegroundColor DarkGray
+Write-Host ""
+
+if ($SoundVal -eq "on") {
+    Write-Host "  [SYSTEM] Audio enabled. Registry key [Eclipse\Launcher] updated." -ForegroundColor Green
+} else {
+    Write-Host "  [SYSTEM] Audio disabled. Registry key [Eclipse\Launcher] updated." -ForegroundColor DarkGray
 }
-catch {
-}
+Write-Host ""
 
-# ============================================================================
-# configuration
-# ============================================================================
+Write-Host "  [AVIS] Searching for installation gateway" -ForegroundColor Yellow
+Write-Host "  [AVIS] » Target Source : " -NoNewline -ForegroundColor DarkGray
+Write-Host "$RepoUrl" -ForegroundColor White
+Write-Host "  [AVIS] » Target Output : " -NoNewline -ForegroundColor DarkGray
+Write-Host "$TempInstaller" -ForegroundColor White
+Write-Host ""
+Write-Host "  [AVIS] Connecting to gateway via dc2url..." -ForegroundColor Cyan
 
-
-$RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
-
-$tempinstaller = join-path `
-    $env:temp `
-    ("dc2_install_{0}.bat" -f ([guid]::newguid().tostring("n").substring(0,8)))
-
-# ============================================================================
-# banner
-# ============================================================================
-
-clear-host
-
-write-host "====================================================================================" -foregroundcolor darkgray
-write-host "     e c l i p s e    i n s t a l l e r    ■    d c 2 u r l    k e r n e l" -foregroundcolor cyan
-write-host "     stargate 2 quasar 22" -foregroundcolor cyan
-write-host "====================================================================================" -foregroundcolor darkgray
-write-host "  mercwar stargate technology" -foregroundcolor darkyellow
-write-host "  status: contacting server..." -foregroundcolor gray
-write-host "====================================================================================" -foregroundcolor darkgray
-write-host ""
-
-write-host "  [system] sound mode = $soundval" -foregroundcolor cyan
-write-host ""
-
-write-host "  [avis] searching for installation gateway" -foregroundcolor yellow
-
-write-host "  [avis] » target source : " -nonewline -foregroundcolor darkgray
-write-host $repourl -foregroundcolor white
-
-write-host "  [avis] » target output : " -nonewline -foregroundcolor darkgray
-write-host $tempinstaller -foregroundcolor white
-
-write-host ""
-write-host "  [avis] connecting to gateway via dc2url..." -foregroundcolor cyan
-
-# ============================================================================
-# download launcher
-# ============================================================================
-
+# Fetch payload and validate it isn't an HTML error page
 try {
-
-    $dc2check = get-command dc2url -erroraction silentlycontinue
-
+    $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
     if ($dc2check) {
-
-        dc2url -o $tempinstaller $repourl
-
-    }
-    else {
-
-        $webclient = new-object system.net.webclient
-        $webclient.downloadfile($repourl, $tempinstaller)
-
+        curl -o "$TempInstaller" "$RepoUrl"
+    } else {
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($RepoUrl, $TempInstaller)
     }
 
-    if (-not (test-path $tempinstaller)) {
-        throw "download failed. launcher missing."
+    if (-not (Test-Path $TempInstaller) -or (Get-Item $TempInstaller).Length -eq 0) {
+        throw "Downloaded payload is empty or missing."
     }
 
-    if ((get-item $tempinstaller).length -eq 0) {
-        throw "download failed. launcher empty."
+    # Inspect file content to ensure it's a batch script and not an HTML error/404 page
+    $FileHeader = Get-Content $TempInstaller -TotalCount 3 -ErrorAction SilentlyContinue | Out-String
+    if ($FileHeader -match "<!DOCTYPE|<html>|<html") {
+        throw "Server returned an HTML response instead of raw script content. Check downlink.php or file path."
     }
-
-    $fileheader = get-content `
-        $tempinstaller `
-        -totalcount 5 `
-        -erroraction silentlycontinue |
-        out-string
-
-    if ($fileheader -match '<!doctype|<html') {
-        throw "server returned html instead of launcher.bat"
-    }
-
 }
 catch {
-
-    write-host ""
-    write-host "  [avis error] $_" -foregroundcolor red
-    write-host ""
-
-    pause
-
+    Write-Host ""
+    Write-Host "  [AVIS ERROR] Download failed: $_" -ForegroundColor Red
+    Pause
     exit 1
 }
 
-write-host ""
-write-host "  [avis success] payload secured on disk." -foregroundcolor green
-write-host ""
+Write-Host "  [AVIS SUCCESS] Payload secured on disk." -ForegroundColor Green
+Write-Host ""
 
-# ============================================================================
-# pre execution
-# ============================================================================
+# Brief pause so the user can read the screen output
+Write-Host "  [AVIS ECLIPSE] Searching for Cyborg Launcher..." -ForegroundColor DarkGray
+Start-Sleep -Seconds 3
 
-write-host "  [avis eclipse] searching for cyborg launcher..." -foregroundcolor darkgray
+Write-Host ""
+Write-Host "  [AVIS] Calling Portal Installer" -ForegroundColor Yellow
+Write-Host "  [ECLIPSE] » AVIS REPORTED SUCCESS..." -ForegroundColor DarkGray
+Write-Host "====================================================================================" -ForegroundColor DarkGray
+Write-Host ""
 
-start-sleep -seconds 3
+Start-Sleep -Milliseconds 600
 
-write-host ""
-write-host "  [avis] calling portal installer" -foregroundcolor yellow
-write-host "  [eclipse] » avis reported success..." -foregroundcolor darkgray
-write-host "====================================================================================" -foregroundcolor darkgray
-write-host ""
+# Execute the downloaded batch script natively
+Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $TempInstaller) -Wait -NoNewWindow
 
-start-sleep -milliseconds 600
-
-# ============================================================================
-# execute launcher with sound argument
-# ============================================================================
-
-write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
-
-# FIX: Literal outer single quotes protect the internal double quotes.
-# This prevents the script block compiler from crashing on line 162.
-$fullCommandLine = '/c "call "' + $tempinstaller + '" ' + $soundval + '"'
-
-write-host "  [debug] command line   = cmd.exe $fullCommandLine" -foregroundcolor yellow
-write-host ""
-
-start-process `
-    -filepath "cmd.exe" `
-    -argumentlist $fullCommandLine `
-    -wait `
-    -nonewwindow
-
-# ============================================================================
-# cleanup
-# ============================================================================
-
-if (test-path $tempinstaller) {
-
-    remove-item `
-        $tempinstaller `
-        -force `
-        -erroraction silentlycontinue
+# Cleanup
+if (Test-Path $TempInstaller) {
+    Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
 }
 
-# ============================================================================
-# completion
-# ============================================================================
-
-write-host ""
-write-host "  [eclipse] dc2url will be visible in add/remove programs after registration." -foregroundcolor green
-write-host "  [eclipse] auto updates are not supported at this time." -foregroundcolor green
-write-host "  [eclipse] run this installer again at any time to update dc2url." -foregroundcolor green
-write-host "====================================================================================" -foregroundcolor darkgray
+Write-Host ""
+Write-Host "  [ECLIPSE] dc2url will be visible in your add/remove programs after the registration." -ForegroundColor Green
+Write-Host "  [ECLIPSE] Auto updates are not supported at this time, you may run this irm or launcher at any time to update dc2url." -ForegroundColor Green
+Write-Host "====================================================================================" -ForegroundColor DarkGray
