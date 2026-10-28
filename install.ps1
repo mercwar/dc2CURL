@@ -30,7 +30,7 @@ $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring
 Clear-Host
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "     E C L I P S E    I N S T A L L E R    ■    D C 2 U R L    K E R N E L" -ForegroundColor Cyan
-Write-Host "     Stargate 2 Quasar 5" -ForegroundColor Cyan
+Write-Host "     Stargate 2 Quasar 6" -ForegroundColor Cyan
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "  Mercwar Stargate  technology" -ForegroundColor DarkYellow
 Write-Host "  Status: Contacting server..." -ForegroundColor Gray
