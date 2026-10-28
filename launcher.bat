@@ -26,7 +26,7 @@ set "LINE_COLOR=%ESC%[38;2;255;90;0m"
 
 mode con cols=100 lines=50
 color 00
-title DC2URL STARGATE v1.0 QUASAR 1
+title DC2URL STARGATE v1.0 QUASAR 2
 
 cd /d "%~dp0"
 
