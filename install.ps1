@@ -10,8 +10,8 @@ $ErrorActionPreference = 'Stop'
 [Net.SecurityProtocolType]::Tls12
 
 # Resolve sound status from either parameter block input or global session context variable fallback
-$Sound = "off"
-if ($sound -eq "on" -or $global:sound -eq "on") { $SoundVal = "on" }
+$sound = "off"
+if ($sound -eq "on" -or $global:sound -eq "on") { $sound = "on" }
 
 # Configure Window Title & Dimensions for Clean Presentation
 $host.UI.RawUI.WindowTitle = "MERCWAR dc2URL Launcer v1.0"
@@ -68,7 +68,7 @@ Write-Host ""
 Start-Sleep -Milliseconds 600
 
 # Execute the launcher interactively and explicitly forward the sound parameter
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`" $Sound" -Wait -NoNewWindow
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`" $sound" -Wait -NoNewWindow
 
 # Cleanup
 if (Test-Path $TempInstaller) {
