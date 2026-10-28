@@ -68,9 +68,7 @@ Write-Host ""
 
 Start-Sleep -Milliseconds 600
 
-# Execute the launcher interactively and explicitly forward the correct sound parameter
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"`"$TempInstaller`"`" $SoundVal" -Wait -NoNewWindow
-
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c call `"$TempInstaller`" $SoundVal" -Wait -NoNewWindow
 # Cleanup
 if (Test-Path $TempInstaller) {
     Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
