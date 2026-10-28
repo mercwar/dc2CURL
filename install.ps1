@@ -23,7 +23,7 @@ try {
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
-$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
+$RepoUrl = "https://mercwar01.byethost3.com/darkcom2/launcher.bat"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
 Clear-Host
@@ -36,6 +36,30 @@ Write-Host "  Status: Contacting server..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
+# TRIGGER SOUND DIRECTLY IN POWERSHELL IF ENABLED
+if ($SoundVal -eq "on") {
+    Write-Host "  [SYSTEM] Turning network subsystem stream sound ON..." -ForegroundColor Cyan
+    $MidiUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/sound/transformers.mid"
+    $MidiFile = "$env:TEMP\transformers.mid"
+    try {
+        $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
+        if ($dc2check) {
+            dc2url -o "$MidiFile" "$MidiUrl"
+        } else {
+            (New-Object System.Net.WebClient).DownloadFile($MidiUrl, $MidiFile)
+        }
+        if (Test-Path $MidiFile) {
+            Write-Host "  [SUCCESS] Playing Transformers theme song..." -ForegroundColor Green
+            Start-Process $MidiFile
+        }
+    } catch {
+        Write-Host "  [WARNING] Could not stream MIDI asset." -ForegroundColor DarkYellow
+    }
+} else {
+    Write-Host "  [SYSTEM] Audio disabled." -ForegroundColor DarkGray
+}
+Write-Host ""
+
 Write-Host "  [AVIS] Searching for installation gateway" -ForegroundColor Yellow
 Write-Host "  [AVIS] » Target Source : " -NoNewline -ForegroundColor DarkGray
 Write-Host "$RepoUrl" -ForegroundColor White
@@ -44,9 +68,8 @@ Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
 Write-Host "  [AVIS] Connecting to gateway via dc2url..." -ForegroundColor Cyan
 
-# Fetch payload using dc2url output flag (-o) or standard WebClient fallback
+# Fetch payload using dc2url output flag (-o) or standard WebClient fallback from byethost3
 try {
-    # Check if dc2url is available in path, use it to output directly to $TempInstaller
     $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
     if ($dc2check) {
         dc2url -o "$TempInstaller" "$RepoUrl"
@@ -81,8 +104,8 @@ Write-Host ""
 
 Start-Sleep -Milliseconds 600
 
-# Execute the downloaded batch script via cmd.exe array parameter passing, forwarding $SoundVal
-Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $TempInstaller, $SoundVal) -Wait -NoNewWindow
+# Execute the downloaded batch script natively
+Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $TempInstaller) -Wait -NoNewWindow
 
 # Cleanup
 if (Test-Path $TempInstaller) {
