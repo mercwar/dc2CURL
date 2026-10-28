@@ -49,14 +49,14 @@ echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. VERSIONED PATH TARGETING SETUP (%~dp0 points to C:\...\v1.0\)
+:: 1. VERSIONED PATH TARGETING SETUP (Directly point execution root to %~dp0)
 set "VERSION_DIR=%~dp0"
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
 for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
 for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+set "FINAL_EXEC_DIR=%VERSION_DIR%"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
 
 :: 2. VERIFY DISCOVERED FILE ASSETS IN VERSION DIRECTORY
@@ -81,8 +81,11 @@ echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo                  [SUCCESS] installed 'dc2url.bat' successfully.
 
-:: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS
+:: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS & ECLIPSE SYSTEM CONFIG
 echo %O2%        [*] Auto Configuring dc2url for windows...%RESET%%BG_GLASS%
+
+:: --- Register InstallPath in Eclipse Hive for system_loader.c ---
+reg add "HKCU\Software\Eclipse\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
 :: --- Standard Native 64-bit Application Paths Integration ---
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
@@ -96,7 +99,7 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN (Icon correctly points to BASE_DIR root)
+:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN
 echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
 
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
@@ -123,19 +126,13 @@ reg add "%UNINSTALL_KEY_32%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 :: 7. MASTER SYSTEM ENVIRONMENT VARIABLE & MACHINE PATH INJECTION
 echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
 
-:: Set persistent machine environment variable pointer
 setx /M dc2url_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: Forcefully prepend target directory to the Machine (System) PATH registry safely without duplicates
 powershell -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($m -split ';' -notcontains '%FINAL_EXEC_DIR%'){[System.Environment]::SetEnvironmentVariable('PATH',('%FINAL_EXEC_DIR%;'+$m),'Machine')}" >nul 2>&1
-
-:: Prepend to User PATH block as a fallback layer
 powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p -split ';' -notcontains '%FINAL_EXEC_DIR%'){[System.Environment]::SetEnvironmentVariable('PATH',('%FINAL_EXEC_DIR%;'+$p),'User')}" >nul 2>&1
 
-:: Broadcast environment changes globally to invalidate stale Win32 process caches
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-:: Synchronize path variables onto the running terminal session instance context immediately
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
 echo                  [SUCCESS] dc2url is now fully installed and at your command!
