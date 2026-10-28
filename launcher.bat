@@ -133,14 +133,14 @@ goto :START_EXECUTION
 cls
 echo.
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo    %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   K E R N E L%RST%
+echo    %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   %ICE%K E R N E L%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
 echo %GRAD2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
 echo %GRAD3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RST%
 echo %GRAD4%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RST%
 echo %GRAD5%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
-echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
+echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
 echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
 echo.
 echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3% %RST% %GOLD%ECLIPSE TECHNOLOGY%RST%
@@ -282,83 +282,30 @@ if /i "!SELECTED_TOOL!"=="curl" (
 )
 
 if exist "!CONFIG_FILE!" (
-    set "FRAME_PHASE=[AVIS] PAYLOAD DEPLOYMENT"
-    set "FRAME_STATUS=[AVIS] Manifest locked. Streaming via progress bar..."
+    set "FRAME_PHASE=[AVIS] PAYLOAD STREAM"
+    set "FRAME_STATUS=[AVIS] Downloading files from config.json..."
     set "FRAME_BODY_1=  Config: Success"
     set "FRAME_BODY_2=  Path:   !INSTALL_PATH!"
-    set "FRAME_BODY_3=        [AVIS] Executing non-blocking payload deployment..."
+    set "FRAME_BODY_3=        [AVIS] Streaming payload files..."
     call :DRAW_PROGRESS 90
     set "FRAME_BAR_COL=%GREEN%"
     call :RENDER_FRAME
 
-    set "PS_SCRIPT=!INSTALL_PATH!\parse_manifest.ps1"
-    set "VER_FILE=!INSTALL_PATH!\detected_version.tmp"
-    
-    (
-        echo param([string]$ConfigPath, [string]$InstallPath, [string]$VersionFile^)
-        echo $cfg = Get-Content $ConfigPath -Raw ^| ConvertFrom-Json
-        echo $owner = if ($cfg.repo_owner^) { $cfg.repo_owner } else { 'mercwar' }
-        echo $repo = if ($cfg.repo_name^) { $cfg.repo_name } else { 'dc2url' }
-        echo $ver = if ($cfg.version^) { $cfg.version } else { 'v1.0' }
-        echo Set-Content -Path $VersionFile -Value $ver -Encoding ascii
-        echo $baseUrl = "https://raw.githubusercontent.com/$owner/$repo/refs/heads/main/"
-        echo $allFiles = @^(^)
-        echo if ($cfg.manifest_layout^) {
-        echo     $catIdx = 0
-        echo     foreach ($prop in $cfg.manifest_layout.psobject.properties^) {
-        echo         $catIdx++
-        echo         foreach ($item in $prop.Value^) {
-        echo             $source = $item.source
-        echo             $target = if ($item.target^) { $item.target } else { $source }
-        echo             if ($catIdx -eq 1^) {
-        echo                 $relPath = $target
-        echo                 $remotePath = $source
-        echo             } else {
-        echo                 $relPath = Join-Path $ver $target
-        echo                 $remotePath = Join-Path $ver $source
-        echo             }
-        echo             $fileUrl = $baseUrl + ($remotePath -replace '\\', '/'^)
-        echo             $dest = Join-Path $InstallPath $relPath
-        echo             $allFiles += [PSCustomObject]@{ Url = $fileUrl; Dest = $dest; Source = $source }
-        echo         }
-        echo     }
-        echo }
-        echo $total = $allFiles.Count
-        echo $curr = 0
-        echo foreach ($file in $allFiles^) {
-        echo     $curr++
-        echo     $pct = [int^](($curr / $total^) * 100^)
-        echo     Write-Progress -Activity "AVIS PAYLOAD STREAM" -Status "Downloading [$curr/$total]: $($file.Source^)" -PercentComplete $pct
-        echo     $parent = Split-Path $file.Dest -Parent
-        echo     if (-not (Test-Path $parent^)^) { New-Item -ItemType Directory -Force -Path $parent ^| Out-Null }
-        echo     try {
-        echo         Invoke-WebRequest -Uri $file.Url -OutFile $file.Dest -UseBasicParsing
-        echo     } catch {
-        echo         Write-Warning "Failed to download $($file.Source^): $_"
-        echo     }
-        echo }
-        echo Write-Progress -Activity "AVIS PAYLOAD STREAM" -Completed
-    ) > "!PS_SCRIPT!"
+    for /f "delims=" %%v in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$cfg = Get-Content '!INSTALL_PATH!\config.json' -Raw | ConvertFrom-Json; $owner = if ($cfg.repo_owner) { $cfg.repo_owner } else { 'mercwar' }; $repo = if ($cfg.repo_name) { $cfg.repo_name } else { 'dc2url' }; $ver = if ($cfg.version) { $cfg.version } else { 'v1.0' }; [Console]::Write($ver); $baseUrl = 'https://raw.githubusercontent.com/' + $owner + '/' + $repo + '/refs/heads/main/'; foreach ($propName in $cfg.manifest_layout.psobject.properties.Name) { foreach ($item in $cfg.manifest_layout.$propName) { $source = $item.source; $target = if ($item.target) { $item.target } else { $source }; $isRoot = ($propName -eq 'root_files'); $remotePath = if ($isRoot) { $source } else { Join-Path $ver $source }; $relPath = if ($isRoot) { $target } else { Join-Path $ver $target }; $fileUrl = $baseUrl + ($remotePath -replace '\\', '/'); $dest = Join-Path '!INSTALL_PATH!' $relPath; $parent = Split-Path $dest -Parent; if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }; Write-Host ('[DOWNLOADING] ' + $source); try { if ('!SELECTED_TOOL!' -eq 'curl') { & curl -s -L -f $fileUrl -o $dest } elseif ('!SELECTED_TOOL!' -eq 'wget') { & wget -q $fileUrl -O $dest } else { Invoke-WebRequest -Uri $fileUrl -OutFile $dest -UseBasicParsing } } catch { Write-Host ('[-] ERROR downloading ' + $source + ': ' + $_.Exception.Message) -ForegroundColor Red } } }"') do set "VER_DIR=%%v"
 
-    powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Normal -File "!PS_SCRIPT!" -ConfigPath "!CONFIG_FILE!" -InstallPath "!INSTALL_PATH!" -VersionFile "!VER_FILE!"
-    del "!PS_SCRIPT!" >nul 2>&1
+    if "!VER_DIR!"=="" set "VER_DIR=v1.0"
 
-    set "VER_DIR=v1.0"
-    if exist "!VER_FILE!" (
-        set /p VER_DIR=<"!VER_FILE!"
-        del "!VER_FILE!" >nul 2>&1
-    )
-
-    set "FRAME_PHASE=[AVIS] SEQUENCE COMPLETE"
-    set "FRAME_STATUS=[AVIS] Handoff verified."
+    set "FRAME_PHASE=[AVIS] READY"
+    set "FRAME_STATUS=[AVIS] Download complete. Launching installer..."
     call :DRAW_PROGRESS 100
     set "FRAME_BAR_COL=%GREEN%"
     call :RENDER_FRAME
 
     echo.
-    echo Installation preparing to install....
-    echo ====================================================================================
-    timeout /t 5 >nul
+	echo The dc2url files will now be installed...
+	echo.
+    echo Missing files are listed below:
+	timeout /t 3 >nul
     call "!INSTALL_PATH!\!VER_DIR!\install.bat"
     endlocal
 ) else (
