@@ -62,7 +62,7 @@ clear-host
 
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "     e c l i p s e    i n s t a l l e r    ■    d c 2 u r l    k e r n e l" -foregroundcolor cyan
-write-host "     stargate 2 quasar 19" -foregroundcolor cyan
+write-host "     stargate 2 quasar 22" -foregroundcolor cyan
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "  mercwar stargate technology" -foregroundcolor darkyellow
 write-host "  status: contacting server..." -foregroundcolor gray
