@@ -26,7 +26,7 @@
 😲️ Your command line now has access to your private host's php and web app cgi/uri/api  
 😜️ Your command line will no longer be rejected by javascript enabled warnings you get with cURL
   
-# TO LISTEN TO THE SURPRISE THEME SOND MIDI SELECT SOUND ON
+# TO LISTEN TO THE SURPRISE THEME SONG MIDI SELECT SOUND ON
 
 ```bash
 $sound="on"; irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
