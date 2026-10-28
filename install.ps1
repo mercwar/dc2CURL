@@ -50,7 +50,7 @@ Write-Host ""
 
 # Brief pause so the user can actually read the screen output
 Write-Host "  [AVIS ECLIPSE] Searching for Cyborg Launcher..." -ForegroundColor DarkGray
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 3
 
 Write-Host ""
 Write-Host "  [AVIS] Calling Portal Installer" -ForegroundColor Yellow
