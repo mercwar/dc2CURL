@@ -356,8 +356,9 @@ if exist "!CONFIG_FILE!" (
     call :RENDER_FRAME
 
     echo.
-    echo Installation sequence complete.
+    echo Installation preparing to install....
     echo ====================================================================================
+    timeout /t 5 >nul
     call "!INSTALL_PATH!\!VER_DIR!\install.bat"
     endlocal
 ) else (
