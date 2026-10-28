@@ -23,8 +23,8 @@ try {
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
-# Strictly lowercase URL for Linux/Apache case-sensitivity compliance
-$RepoUrl = "https://mercwar01.byethost3.com/darkcom2/launcher.bat"
+# Routed through PHP downlink handler to securely bypass extension blocking
+$RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
 Clear-Host
@@ -86,7 +86,7 @@ try {
     # Inspect file content to ensure it's a batch script and not an HTML error/404 page
     $FileHeader = Get-Content $TempInstaller -TotalCount 3 -ErrorAction SilentlyContinue | Out-String
     if ($FileHeader -match "<!DOCTYPE|<html>|<html") {
-        throw "Server returned an HTML response (404/500 error page) instead of a batch script. Check file casing and path."
+        throw "Server returned an HTML response instead of raw script content. Verify downlink.php file parameter."
     }
 }
 catch {
