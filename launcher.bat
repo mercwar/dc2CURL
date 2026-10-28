@@ -26,7 +26,7 @@ set "LINE_COLOR=%ESC%[38;2;255;90;0m"
 
 mode con cols=100 lines=50
 color 00
-title ROBO ROOK KERNEL // DC2URL DEPLOYMENT CONSOLE
+title DC2URL STARGATE v1.0 QUASAR 1
 
 cd /d "%~dp0"
 
