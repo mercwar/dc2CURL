@@ -43,9 +43,9 @@ echo %O2%        ██╔══██╗██╔══██╗██╔══
 echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
 echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+echo %Y2%        ╚═════╝ ╚_╝  ╚_╝╚_╝  ╚_╝╚_╝  ╚_╝ ╚═════╝ ╚═════╝ ╚_╝     ╚_╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                dc2url Core Cyborg Ecosystem Uninstaller%RESET%%BG_GLASS%
+echo %Y2%                    dc2url Core Cyborg Ecosystem Uninstaller%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -62,11 +62,11 @@ set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 echo %O2%        [*] Unregistering OLE/COM Components...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                  [SUCCESS] DarkComHeadless.dll unregistered.
+    echo                     [SUCCESS] DarkComHeadless.dll unregistered.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                  [SUCCESS] WebView2Loader.dll unregistered.
+    echo                     [SUCCESS] WebView2Loader.dll unregistered.
 )
 
 :: 3. REMOVE REGISTRY APP PATHS & UNINSTALL ENTRIES
@@ -78,18 +78,32 @@ reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths
 
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKCU\Software\Eclipse\Launcher" /f >nul 2>&1
 
 :: 4. CLEAN SYSTEM ENVIRONMENT VARIABLES & PATHS
 echo %O2%        [*] Purging Environment Pointers and Machine PATH...%RESET%%BG_GLASS%
 reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
+reg delete "HKCU\Environment" /v "dc2url_path" /f >nul 2>&1
 
 :: Safely remove entry from Machine and User PATH variables via single-line PowerShell commands
 powershell -Command "$m = [System.Environment]::GetEnvironmentVariable('PATH', 'Machine'); if ($m) { $p = ($m -split ';' | Where-Object { $_ -and $_ -notlike '*dc2url*' }) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH', $p, 'Machine') }" >nul 2>&1
 powershell -Command "$u = [System.Environment]::GetEnvironmentVariable('PATH', 'User'); if ($u) { $p = ($u -split ';' | Where-Object { $_ -and $_ -notlike '*dc2url*' }) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH', $p, 'User') }" >nul 2>&1
 
-echo                  [SUCCESS] dc2url successfully uninstalled from system registers!
-echo.
-echo %Y2%        [Note: Installation directory files can be safely deleted from: %BASE_DIR%]%RESET%%BG_GLASS%
+:: Trigger environment broadcast reload so cmd/explorer updates instantly
+powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
+
+:: 5. SELF-DESTRUCT FILE CLEANUP PIPELINE (Cleans up version folder, exec files, and base directory assets if empty)
+echo %O2%        [*] Purging Installation Payload Files...%RESET%%BG_GLASS%
+if exist "%VERSION_DIR%" (
+    rmdir /s /q "%VERSION_DIR%" >nul 2>&1
+)
+
+:: If base directory (e.g., C:\Program Files\dc2url) is empty after removing version folder, remove it too
+if exist "%BASE_DIR%" (
+    rmdir "%BASE_DIR%" >nul 2>&1
+)
+
+echo                     [SUCCESS] dc2url successfully uninstalled and purged from system registers!
 echo.
 
 :finish

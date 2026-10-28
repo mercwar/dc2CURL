@@ -11,17 +11,26 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 :ExecuteSetup
 setlocal DisableDelayedExpansion
 
-:: Force the working directory to match the actual folder location of this script file (e.g., Program Files\dc2url\v1.0).
-cd /d "%~dp0"
+:: =========================================================================
+:: DIRECTORY RESOLUTION MAPPING (CRITICAL FIX FOR MANIFEST LAYOUT)
+:: =========================================================================
+set "VERSION_DIR=%~dp0"
+if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
-:: InstallShield Configuration Properties: Title Block & Bounds
+for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
+for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
+
+set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
+
+cd /d "%FINAL_EXEC_DIR%"
+
 title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Deployment Engine
 mode con: cols=120 lines=34
 
 chcp 65001 >nul 2>&1
 color 0E
 
-:: Force TrueColor Console Canvas Context Allocation
 reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
 set "RESET=%E%[0m"
@@ -45,61 +54,44 @@ echo %Y1%        ██║  ██║██╔══██║██╔══█�
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %Y2%                    dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. VERSIONED PATH TARGETING SETUP (Directly point execution root to %~dp0)
-set "VERSION_DIR=%~dp0"
-if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
-
-for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
-for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
-
-set "FINAL_EXEC_DIR=%VERSION_DIR%"
-set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
-
-:: 2. VERIFY DISCOVERED FILE ASSETS IN VERSION DIRECTORY
 if not exist "%FINAL_EXE_PATH%" (
-    echo %O1%        [AVIS FAILED] Installation files are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
+    echo %O1%        [AVIS FAILED] Execution binaries are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
     goto :finish
 )
 
-:: 3. COM SUBSYSTEM SELF-REGISTRATION PIPELINE
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                  [SUCCESS] DarkComHeadless.dll registration.
+    echo                     [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                  [SUCCESS] WebView2Loader.dll registration.
+    echo                     [SUCCESS] WebView2Loader.dll registration.
 )
 
-:: 4. GENERATE CLEAN COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                  [SUCCESS] installed 'dc2url.bat' successfully.
+echo                     [SUCCESS] installed 'dc2url.bat' successfully.
 
-:: 5. MULTI-ARCHITECTURE CROSS-REGISTRY LAYER MAPS & ECLIPSE SYSTEM CONFIG
-echo %O2%        [*] Auto Configuring dc2url for windows...%RESET%%BG_GLASS%
+echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
-:: --- Register InstallPath in Eclipse Hive for system_loader.c ---
 reg add "HKCU\Software\Eclipse\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: --- Standard Native 64-bit Application Paths Integration ---
+:: --- Configure App Paths cleanly from system root / program files paths ---
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: --- Explicit WoW6432Node Redirector Registry Mappings ---
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: 6. REGISTRATION IN WINDOWS PROGRAMS SCREEN
 echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
 
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
@@ -112,7 +104,6 @@ reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
-:: Double mirror registry visibility configuration to WoW6432Node space
 set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
@@ -123,7 +114,6 @@ reg add "%UNINSTALL_KEY_32%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&
 reg add "%UNINSTALL_KEY_32%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%UNINSTALL_KEY_32%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
-:: 7. MASTER SYSTEM ENVIRONMENT VARIABLE & MACHINE PATH INJECTION
 echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
 
 setx /M dc2url_path "%FINAL_EXEC_DIR%" >nul 2>&1
@@ -135,7 +125,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                  [SUCCESS] dc2url is now fully installed and at your command!
+echo                     [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
 echo.
