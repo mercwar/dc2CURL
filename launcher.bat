@@ -13,6 +13,41 @@ if %errorlevel% neq 0 (
 
 cd /d "%~dp0"
 
+:: InstallShield Setup Configuration Properties: Title Block & Bounds
+title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Deployment Engine
+mode con: cols=120 lines=34
+color 0E
+
+:: Force TrueColor Console Canvas Context Allocation
+reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
+set "RESET=%E%[0m"
+set "BG_GLASS=%E%[48;2;10;10;12m"
+set "O1=%E%[38;2;255;68;0m"
+set "O2=%E%[38;2;255;110;0m"
+set "O3=%E%[38;2;255;153;0m"
+set "Y1=%E%[38;2;255;200;0m"
+set "Y2=%E%[38;2;255;235;0m"
+set "TXT=%E%[38;2;240;240;240m"
+set "GRAY=%E%[38;2;115;125;145m"
+set "GREEN=%E%[38;2;90;255;120m"
+
+cls
+echo %BG_GLASS%
+cls
+
+echo.
+echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
+echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
+echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
+echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
+echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
+echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚_╝  ╚_╝╚_╝  ╚_╝ ╚═════╝ ╚═════╝ ╚_╝     ╚_╝╚══════╝%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %Y2%                    dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo.
+
 :: ============================================================
 :: TOOL DETECTION & SELECTION
 :: ============================================================
@@ -26,19 +61,19 @@ for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin wget 
 )
 
 if !count! equ 0 (
-    echo [-] No download engines found. Exiting.
+    echo %O1%    [-] No download engines found. Exiting.%RESET%
     pause
     exit /b
 )
 
-echo === AVAILABLE TOOLS ===
+echo %O2%    [AVIS] Scanning system engines...%RESET%
 echo.
 for /l %%i in (1,1,!count!) do (
-    echo [%%i] !tool_%%i!
+    echo     %GRAY%[%Y1%%%i%GRAY%]%TXT% !tool_%%i!%RESET%
 )
 echo.
 
-set /p "TOOL_NUM=Select engine [1-!count!]: "
+set /p "TOOL_NUM=%Y2%    >>> SELECT ENGINE [1-!count!]: %RESET%"
 if "!TOOL_NUM!"=="" (
     set "SELECTED_TOOL=curl"
 ) else (
@@ -56,11 +91,12 @@ set "DEFAULT_INSTALL=%ProgramFiles%\dc2url"
 if "%DEFAULT_INSTALL%"=="" set "DEFAULT_INSTALL=%SystemDrive%\Program Files\dc2url"
 
 echo.
-echo === DOWNLOAD DESTINATION CONFIGURATION ===
-echo Default system path: !DEFAULT_INSTALL!
+echo %O2%    ------------------------------------------------------------------------------------%RESET%
+echo %Y2%    [AVIS] DIRECTORY CONFIGURATION%RESET%
+echo %GRAY%    Default system path: !DEFAULT_INSTALL!%RESET%
 echo.
 
-set /p "INSTALL_PATH=>>> ENTER FULL PATH OR PRESS ENTER FOR DEFAULT: "
+set /p "INSTALL_PATH=%Y2%    >>> ENTER FULL PATH OR PRESS ENTER FOR DEFAULT: %RESET%"
 if "!INSTALL_PATH!"=="" set "INSTALL_PATH=!DEFAULT_INSTALL!"
 
 if not exist "!INSTALL_PATH!" (
@@ -74,34 +110,32 @@ set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main
 set "CONFIG_FILE=!INSTALL_PATH!\config.json"
 
 echo.
-echo [*] Downloading config.json using !SELECTED_TOOL!...
+echo %O2%    [*] Downloading config.json using !SELECTED_TOOL!...%RESET%
 call :download_!SELECTED_TOOL! "!CONFIG_URL!" "!CONFIG_FILE!" 2>error_config.log
 
 if not exist "!CONFIG_FILE!" (
-    echo [-] Failed to download config.json.
-    echo === ENGINE ERROR LOG ===
+    echo %O1%    [-] Failed to download config.json.%RESET%
     if exist error_config.log type error_config.log
     del error_config.log >nul 2>&1
     pause
     exit /b
 )
 del error_config.log >nul 2>&1
-echo [+] config.json downloaded successfully.
+echo %GREEN%    [+] config.json downloaded successfully.%RESET%
 
 :: ============================================================
 :: PARSE MANIFEST & LOOP NODES (RESPECTING do_not_version)
 :: ============================================================
-echo [*] Parsing manifest layout and downloading payload nodes...
+echo %O2%    [*] Parsing manifest layout and streaming payload nodes...%RESET%
 
 set "PS_CMD=$cfg = Get-Content '!CONFIG_FILE!' -Raw | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }"
 
 for /f "delims=" %%i in ('powershell -NoProfile -Command "try { !PS_CMD! } catch { $_.Exception.Message | Out-File error_manifest.log }"') do (
     set "LINE=%%i"
     
-    :: Safe catch check to verify if the return payload is a PowerShell error trace
     if exist error_manifest.log (
         echo.
-        echo === CRITICAL MANIFEST PARSING ERROR DETECTED ===
+        echo %O1%    === CRITICAL MANIFEST PARSING ERROR DETECTED ===%RESET%
         type error_manifest.log
         echo ================================================
         pause
@@ -121,36 +155,52 @@ for /f "delims=" %%i in ('powershell -NoProfile -Command "try { !PS_CMD! } catch
             if not exist "!TARGET_DIR!" mkdir "!TARGET_DIR!" >nul 2>&1
         )
         
-        echo    [NODE: !NODE_NAME!] Downloading !REMOTE_REL! ...
+        echo     %GRAY%[NODE: !NODE_NAME!]%TXT% Downloading !REMOTE_REL! ...%RESET%
         call :download_!SELECTED_TOOL! "!FILE_URL!" "!DEST_FILE!" 2>error_download.log
         
         if errorlevel 1 (
-            echo [!] Error occurred while attempting download tool handling.
+            echo %O1%    [!] Error occurred while attempting download tool handling.%RESET%
             if exist error_download.log type error_download.log
-            pause
         )
         del error_download.log >nul 2>&1
     )
 )
 
-
 echo.
-echo [+] Processing completed to destination target path: !INSTALL_PATH!
+echo %GREEN%    [+] Processing completed to destination target path: !INSTALL_PATH!%RESET%
+
 :: ============================================================
-:: POST-DOWNLOAD VALIDATION
+:: POST-DOWNLOAD AUTOMATIC EXECUTION OF INSTALL.BAT
 :: ============================================================
 set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\v1.0\install.bat"
 
-echo [*] Validating installation components...
+echo %O2%    [*] Validating and executing install.bat automatically...%RESET%
 if exist "!EXPECTED_INSTALL_BAT!" (
-    echo [+] Success: install.bat was found at !EXPECTED_INSTALL_BAT!
-	call "!EXPECTED_INSTALL_BAT!"
+    echo %GREEN%    [+] Success: Running install.bat...%RESET%
+    echo.
+    call "!EXPECTED_INSTALL_BAT!"
 ) else (
-    echo [-] Warning: install.bat could not be verified at the expected location.
+    echo %O1%    [-] Warning: install.bat could not be verified at expected location.%RESET%
 )
 
-endlocal
-exit /b
+:: ============================================================
+:: ECLIPSE & ROOT SETUP PROMPT
+:: ============================================================
+echo.
+set /p "RUN_ECLIPSE=%Y2%    >>> DO YOU WANT TO RUN THE ECLIPSE INSTALLER? (Y/N): %RESET%"
+if /i "!RUN_ECLIPSE!"=="y" (
+    echo.
+    echo %O2%    [*] Running root setup.bat...%RESET%
+    if exist "!INSTALL_PATH!\setup.bat" (
+        call "!INSTALL_PATH!\setup.bat"
+    ) else (
+        echo %O1%    [-] Warning: setup.bat could not be found at !INSTALL_PATH!\setup.bat.%RESET%
+    )
+) else (
+    echo.
+    echo %GRAY%    [!] Root setup.bat skipped by user.%RESET%
+)
+goto :eof
 
 :: ============================================================
 :: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
