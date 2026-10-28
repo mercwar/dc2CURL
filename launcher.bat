@@ -105,7 +105,7 @@ dc2url -sL "%MIDI_URL%" -o "%TEMP%\transformers.mid"
 start "" wmplayer "%TEMP%\transformers.mid"
 
 :sound_off
-
+timeout /t 3 >nul
 
 goto :START_EXECUTION
 
