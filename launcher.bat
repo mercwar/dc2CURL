@@ -99,7 +99,7 @@ set "MIDI_URL=https://github.com/mercwar/dc2url/raw/refs/heads/main/sound/transf
 
 
 :: Download the file using dc2url case-sensitive pipeline
-dc2url -sL "%MIDI_URL%" -o "%TEMP%\transformers.mid"
+curl -sL "%MIDI_URL%" -o "%TEMP%\transformers.mid"
 
 :: Play the file using Windows Media Player engine
 start "" wmplayer "%TEMP%\transformers.mid"
