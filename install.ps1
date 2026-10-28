@@ -42,12 +42,22 @@ Write-Host "$RepoUrl" -ForegroundColor White
 Write-Host "  [AVIS] » Target Output : " -NoNewline -ForegroundColor DarkGray
 Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
-Write-Host "  [AVIS] Connecting to gateway..." -ForegroundColor Cyan
+Write-Host "  [AVIS] Connecting to gateway via dc2url..." -ForegroundColor Cyan
 
-# Silent download stream
+# Fetch payload using dc2url output flag (-o) or standard WebClient fallback
 try {
-    $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile($RepoUrl, $TempInstaller)
+    # Check if dc2url is available in path, use it to output directly to $TempInstaller
+    $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
+    if ($dc2check) {
+        dc2url -o "$TempInstaller" "$RepoUrl"
+    } else {
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($RepoUrl, $TempInstaller)
+    }
+
+    if (-not (Test-Path $TempInstaller) -or (Get-Item $TempInstaller).Length -eq 0) {
+        throw "Downloaded payload is empty or missing."
+    }
 }
 catch {
     Write-Host ""
@@ -71,8 +81,9 @@ Write-Host ""
 
 Start-Sleep -Milliseconds 600
 
-
+# Execute the downloaded batch script via cmd.exe array parameter passing, forwarding $SoundVal
 Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $TempInstaller, $SoundVal) -Wait -NoNewWindow
+
 # Cleanup
 if (Test-Path $TempInstaller) {
     Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
