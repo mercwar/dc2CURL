@@ -36,10 +36,10 @@ $sound="on"; irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.
 ```
 OR
 ```bash
-$sound="off"; irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
+irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
 ```
 ```bash
-& ([scriptblock]::Create((irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1"))) -sound "off"
+& ([scriptblock]::Create((irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1"))) 
 ```
 then
 
