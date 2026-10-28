@@ -3,35 +3,7 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 :: ============================================================
-:: FIREGEM // DARK-COM-2 (PROGRESS BAR STREAMING KERNEL)
-:: ============================================================
-
-for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
-
-set "GRAD1=%ESC%[38;2;255;90;0m"
-set "GRAD2=%ESC%[38;2;255;125;0m"
-set "GRAD3=%ESC%[38;2;255;160;0m"
-set "GRAD4=%ESC%[38;2;255;195;0m"
-set "GRAD5=%ESC%[38;2;255;225;0m"
-set "GRAD6=%ESC%[38;2;255;255;0m"
-
-set "GOLD=%ESC%[38;2;255;210;0m"
-set "BLUE=%ESC%[38;2;255;140;0m"
-set "ICE=%ESC%[38;2;255;230;0m"
-set "GREEN=%ESC%[38;2;255;190;0m"
-set "MUTED=%ESC%[38;2;115;125;145m"
-set "WHITE=%ESC%[38;2;240;240;250m"
-set "RST=%ESC%[0m"
-set "LINE_COLOR=%ESC%[38;2;255;90;0m"
-
-mode con cols=100 lines=50
-color 00
-title DC2URL v1.0 STARGATE 3 QUASAR 1
-
-cd /d "%~dp0"
-
-:: ============================================================
-:: SELF-ELEVATION PIPELINE
+:: SELF-ELEVATION PIPELINE (REQUIRES ADMIN FOR PROGRAM FILES)
 :: ============================================================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -41,282 +13,193 @@ if %errorlevel% neq 0 (
 
 cd /d "%~dp0"
 
-
-:: Clear the screen and request ANSI escape sequence support for classic Windows Console
-cls
-reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
-
-:: Visual Anchors / Escape Codes
-for /F %%A in ('echo prompt $E ^| cmd') do set ESC=%%A
-set "CYAN=%ESC%[96m"
-set "WHITE=%ESC%[97m"
-set "GREEN=%ESC%[92m"
-set "GRAY=%ESC%[90m"
-set "RESET=%ESC%[0m"
-
-:: BIOS Post Header Simulation
-echo %CYAN%================================================================================%RESET%
-echo %WHITE%  DC2URL AMIBIOS(C)2026 Core Execution Pipeline v2.40                          %RESET%
-echo %WHITE%  BIOS Date: 10/27/26 23:46:11 Ver: 08.00.16                                    %RESET%
-echo %CYAN%================================================================================%RESET%
-echo.
-echo  CPU: Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz
-echo  Speed: 3800MHz  Count: 16
-echo.
-echo  %GRAY%Entering Pipeline Verification...%RESET%
-
-:: Hardware Check / Software Component Validation Emulation
-timeout /t 1 >nul
-echo  Checking Memory NVRAM... %GREEN%OK%RESET%
-timeout /t 1 >nul
-
-:: Detect dc2url application path registration
-where dc2url >nul 2>&1
-if %ERRORLEVEL% equ 0 (
-    echo  Detecting Network Layer Executable... %GREEN%[FOUND]%RESET%
-) else (
-    echo  Detecting Network Layer Executable... %ESC%[91m[NOT FOUND]%RESET%
-)
-
-:: Emulate Initializing State Broker Panels
-timeout /t 3 >nul
-echo  Initializing Gateway Control... %GREEN%ALIVE%RESET%
-echo.
-echo %GRAY%--------------------------------------------------------------------------------%RESET%
-echo  %GREEN%POST Complete. Booting dc2url Software Environment Engine...%RESET%
-echo %GRAY%--------------------------------------------------------------------------------%RESET%
-echo.
-REM =============================================================================
-REM SOUND SYSTEM (Registry-Backed Check)
-REM =============================================================================
-
-set "SOUND_REG=off"
-for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v sound 2^>nul') do set "SOUND_REG=%%B"
-
-echo [DEBUG] Registry Sound Setting: [%SOUND_REG%]
-timeout /t 3 >nul
-
-if /i "%SOUND_REG%"=="on" goto sound_on
-goto sound_off
-
-:sound_on
-echo.
-echo [SYSTEM] Initializing audio portal...
-
-set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transformers.mid"
-set "MIDI_FILE=%TEMP%\transformers.mid"
-
-curl -L -s -f "%MIDI_URL%" -o "%MIDI_FILE%"
-
-if exist "%MIDI_FILE%" (
-    echo [SYSTEM] Playing Transformers theme...
-    start "" "%MIDI_FILE%"
-) else (
-    echo [WARNING] MIDI download failed or resource unreachable.
-)
-goto after_sound
-
-:sound_off
-echo.
-echo [SYSTEM] Audio disabled.
-
-:after_sound
-timeout /t 2 >nul
-goto :START_EXECUTION
-
-
-
 :: ============================================================
-:: FRAME BUFFER SUBROUTINE
+:: TOOL DETECTION & SELECTION
 :: ============================================================
-:RENDER_FRAME
-cls
-echo.
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo    %GOLD%// %WHITE%F I R E G E M   %MUTED%■   %BLUE%D A R K - C O M - 2   %MUTED%//   %ICE%M O D E R N   %ICE%K E R N E L%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo %GRAD1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RST%
-echo %GRAD2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RST%
-echo %GRAD3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RST%
-echo %GRAD4%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RST%
-echo %GRAD5%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RST%
-echo %GRAD6%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo.
-echo %MUTED%  MERCWAR SYSTEMS%RST% %GRAD3% %RST% %GOLD%ECLIPSE TECHNOLOGY%RST%
-echo %MUTED%  STATUS: %RST% %GOLD%%FRAME_STATUS%%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-echo.
-echo %WHITE%%FRAME_BODY_1%%RST%
-echo %WHITE%%FRAME_BODY_2%%RST%
-echo %WHITE%%FRAME_BODY_3%%RST%
-echo.
-echo %MUTED%  📊 STAGE:%RST%
-echo    %MUTED%[%RST%%FRAME_BAR_COL%%FRAME_BAR_FILL%%MUTED%%FRAME_BAR_EMPTY%%MUTED%]%RST% %GOLD%%FRAME_PCT%%%%%%RST%
-echo.
-echo    %MUTED%» %BLUE%PHASE: %FRAME_PHASE%%RST%
-echo %LINE_COLOR%  ────────────────────────────────────────────────────────────────────────────────────%RST%
-goto :eof
-
-:DRAW_PROGRESS
-set /a "NUM_BLOCKS=%1 / 5"
-set "FRAME_BAR_FILL="
-set "FRAME_BAR_EMPTY="
-for /l %%B in (1,1,20) do (
-    if %%B leq !NUM_BLOCKS! (
-        set "FRAME_BAR_FILL=!FRAME_BAR_FILL!█"
-    ) else (
-        set "FRAME_BAR_EMPTY=!FRAME_BAR_EMPTY!░"
-    )
-)
-set "FRAME_PCT=%1"
-if %1 lss 10 set "FRAME_PCT=  %1"
-if %1 geq 10 if %1 lss 100 set "FRAME_PCT= %1"
-goto :eof
-
-:: ============================================================
-:: START_EXECUTION
-:: ============================================================
-:START_EXECUTION
-set "FRAME_PHASE=[AVIS] SCANNER"
-set "FRAME_STATUS=[AVIS] Scanning system ..."
-set "FRAME_BODY_1=[AVIS] Scanning windows for installation methods..."
-set "FRAME_BODY_2=[AVIS] Validating connection..."
-set "FRAME_BODY_3=[AVIS] Launcher alive."
-call :DRAW_PROGRESS 10
-set "FRAME_BAR_COL=%BLUE%"
-call :RENDER_FRAME
-
-set "found_tools="
 set "count=0"
 for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin wget node winget) do (
     where %%T >nul 2>&1
     if not errorlevel 1 (
         set /a count+=1
         set "tool_!count!=%%T"
-        set "found_tools=!found_tools! %%T"
     )
 )
 
-set "FRAME_PHASE=[AVIS] DEVICE SELECTOR"
-set "FRAME_STATUS=[AVIS] Device detection complete."
-set "FRAME_BODY_1=[AVIS] Devices detected: %count% available."
-set "FRAME_BODY_2=[AVIS] Select your preferred device engine."
-set "FRAME_BODY_3=[AVIS] Follow the interactive steps below."
-call :DRAW_PROGRESS 35
-set "FRAME_BAR_COL=%GOLD%"
-call :RENDER_FRAME
+if !count! equ 0 (
+    echo [-] No download engines found. Exiting.
+    pause
+    exit /b
+)
 
+echo === AVAILABLE TOOLS ===
 echo.
 for /l %%i in (1,1,!count!) do (
-    echo %GRAD2%     ╔═[%GOLD% %%i %GRAD2%]══%RST% %WHITE%!tool_%%i!%RST%
+    echo [%%i] !tool_%%i!
 )
 echo.
 
-set /p "TOOL_NUM=%GOLD%    >>> SELECT ENGINE [1-%count%]: %RST%"
+set /p "TOOL_NUM=Select engine [1-!count!]: "
 if "!TOOL_NUM!"=="" (
     set "SELECTED_TOOL=curl"
 ) else (
+    set "SELECTED_TOOL="
     for /l %%i in (1,1,!count!) do (
         if "!TOOL_NUM!"=="%%i" set "SELECTED_TOOL=!tool_%%i!"
     )
 )
 if "!SELECTED_TOOL!"=="" set "SELECTED_TOOL=curl"
 
-:: Target Installation Path Selection
+:: ============================================================
+:: DIRECTORY CONFIGURATION
+:: ============================================================
 set "DEFAULT_INSTALL=%ProgramFiles%\dc2url"
 if "%DEFAULT_INSTALL%"=="" set "DEFAULT_INSTALL=%SystemDrive%\Program Files\dc2url"
 
-set "FRAME_PHASE=[AVIS] SELECT INSTALL PATH"
-set "FRAME_STATUS=[AVIS] Configuring target directories..."
-set "FRAME_BODY_1=  Default: %DEFAULT_INSTALL%"
-set "FRAME_BODY_2=  Engine:  %SELECTED_TOOL%"
-set "FRAME_BODY_3=        [AVIS] Ready for configuration."
-call :DRAW_PROGRESS 55
-set "FRAME_BAR_COL=%BLUE%"
-call :RENDER_FRAME
-
 echo.
-set /p "INSTALL_PATH=%GOLD%    >>> ENTER INSTALL PATH (PRESS ENTER FOR DEFAULT): %RST%"
+echo === DOWNLOAD DESTINATION CONFIGURATION ===
+echo Default system path: !DEFAULT_INSTALL!
+echo.
+
+set /p "INSTALL_PATH=>>> ENTER FULL PATH OR PRESS ENTER FOR DEFAULT: "
 if "!INSTALL_PATH!"=="" set "INSTALL_PATH=!DEFAULT_INSTALL!"
 
 if not exist "!INSTALL_PATH!" (
     mkdir "!INSTALL_PATH!" >nul 2>&1
 )
 
+:: ============================================================
+:: DOWNLOAD CONFIG.JSON FIRST
+:: ============================================================
 set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/config.json"
 set "CONFIG_FILE=!INSTALL_PATH!\config.json"
 
-set "FRAME_PHASE=[AVIS] FETCHING MANIFEST"
-set "FRAME_STATUS=[AVIS] Downlinking configuration manifest..."
-set "FRAME_BODY_1=  Source: %CONFIG_URL%"
-set "FRAME_BODY_2=  Target: %CONFIG_FILE%"
-set "FRAME_BODY_3=        [AVIS] Executing download..."
-call :DRAW_PROGRESS 75
-set "FRAME_BAR_COL=%GOLD%"
-call :RENDER_FRAME
+echo.
+echo [*] Downloading config.json using !SELECTED_TOOL!...
+call :download_!SELECTED_TOOL! "!CONFIG_URL!" "!CONFIG_FILE!" 2>error_config.log
 
-if /i "!SELECTED_TOOL!"=="curl" (
-    curl -s -L -f "!CONFIG_URL!" -o "!CONFIG_FILE!"
-) else if /i "!SELECTED_TOOL!"=="wget" (
-    wget -q "!CONFIG_URL!" -O "!CONFIG_FILE!"
-) else if /i "!SELECTED_TOOL!"=="certutil" (
-    certutil -urlcache -split -f "!CONFIG_URL!" "!CONFIG_FILE!" >nul 2>&1
-    certutil -urlcache * delete >nul 2>&1
-) else if /i "!SELECTED_TOOL!"=="powershell" (
-    powershell -NoProfile -Command "Invoke-WebRequest -Uri '!CONFIG_URL!' -OutFile '!CONFIG_FILE!' -UseBasicParsing"
-) else if /i "!SELECTED_TOOL!"=="bitsadmin" (
-    bitsadmin /transfer dc2url_job /download /priority normal "!CONFIG_URL!" "!CONFIG_FILE!" >nul 2>&1
-) else if /i "!SELECTED_TOOL!"=="python" (
-    python -c "import urllib.request; urllib.request.urlretrieve('!CONFIG_URL!', '!CONFIG_FILE!')"
-) else if /i "!SELECTED_TOOL!"=="node" (
-    node -e "const fs=require('fs');const https=require('https');https.get('!CONFIG_URL!',res=>{const stream=fs.createWriteStream('!CONFIG_FILE!');res.pipe(stream);});"
-) else if /i "!SELECTED_TOOL!"=="mshta" (
-    mshta "javascript:var xhr=new ActiveXObject('MSXML2.XMLHTTP');xhr.open('GET','!CONFIG_URL!',false);xhr.send();var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(xhr.ResponseBody);s.SaveToFile('!CONFIG_FILE!',2);window.close();"
-) else if /i "!SELECTED_TOOL!"=="cscript" (
-    cscript //nologo //e:jscript "%~f0" download_js "!CONFIG_URL!" "!CONFIG_FILE!"
-) else if /i "!SELECTED_TOOL!"=="dc2url" (
-    dc2url "!CONFIG_URL!" "!CONFIG_FILE!"
-) else if /i "!SELECTED_TOOL!"=="winget" (
-    powershell -NoProfile -Command "Invoke-WebRequest -Uri '!CONFIG_URL!' -OutFile '!CONFIG_FILE!' -UseBasicParsing"
-)
-
-if exist "!CONFIG_FILE!" (
-    set "FRAME_PHASE=[AVIS] PAYLOAD STREAM"
-    set "FRAME_STATUS=[AVIS] Downloading files from config.json..."
-    set "FRAME_BODY_1=  Config: Success"
-    set "FRAME_BODY_2=  Path:   !INSTALL_PATH!"
-    set "FRAME_BODY_3=        [AVIS] Streaming payload files..."
-    call :DRAW_PROGRESS 90
-    set "FRAME_BAR_COL=%GREEN%"
-    call :RENDER_FRAME
-
-    for /f "delims=" %%v in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$cfg = Get-Content '!INSTALL_PATH!\config.json' -Raw | ConvertFrom-Json; $owner = if ($cfg.repo_owner) { $cfg.repo_owner } else { 'mercwar' }; $repo = if ($cfg.repo_name) { $cfg.repo_name } else { 'dc2url' }; $ver = if ($cfg.version) { $cfg.version } else { 'v1.0' }; [Console]::Write($ver); $baseUrl = 'https://raw.githubusercontent.com/' + $owner + '/' + $repo + '/refs/heads/main/'; foreach ($propName in $cfg.manifest_layout.psobject.properties.Name) { foreach ($item in $cfg.manifest_layout.$propName) { $source = $item.source; $target = if ($item.target) { $item.target } else { $source }; $isRoot = ($propName -eq 'root_files'); $remotePath = if ($isRoot) { $source } else { Join-Path $ver $source }; $relPath = if ($isRoot) { $target } else { Join-Path $ver $target }; $fileUrl = $baseUrl + ($remotePath -replace '\\', '/'); $dest = Join-Path '!INSTALL_PATH!' $relPath; $parent = Split-Path $dest -Parent; if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }; Write-Host ('[DOWNLOADING] ' + $source); try { if ('!SELECTED_TOOL!' -eq 'curl') { & curl -s -L -f $fileUrl -o $dest } elseif ('!SELECTED_TOOL!' -eq 'wget') { & wget -q $fileUrl -O $dest } else { Invoke-WebRequest -Uri $fileUrl -OutFile $dest -UseBasicParsing } } catch { Write-Host ('[-] ERROR downloading ' + $source + ': ' + $_.Exception.Message) -ForegroundColor Red } } }"') do set "VER_DIR=%%v"
-
-    if "!VER_DIR!"=="" set "VER_DIR=v1.0"
-
-    set "FRAME_PHASE=[AVIS] READY"
-    set "FRAME_STATUS=[AVIS] Download complete. Launching installer..."
-    call :DRAW_PROGRESS 100
-    set "FRAME_BAR_COL=%GREEN%"
-    call :RENDER_FRAME
-
-    echo.
-	echo The dc2url files will now be installed...
-	echo.
-    echo Missing files are listed below:
-	timeout /t 3 >nul
-    call "!INSTALL_PATH!\!VER_DIR!\install.bat"
-    endlocal
-) else (
-    echo [-] Failed to download config.json. Exiting.
+if not exist "!CONFIG_FILE!" (
+    echo [-] Failed to download config.json.
+    echo === ENGINE ERROR LOG ===
+    if exist error_config.log type error_config.log
+    del error_config.log >nul 2>&1
     pause
-    endlocal
+    exit /b
+)
+del error_config.log >nul 2>&1
+echo [+] config.json downloaded successfully.
+
+:: ============================================================
+:: PARSE MANIFEST & LOOP NODES (RESPECTING do_not_version)
+:: ============================================================
+echo [*] Parsing manifest layout and downloading payload nodes...
+
+set "PS_CMD=$cfg = Get-Content '!CONFIG_FILE!' -Raw | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }"
+
+for /f "delims=" %%i in ('powershell -NoProfile -Command "try { !PS_CMD! } catch { $_.Exception.Message | Out-File error_manifest.log }"') do (
+    set "LINE=%%i"
+    
+    :: Safe catch check to verify if the return payload is a PowerShell error trace
+    if exist error_manifest.log (
+        echo.
+        echo === CRITICAL MANIFEST PARSING ERROR DETECTED ===
+        type error_manifest.log
+        echo ================================================
+        pause
+        exit /b 1
+    )
+
+    for /f "tokens=1,2,3 delims=|" %%a in ("!LINE!") do (
+        set "NODE_NAME=%%a"
+        set "REMOTE_REL=%%b"
+        set "LOCAL_REL=%%c"
+        
+        set "FILE_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/!REMOTE_REL!"
+        set "DEST_FILE=!INSTALL_PATH!\!LOCAL_REL!"
+        
+        for %%p in ("!DEST_FILE!") do (
+            set "TARGET_DIR=%%~dpp"
+            if not exist "!TARGET_DIR!" mkdir "!TARGET_DIR!" >nul 2>&1
+        )
+        
+        echo    [NODE: !NODE_NAME!] Downloading !REMOTE_REL! ...
+        call :download_!SELECTED_TOOL! "!FILE_URL!" "!DEST_FILE!" 2>error_download.log
+        
+        if errorlevel 1 (
+            echo [!] Error occurred while attempting download tool handling.
+            if exist error_download.log type error_download.log
+            pause
+        )
+        del error_download.log >nul 2>&1
+    )
 )
 
-exit /b 0
 
-:: JScript helper routine for cscript execution if invoked
+echo.
+echo [+] Processing completed to destination target path: !INSTALL_PATH!
+:: ============================================================
+:: POST-DOWNLOAD VALIDATION
+:: ============================================================
+set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\v1.0\install.bat"
+
+echo [*] Validating installation components...
+if exist "!EXPECTED_INSTALL_BAT!" (
+    echo [+] Success: install.bat was found at !EXPECTED_INSTALL_BAT!
+	call "!EXPECTED_INSTALL_BAT!"
+) else (
+    echo [-] Warning: install.bat could not be verified at the expected location.
+)
+
+endlocal
+exit /b
+
+:: ============================================================
+:: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
+:: ============================================================
+:download_curl
+curl -s -L -f "%~1" -o "%~2"
+goto :eof
+
+:download_wget
+wget -q "%~1" -O "%~2"
+goto :eof
+
+:download_certutil
+certutil -urlcache -split -f "%~1" "%~2" >nul 2>&1
+certutil -urlcache * delete >nul 2>&1
+goto :eof
+
+:download_powershell
+powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
+goto :eof
+
+:download_bitsadmin
+bitsadmin /transfer dc2url_job /download /priority normal "%~1" "%~2" >nul 2>&1
+goto :eof
+
+:download_python
+python -c "import urllib.request; urllib.request.urlretrieve('%~1', '%~2')"
+goto :eof
+
+:download_node
+node -e "const fs=require('fs');const https=require('https');https.get('%~1',res=>{const stream=fs.createWriteStream('%~2');res.pipe(stream);});"
+goto :eof
+
+:download_mshta
+mshta "javascript:var xhr=new ActiveXObject('MSXML2.XMLHTTP');xhr.open('GET','%~1',false);xhr.send();var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(xhr.ResponseBody);s.SaveToFile('%~2',2);window.close();"
+goto :eof
+
+:download_cscript
+cscript //nologo //e:jscript "%~f0" download_js "%~1" "%~2"
+goto :eof
+
+:download_dc2url
+dc2url "%~1" "%~2"
+goto :eof
+
+:download_winget
+powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
+goto :eof
+
 <job>
 <script language="JScript">
 var args = WScript.Arguments;
