@@ -4,20 +4,20 @@
 #>
 [CmdletBinding()]
 param (
-    [string]$sound = $env:SOUND_MODE
+    [string]$sound = ""
 )
 
 $ErrorActionPreference = 'Stop'
 [Net.SecurityProtocolType]::Tls12
 
-# Resolve sound status safely, checking parameter, global scope, and environment variables
+# Clean, single lowercase sound validation
 $SoundVal = "off"
-if ($sound -eq "on" -or $global:sound -eq "on" -or $env:SOUND_MODE -eq "on") { 
+if ($sound -eq "on") { 
     $SoundVal = "on" 
 }
 
 # Configure Window Title & Dimensions for Clean Presentation
-$host.UI.RawUI.WindowTitle = "dc2url Launcher v1.0"
+$host.UI.RawUI.WindowTitle = "dc2URL Launcher v1.0"
 try {
     $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
@@ -69,7 +69,7 @@ Write-Host "$TempInstaller" -ForegroundColor White
 Write-Host ""
 Write-Host "  [AVIS] Connecting to gateway via dc2url..." -ForegroundColor Cyan
 
-# Fetch payload using lowercase dc2url output flag (-o) or standard WebClient fallback
+# Fetch payload and validate it isn't an HTML error page
 try {
     $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
     if ($dc2check) {
@@ -81,6 +81,12 @@ try {
 
     if (-not (Test-Path $TempInstaller) -or (Get-Item $TempInstaller).Length -eq 0) {
         throw "Downloaded payload is empty or missing."
+    }
+
+    # Inspect file content to ensure it's a batch script and not an HTML error/404 page
+    $FileHeader = Get-Content $TempInstaller -TotalCount 3 -ErrorAction SilentlyContinue | Out-String
+    if ($FileHeader -match "<!DOCTYPE|<html>|<html") {
+        throw "Server returned an HTML response (404/500 error page) instead of a batch script. Check file casing and path."
     }
 }
 catch {
