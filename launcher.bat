@@ -88,7 +88,7 @@ echo %GRAY%---------------------------------------------------------------------
 echo.
 
 :: Check for the switch parameter (case-insensitive) or missing arguments
-if "%~1"=="" goto :sound_off
+if "%~1"=="" goto :sound_on
 if /i "%~1"=="on" goto :sound_on
 if /i "%~1"=="off" goto :sound_off
 
