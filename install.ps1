@@ -152,30 +152,24 @@ write-host ""
 
 start-sleep -milliseconds 600
 
-
-
 # ============================================================================
 # execute launcher with sound argument
 # ============================================================================
 
 write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
 
-# MSDN Syntax Rule: The entire chunk following /c must be encapsulated in outer quotes.
-# By using single quotes globally, the double quotes pass perfectly to cmd without breaking.
-# 1. Set up test variables to simulate the script environment
-$soundval = "on"
-$tempinstaller = "C:\Users\Admin\AppData\Local\Temp\dc2_install_test.bat"
-
-# 2. Run the debug line (It will now show the variable value)
-write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
-
-# 3. Build the MSDN-compliant command string using the single-quote approach
+# Clean outer single quotes guarantee that nested path double quotes are passed 
+# explicitly down to cmd.exe without triggering internal parser conflicts.
 $fullCommandLine = '/c "call "' + $tempinstaller + '" ' + $soundval + '"'
 
-# 4. Check the exact string that will be sent to cmd.exe
 write-host "  [debug] command line   = cmd.exe $fullCommandLine" -foregroundcolor yellow
+write-host ""
 
-
+start-process `
+    -filepath "cmd.exe" `
+    -argumentlist $fullCommandLine `
+    -wait `
+    -nonewwindow
 
 # ============================================================================
 # cleanup
@@ -189,7 +183,7 @@ if (test-path $tempinstaller) {
         -erroraction silentlycontinue
 }
 
-# =====================================================================
+# ============================================================================
 # completion
 # ============================================================================
 
