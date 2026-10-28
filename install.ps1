@@ -61,7 +61,7 @@ clear-host
 
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "     e c l i p s e    i n s t a l l e r    ■    d c 2 u r l    k e r n e l" -foregroundcolor cyan
-write-host "     stargate 2 quasar 9" -foregroundcolor cyan
+write-host "     stargate 2 quasar 19" -foregroundcolor cyan
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "  mercwar stargate technology" -foregroundcolor darkyellow
 write-host "  status: contacting server..." -foregroundcolor gray
@@ -152,28 +152,24 @@ write-host ""
 
 start-sleep -milliseconds 600
 
-# ============================================================================
-# execute launcher with sound argument
-# ============================================================================
 
-# ============================================================================
-# execute launcher with sound argument
-# ============================================================================
-
-# ============================================================================
-# execute launcher with sound argument
-# ============================================================================
 
 write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
-write-host "  [debug] launching target script directly..." -foregroundcolor yellow
+
+# MSDN Syntax Rule: The entire string after /c must be encapsulated in an outer set 
+# of quotes if internal sub-strings contain their own literal quotes due to spaces.
+# `cmd.exe` strips the outer matching pair and executes the pristine parameters inside.
+$fullCommandLine = "/c `""call `"$tempinstaller`" $soundval`""
+
+write-host "  [debug] command line   = cmd.exe $fullCommandLine" -foregroundcolor yellow
 write-host ""
 
-# Let Start-Process manage the arguments directly instead of manually escaping cmd strings
 start-process `
     -filepath "cmd.exe" `
-    -argumentlist "/c", "call", "`"$tempinstaller`"", $soundval `
+    -argumentlist $fullCommandLine `
     -wait `
     -nonewwindow
+
 
 
 
