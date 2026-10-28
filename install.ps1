@@ -154,12 +154,15 @@ start-sleep -milliseconds 600
 
 
 
+# ============================================================================
+# execute launcher with sound argument
+# ============================================================================
+
 write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
 
-# MSDN Syntax Rule: The entire string after /c must be encapsulated in an outer set 
-# of quotes if internal sub-strings contain their own literal quotes due to spaces.
-# `cmd.exe` strips the outer matching pair and executes the pristine parameters inside.
-$fullCommandLine = "/c `""call `"$tempinstaller`" $soundval`""
+# MSDN Syntax Rule: The entire chunk following /c must be encapsulated in outer quotes.
+# By using single quotes globally, the double quotes pass perfectly to cmd without breaking.
+$fullCommandLine = '/c "call "' + $tempinstaller + '" ' + $soundval + '"'
 
 write-host "  [debug] command line   = cmd.exe $fullCommandLine" -foregroundcolor yellow
 write-host ""
@@ -169,8 +172,6 @@ start-process `
     -argumentlist $fullCommandLine `
     -wait `
     -nonewwindow
-
-
 
 
 # ============================================================================
