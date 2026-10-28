@@ -26,15 +26,29 @@
 😲️ Your command line now has access to your private host's php and web app cgi/uri/api  
 😜️ Your command line will no longer be rejected by javascript enabled warnings you get with cURL
   
-```bash
-irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
-```
+# TO LISTEN TO THE SURPRISE THEME SOND MIDI SELECT SOUND ON
 
+```bash
+$sound="on"; irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
+```
+```bash
+& ([scriptblock]::Create((irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1"))) -sound "on"
+```
+OR
+```bash
+$sound="off"; irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1" | iex
+```
+```bash
+& ([scriptblock]::Create((irm "https://raw.githubusercontent.com/mercwar/dc2URL/main/install.ps1"))) -sound "off"
+```
 then
 
 ```bash
 dc2url -v "http://mercwar01.byethost3.com/darkcom2/echo.php"
 ```
+
+This method wraps the download string into a local script block invocation (`&`) so you can append parameters directly to the tail end of the command.
+
 
 ##### 🌈 **Dark-Com-2** is a lightweight, high-performance command-line HTTP client and headless browser engine .
 
