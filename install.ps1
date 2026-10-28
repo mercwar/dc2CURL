@@ -61,7 +61,7 @@ clear-host
 
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "     e c l i p s e    i n s t a l l e r    ■    d c 2 u r l    k e r n e l" -foregroundcolor cyan
-write-host "     stargate 2 quasar 8" -foregroundcolor cyan
+write-host "     stargate 2 quasar 9" -foregroundcolor cyan
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "  mercwar stargate technology" -foregroundcolor darkyellow
 write-host "  status: contacting server..." -foregroundcolor gray
@@ -160,17 +160,21 @@ start-sleep -milliseconds 600
 # execute launcher with sound argument
 # ============================================================================
 
-$cmdline = "/c call `"$tempinstaller`" $soundval"
+# ============================================================================
+# execute launcher with sound argument
+# ============================================================================
 
 write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
-write-host "  [debug] command line   = cmd.exe $cmdline" -foregroundcolor yellow
+write-host "  [debug] launching target script directly..." -foregroundcolor yellow
 write-host ""
 
+# Let Start-Process manage the arguments directly instead of manually escaping cmd strings
 start-process `
     -filepath "cmd.exe" `
-    -argumentlist $cmdline `
+    -argumentlist "/c", "call", "`"$tempinstaller`"", $soundval `
     -wait `
     -nonewwindow
+
 
 
 # ============================================================================
