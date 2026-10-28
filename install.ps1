@@ -2,9 +2,16 @@
 .SYNOPSIS
     dc2URL Root Staging Loader (Flicker-Free with Readable Delays)
 #>
+param (
+    [string]$sound
+)
 
 $ErrorActionPreference = 'Stop'
 [Net.SecurityProtocolType]::Tls12
+
+# Resolve sound status from either parameter block input or global session context variable fallback
+$SoundVal = "off"
+if ($sound -eq "on" -or $global:sound -eq "on") { $SoundVal = "on" }
 
 # Configure Window Title & Dimensions for Clean Presentation
 $host.UI.RawUI.WindowTitle = "MERCWAR dc2URL Launcer v1.0"
@@ -60,8 +67,8 @@ Write-Host ""
 
 Start-Sleep -Milliseconds 600
 
-# Execute the launcher interactively without screen flashing
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`"" -Wait -NoNewWindow
+# Execute the launcher interactively and explicitly forward the sound parameter
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`" $SoundVal" -Wait -NoNewWindow
 
 # Cleanup
 if (Test-Path $TempInstaller) {
@@ -72,5 +79,3 @@ Write-Host ""
 Write-Host "  [ECLIPSE] dc2url will be visible in your add/remove programs after the registration." -ForegroundColor Green
 Write-Host "  [ECLIPSE] Auto updates are not supported at this time, you may run this irm or launcher at any time to update dc2url." -ForegroundColor Green
 Write-Host "====================================================================================" -ForegroundColor DarkGray
-
-
