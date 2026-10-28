@@ -40,6 +40,73 @@ if %errorlevel% neq 0 (
 )
 
 cd /d "%~dp0"
+
+
+:: Clear the screen and request ANSI escape sequence support for classic Windows Console
+cls
+reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: Visual Anchors / Escape Codes
+for /F %%A in ('echo prompt $E ^| cmd') do set ESC=%%A
+set "CYAN=%ESC%[96m"
+set "WHITE=%ESC%[97m"
+set "GREEN=%ESC%[92m"
+set "GRAY=%ESC%[90m"
+set "RESET=%ESC%[0m"
+
+:: BIOS Post Header Simulation
+echo %CYAN%================================================================================%RESET%
+echo %WHITE%  DC2URL AMIBIOS(C)2026 Core Execution Pipeline v2.40                          %RESET%
+echo %WHITE%  BIOS Date: 10/27/26 23:46:11 Ver: 08.00.16                                    %RESET%
+echo %CYAN%================================================================================%RESET%
+echo.
+echo  CPU: Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz
+echo  Speed: 3800MHz  Count: 16
+echo.
+echo  %GRAY%Entering Pipeline Verification...%RESET%
+
+:: Hardware Check / Software Component Validation Emulation
+timeout /t 1 >nul
+echo  Checking Memory NVRAM... %GREEN%OK%RESET%
+timeout /t 1 >nul
+
+:: Detect dc2url application path registration
+where dc2url >nul 2>&1
+if %ERRORLEVEL% equ 0 (
+    echo  Detecting Network Layer Executable... %GREEN%[FOUND]%RESET%
+) else (
+    echo  Detecting Network Layer Executable... %ESC%[91m[NOT FOUND]%RESET%
+)
+
+:: Emulate Initializing State Broker Panels
+timeout /t 3 >nul
+echo  Initializing Gateway Control... %GREEN%ALIVE%RESET%
+echo.
+echo %GRAY%--------------------------------------------------------------------------------%RESET%
+echo  %GREEN%POST Complete. Booting dc2url Software Environment Engine...%RESET%
+echo %GRAY%--------------------------------------------------------------------------------%RESET%
+echo.
+
+:: Check for the switch parameter (case-insensitive) or missing arguments
+if "%~1"=="" goto :sound_off
+if /i "%~1"=="on" goto :sound_on
+if /i "%~1"=="off" goto :sound_off
+
+
+:sound_on
+echo %CYAN%[SYSTEM]%RESET% Turning network subsystem stream sound ON...
+set "MIDI_URL=https://github.com/mercwar/dc2url/raw/refs/heads/main/sound/transformers.mid"
+
+
+:: Download the file using dc2url case-sensitive pipeline
+dc2url -sL "%MIDI_URL%" -o "%TEMP%\transformers.mid"
+
+:: Play the file using Windows Media Player engine
+start "" wmplayer "%TEMP%\transformers.mid"
+
+:sound_off
+
+
 goto :START_EXECUTION
 
 :: ============================================================
