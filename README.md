@@ -29,18 +29,15 @@
 ###### 🎶 *<i>TO LISTEN TO THE SURPRISE THEME SONG MIDI SELECT SOUND ON</i>!*
 
 ```bash
-$sound="on"; irm "https://raw.githubusercontent.com/mercwar/dc2url/main/install.ps1" | iex
-```
-```bash
 & ([scriptblock]::Create((irm "https://raw.githubusercontent.com/mercwar/dc2url/main/install.ps1"))) -sound "on"
 ```
+
 OR
+
 ```bash
 irm "https://raw.githubusercontent.com/mercwar/dc2url/main/install.ps1" | iex
 ```
-```bash
-& ([scriptblock]::Create((irm "https://raw.githubusercontent.com/mercwar/dc2url/main/install.ps1"))) 
-```
+
 then
 
 ```bash
