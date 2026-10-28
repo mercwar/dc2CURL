@@ -61,7 +61,7 @@ clear-host
 
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "     e c l i p s e    i n s t a l l e r    ■    d c 2 u r l    k e r n e l" -foregroundcolor cyan
-write-host "     stargate 2 quasar 20" -foregroundcolor cyan
+write-host "     stargate 2 quasar 19" -foregroundcolor cyan
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "  mercwar stargate technology" -foregroundcolor darkyellow
 write-host "  status: contacting server..." -foregroundcolor gray
@@ -158,8 +158,8 @@ start-sleep -milliseconds 600
 
 write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
 
-# Fixed syntax block: Literal outer single quotes protect the internal double quotes.
-# This prevents the script block compiler from crashing on multi-level escaping.
+# FIX: Literal outer single quotes protect the internal double quotes.
+# This prevents the script block compiler from crashing on line 162.
 $fullCommandLine = '/c "call "' + $tempinstaller + '" ' + $soundval + '"'
 
 write-host "  [debug] command line   = cmd.exe $fullCommandLine" -foregroundcolor yellow
