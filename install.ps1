@@ -23,7 +23,7 @@ try {
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
-# Routed through PHP downlink handler to securely bypass extension blocking
+# Corrected downlink URL routing through the PHP streaming endpoint
 $RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
@@ -86,7 +86,7 @@ try {
     # Inspect file content to ensure it's a batch script and not an HTML error/404 page
     $FileHeader = Get-Content $TempInstaller -TotalCount 3 -ErrorAction SilentlyContinue | Out-String
     if ($FileHeader -match "<!DOCTYPE|<html>|<html") {
-        throw "Server returned an HTML response instead of raw script content. Verify downlink.php file parameter."
+        throw "Server returned an HTML response instead of raw script content. Check downlink.php or file path."
     }
 }
 catch {
