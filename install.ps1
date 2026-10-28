@@ -61,7 +61,7 @@ clear-host
 
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "     e c l i p s e    i n s t a l l e r    ■    d c 2 u r l    k e r n e l" -foregroundcolor cyan
-write-host "     stargate 2 quasar 7" -foregroundcolor cyan
+write-host "     stargate 2 quasar 8" -foregroundcolor cyan
 write-host "====================================================================================" -foregroundcolor darkgray
 write-host "  mercwar stargate technology" -foregroundcolor darkyellow
 write-host "  status: contacting server..." -foregroundcolor gray
@@ -156,6 +156,10 @@ start-sleep -milliseconds 600
 # execute launcher with sound argument
 # ============================================================================
 
+# ============================================================================
+# execute launcher with sound argument
+# ============================================================================
+
 $cmdline = "/c call `"$tempinstaller`" $soundval"
 
 write-host "  [debug] sound argument = [$soundval]" -foregroundcolor yellow
@@ -167,6 +171,7 @@ start-process `
     -argumentlist $cmdline `
     -wait `
     -nonewwindow
+
 
 # ============================================================================
 # cleanup
