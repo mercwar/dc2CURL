@@ -1,47 +1,22 @@
-echo [DEBUG] Checking if config file exists at: !CONFIG_FILE!
-if exist "!CONFIG_FILE!" (
-    echo [DEBUG] config.json successfully found on disk.
-) else (
-    echo [DEBUG] ERROR: config.json does NOT exist!
-)
-pause
-
-if exist "!CONFIG_FILE!" (
-    set "FRAME_PHASE=[AVIS] PAYLOAD STREAM"
-    set "FRAME_STATUS=[AVIS] Downloading files from config.json..."
-    set "FRAME_BODY_1=  Config: Success"
-    set "FRAME_BODY_2=  Path:   !INSTALL_PATH!"
-    set "FRAME_BODY_3=        [AVIS] Streaming payload files..."
-    call :DRAW_PROGRESS 90
-    set "FRAME_BAR_COL=%GREEN%"
-    call :RENDER_FRAME
-
-    echo [DEBUG] Entering PowerShell configuration parsing and payload downloader loop...
-    pause
-
-    for /f "delims=" %%v in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "$path = '%CONFIG_FILE%'; Write-Information '[PS-DEBUG] Reading path: ' + $path; if (Test-Path $path) { $raw = Get-Content $path -Raw -Encoding UTF8; $cfg = $raw | ConvertFrom-Json; $owner = if ($cfg.repo_owner) { $cfg.repo_owner } else { 'mercwar' }; $repo = if ($cfg.repo_name) { $cfg.repo_name } else { 'dc2url' }; $ver = if ($cfg.version) { $cfg.version } else { 'v1.0' }; [Console]::Out.Write($ver); Write-Information ('[PS-DEBUG] Version detected: ' + $ver); $baseUrl = 'https://raw.githubusercontent.com/' + $owner + '/' + $repo + '/refs/heads/main/'; $selTool = '%SELECTED_TOOL%'; foreach ($propName in $cfg.manifest_layout.psobject.properties.Name) { foreach ($item in $cfg.manifest_layout.$propName) { $source = $item.source; $target = if ($item.target) { $item.target } else { $source }; $isRoot = ($propName -eq 'root_files'); $remotePath = if ($isRoot) { $source } else { Join-Path $ver $source }; $relPath = if ($isRoot) { $target } else { Join-Path $ver $target }; $fileUrl = $baseUrl + ($remotePath -replace '\\', '/'); $dest = Join-Path '%INSTALL_PATH%' $relPath; $parent = Split-Path $dest -Parent; if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }; Write-Information ('[PS-DOWNLOADING] ' + $fileUrl + ' -> ' + $dest); try { if ($selTool -eq 'curl') { & curl -s -L -f $fileUrl -o $dest } elseif ($selTool -eq 'wget') { & wget -q $fileUrl -O $dest } elseif ($selTool -eq 'certutil') { & certutil -urlcache -split -f $fileUrl $dest } elseif ($selTool -eq 'bitsadmin') { & bitsadmin /transfer dc2url_dl /download /priority normal $fileUrl $dest } elseif ($selTool -eq 'python') { & python -c \"import urllib.request; urllib.request.urlretrieve('$fileUrl', '$dest')\" } else { Invoke-WebRequest -Uri $fileUrl -OutFile $dest -UseBasicParsing } } catch { Write-Error ('[PS-ERROR] ' + $_.Exception.Message) } } } } else { Write-Error '[PS-ERROR] Config file path not found by PowerShell!' }"') do set "VER_DIR=%%v"
-
-    echo [DEBUG] PowerShell loop finished. Captured VER_DIR: '!VER_DIR!'
-    pause
-
-    if "!VER_DIR!"=="" set "VER_DIR=v1.0"
-
-    set "FRAME_PHASE=[AVIS] READY"
-    set "FRAME_STATUS=[AVIS] Download complete. Launching installer..."
-    call :DRAW_PROGRESS 100
-    set "FRAME_BAR_COL=%GREEN%"
-    call :RENDER_FRAME
-
-    echo.
-    echo ====================================================================================
-    echo [DEBUG] Launching installer script: "!INSTALL_PATH!\!VER_DIR!\install.bat"
-    pause
-    call "!INSTALL_PATH!\!VER_DIR!\install.bat"
-    endlocal
-) else (
-    echo [-] Failed to download config.json. Exiting.
-    pause
-    endlocal
-)
-exit /b 0
-
+{
+  "repo_owner": "mercwar",
+  "repo_name": "dc2url",
+  "version": "v1.0",
+  "manifest_layout": {
+    "root_files": [
+      {"source": "favi-con.ico", "target": "favi-con.ico"},
+      {"source": "echo.bat", "target": "echo.bat"},
+      {"source": "README.md", "target": "README.md"},
+      {"source": "setup.bat", "target": "setup.bat"}
+    ],
+    "branch_files": [
+      {"source": "install.bat", "target": "install.bat"},
+      {"source": "uninstall.bat", "target": "uninstall.bat"}
+    ],
+    "binary_exec": [
+      {"source": "exec/dc2url.exe", "target": "exec/dc2url.exe"},
+      {"source": "exec/DarkComHeadless.dll", "target": "exec/DarkComHeadless.dll"},
+      {"source": "exec/WebView2Loader.dll", "target": "exec/WebView2Loader.dll"}
+    ]
+  }
+}
