@@ -14,18 +14,19 @@ $SoundVal = "off"
 if ($sound -eq "on" -or $global:sound -eq "on") { $SoundVal = "on" }
 
 # Configure Window Title & Dimensions for Clean Presentation
-$host.UI.RawUI.WindowTitle = "MERCWAR dc2URL Launcher v1.0"
+$host.UI.RawUI.WindowTitle = "dc2URL Launcher v1.0"
 try {
     $host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(100, 40)
     $host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(100, 40)
 } catch {}
 
-$RepoUrl = "https://githubusercontent.com"
+$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
 Clear-Host
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "     E C L I P S E   I N S T A L L E R   ■   D C 2 U R L   K E R N E L" -ForegroundColor Cyan
+Write-Host "     Stargate 1 Quasar 1" -ForegroundColor Cyan
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host "  Mercwar Stargate  technology" -ForegroundColor DarkYellow
 Write-Host "  Status: Contacting server..." -ForegroundColor Gray
