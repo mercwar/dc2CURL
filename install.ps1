@@ -48,7 +48,7 @@ catch {
 # ============================================================================
 
 
-$RepoUrl = "https://raw.githubusercontent.com/mercwar/dc2URL/main/launcher.bat"
+$RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
 
 $tempinstaller = join-path `
     $env:temp `
