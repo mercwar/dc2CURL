@@ -37,28 +37,8 @@ Write-Host "  Status: Contacting server..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
-# TRIGGER SOUND DIRECTLY IN POWERSHELL IF ENABLED
-if ($SoundVal -eq "on") {
-    Write-Host "  [SYSTEM] Turning network subsystem stream sound ON..." -ForegroundColor Cyan
-    $MidiUrl = "https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transformers.mid"
-    $MidiFile = "$env:TEMP\transformers.mid"
-    try {
-        $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
-        if ($dc2check) {
-            dc2url -o "$MidiFile" "$MidiUrl"
-        } else {
-            (New-Object System.Net.WebClient).DownloadFile($MidiUrl, $MidiFile)
-        }
-        if (Test-Path $MidiFile) {
-            Write-Host "  [SUCCESS] Playing Transformers theme song..." -ForegroundColor Green
-            Start-Process $MidiFile
-        }
-    } catch {
-        Write-Host "  [WARNING] Could not stream MIDI asset." -ForegroundColor DarkYellow
-    }
-} else {
-    Write-Host "  [SYSTEM] Audio disabled." -ForegroundColor DarkGray
-}
+# AUDIO HANDLING MOVED ENTIRELY OUT OF POWERSHELL — PASSING ARGUMENT DIRECTLY TO BATCH
+Write-Host "  [SYSTEM] Forwarding audio mode ($SoundVal) to batch processor..." -ForegroundColor Cyan
 Write-Host ""
 
 Write-Host "  [AVIS] Searching for installation gateway" -ForegroundColor Yellow
@@ -86,7 +66,7 @@ try {
     # Inspect file content to ensure it's a batch script and not an HTML error/404 page
     $FileHeader = Get-Content $TempInstaller -TotalCount 3 -ErrorAction SilentlyContinue | Out-String
     if ($FileHeader -match "<!DOCTYPE|<html>|<html") {
-        throw "Server returned an HTML response instead of raw script content. Verify downlink.php or file path."
+        throw "Server returned an HTML response instead of raw script content. Check downlink.php or file path."
     }
 }
 catch {
@@ -111,7 +91,7 @@ Write-Host ""
 
 Start-Sleep -Milliseconds 600
 
-# Execute the downloaded batch script natively, explicitly passing $SoundVal down to %~1
+# Execute the downloaded batch script natively, passing $SoundVal cleanly as %~1
 Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $TempInstaller, $SoundVal) -Wait -NoNewWindow
 
 # Cleanup
