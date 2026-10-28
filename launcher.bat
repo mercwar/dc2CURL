@@ -90,6 +90,9 @@ REM ============================================================================
 REM SOUND SYSTEM
 REM =============================================================================
 
+echo [DEBUG] Received parameter 1: [%~1]
+timeout /t 3 >nul
+
 if "%~1"=="" goto sound_off
 if /i "%~1"=="on" goto sound_on
 goto sound_off
