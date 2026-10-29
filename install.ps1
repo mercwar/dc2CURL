@@ -23,6 +23,7 @@ try {
 $RepoUrl        = "https://raw.githubusercontent.com/mercwar/dc2url/main"
 $LauncherFile   = "launcher.bat"
 $EclipseFile    = "setup.bat"
+$PurgeFile      = "purge.bat"
 $TempInstaller  = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 
 function Write-Header {
@@ -141,10 +142,11 @@ if ($isInstalled) {
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
     Write-Host "    [1] Install Eclipse"                     -ForegroundColor White
     Write-Host "    [2] Reinstall dc2URL"                    -ForegroundColor White
-    Write-Host "    [3] Exit"                                -ForegroundColor White
+    Write-Host "    [3] Purge dc2URL"                        -ForegroundColor White
+    Write-Host "    [4] Exit"                                -ForegroundColor White
     Write-Host ""
     
-    $choice = (Read-Host "  [AVIS INPUT] Enter selection [1-3]").Trim()
+    $choice = (Read-Host "  [AVIS INPUT] Enter selection [1-4]").Trim()
     
     switch ($choice) {
         "1" {
@@ -183,6 +185,26 @@ if ($isInstalled) {
                 }
             } else {
                 Write-Host "  [ERROR] $LauncherFile not found at: $launcherLocalPath" -ForegroundColor Red
+                exit 1
+            }
+            exit 0
+        }
+        "3" {
+            Write-Host ""
+            Write-Host "  [AVIS] Initializing dc2URL system purge protocol..." -ForegroundColor DarkYellow
+            Show-GraphicalProgress -TaskTitle "Executing Purge Sequence" -DurationMs 1000
+            
+            $purgePath = Join-Path $dc2urlRoot $PurgeFile
+            if (Test-Path $purgePath) {
+                try {
+                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
+                    Write-Host "  [AVIS SUCCESS] Purge execution completed." -ForegroundColor White
+                } catch {
+                    Write-Host "  [ERROR] Purge operation was cancelled or failed: $_" -ForegroundColor Red
+                    exit 1
+                }
+            } else {
+                Write-Host "  [ERROR] $PurgeFile not found at: $purgePath" -ForegroundColor Red
                 exit 1
             }
             exit 0
