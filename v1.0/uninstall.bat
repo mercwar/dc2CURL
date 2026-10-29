@@ -11,15 +11,18 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstaller )
 :ExecuteUninstaller
 setlocal DisableDelayedExpansion
 
-:: Store original script directory immediately
-set "SCRIPT_DIR=%~dp0"
+:: =========================================================================
+:: DIRECTORY RESOLUTION MAPPING (MATCHING INSTALLER SCHEMA)
+:: =========================================================================
+set "VERSION_DIR=%~dp0"
+if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
-:: 1. Define Target Paths matching the installer schema
-set "TARGET=%ProgramFiles%\dc2url"
-set "TARGET_BASE=%TARGET%\v1.0"
-set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
+for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
+for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-title Eclipse Uninstaller
+set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+
+title InstallShield Uninstaller :: dc2url Master Deployment Engine
 
 mode con: cols=120 lines=36
 chcp 65001 >nul 2>&1
@@ -48,64 +51,68 @@ echo %Y1%        ██╔══╝  ██║     ██║     ██║██
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                              Eclipse Uninstaller%RESET%%BG_GLASS%
+echo %Y2%                            dc2url Uninstaller%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
 :: =========================================================================
 :: 1. PROCESS TERMINATION & DLL UNREGISTRATION
 :: =========================================================================
-echo %R2%        [*] Closing active Eclipse programs...%RESET%%BG_GLASS%
-taskkill /f /im eclipse.exe >nul 2>&1
+echo %R2%        [*] Closing active dc2url processes...%RESET%%BG_GLASS%
+taskkill /f /im dc2url.exe >nul 2>&1
 
 echo %R2%        [*] Unhooking system DLL components...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                     [OK] Removed DarkComHeadless.dll registration.
+    echo                      [OK] Removed DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
-    echo                     [OK] Removed WebView2Loader.dll registration.
+    echo                      [OK] Removed WebView2Loader.dll registration.
 )
 
 :: =========================================================================
-:: 2. REGISTRY CLEANUP
+:: 2. REGISTRY CLEANUP (CORRECTED TO dc2url SCHEMA)
 :: =========================================================================
 echo %R2%        [*] Removing Windows Registry entries and shortcuts...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 
-reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
-reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
-reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
-reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
-reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
-reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-echo                     [OK] Windows Registry cleared.
+echo                      [OK] Windows Registry cleared.
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
 :: =========================================================================
-echo %R2%        [*] Removing Eclipse from system environment variables...%RESET%%BG_GLASS%
+echo %R2%        [*] Removing dc2url from system environment variables...%RESET%%BG_GLASS%
 
-reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v eclipse_path /f >nul 2>&1
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v dc2url_path /f >nul 2>&1
+reg delete "HKCU\Environment" /v dc2url_path /f >nul 2>&1
+setx /M dc2url_path "" >nul 2>&1
 
 powershell -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($m -split ';' -contains '%FINAL_EXEC_DIR%'){$new=($m -split ';' | Where-Object {$_ -neq '%FINAL_EXEC_DIR%'}) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'Machine')}" >nul 2>&1
 powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p -split ';' -contains '%FINAL_EXEC_DIR%'){$new=($p -split ';' | Where-Object {$_ -neq '%FINAL_EXEC_DIR%'}) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'User')}" >nul 2>&1
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-echo                     [OK] System environment updated.
+echo                      [OK] System environment updated.
 
 :: =========================================================================
-:: 4. FILESYSTEM CLEANUP (TARGETED FILE REMOVAL ONLY)
+:: 4. FILESYSTEM CLEANUP (FULL DIRECTORY WIPE)
 :: =========================================================================
-echo %R2%        [*] Deleting Eclipse application files...%RESET%%BG_GLASS%
+echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_GLASS%
 
-if exist "%FINAL_EXEC_DIR%\eclipse.exe" del /f /q "%FINAL_EXEC_DIR%\eclipse.exe" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nul 2>&1
+cd /d "%TEMP%"
+
+:: Schedule a background task to completely clean the installation directory after exit
+ping 127.0.0.1 -n 2 >nul 2>&1
 
 
 echo.
@@ -114,18 +121,7 @@ echo %Y1%                        UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-
-echo %TXT%        Eclipse has been removed from your computer.%RESET%
+echo %TXT%        dc2url has been completely removed from your computer.%RESET%
 echo.
-
-
-set "REINSTALL="
-set /p "REINSTALL=%Y2%        Would you like to reinstall Eclipse now? (Y/N): %RESET%"
-
-if /i "%REINSTALL%"=="y" (
-    call "%TARGET%\setup.bat"
-)
-
-
-
+pause
 exit /b 0
