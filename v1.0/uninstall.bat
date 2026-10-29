@@ -123,5 +123,6 @@ echo.
 
 echo %TXT%        dc2url has been completely removed from your computer.%RESET%
 echo.
+echo.
 pause
 exit /b 0
