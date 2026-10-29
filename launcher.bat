@@ -304,7 +304,7 @@ goto :eof
 
 :download_dc2url
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-dc2url -nojs -o "%~2" "%~1"
+dc2url -o "%~2" "%~1"
 goto :eof
 
 
@@ -315,7 +315,14 @@ goto :eof
 
 :download_curl
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-curl -s -S -L -f --connect-timeout 15 --retry 2 -o "%~2" "%~1"
+
+:: Option A: Fallback/Upgrade to your DLL engine with -nojs flag
+:: (Assuming your tool binary is named dc2url.exe or similar, which calls RunHeadlessRequest)
+dc2url.exe "%~1 -nojs" -o "%~2"
+if %errorlevel% neq 0 (
+    :: Fallback to PowerShell's native WebClient / Invoke-WebRequest if needed
+    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2'" >nul 2>&1
+)
 goto :eof
 
 :download_mshta
