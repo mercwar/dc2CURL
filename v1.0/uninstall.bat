@@ -6,7 +6,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstaller )
 
 :RequestUAC
     powershell -Command "Start-Process '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
-    exit
+    exit /b
 
 :ExecuteUninstaller
 setlocal DisableDelayedExpansion
@@ -111,6 +111,11 @@ echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_
 
 cd /d "%TEMP%"
 
+:: Schedule a background task to completely clean the installation directory after exit
+if exist "%BASE_DIR%" (
+    start /b "" cmd /c "ping 127.0.0.1 -n 3 > nul & rmdir /s /q "%BASE_DIR%"" >nul 2>&1
+    echo                      [OK] Deletion scheduled for base directory.
+)
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
