@@ -29,10 +29,10 @@ $TempInstaller  = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
     Clear-Host
-    Write-Host " ___   ___  ___  _   _ ___  _      " -ForegroundColor DarkYellow
-    Write-Host "| \ \ / __||_  || | | | _ \| |    " -ForegroundColor DarkYellow
-    Write-Host "| |) | (__  _|_ | |_| |   /| |__  " -ForegroundColor Yellow
-    Write-Host "|___/ \___||___| \___/|_|_\ |____|" -ForegroundColor Yellow
+    Write-Host " ___   ___  ___  _   _ ___  _     " -ForegroundColor DarkYellow
+    Write-Host "|  _ \ / __||__ \| | | |  _ \| |    " -ForegroundColor DarkYellow
+    Write-Host "| |_) | (__  / / | |_| | |_) | |__  " -ForegroundColor Yellow
+    Write-Host "|____/ \___||____|\___/|_|_\/|____|" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "        [E C L I P S E]   I N S T A L L E R   K E R N E L" -ForegroundColor Yellow
     Write-Host ""
