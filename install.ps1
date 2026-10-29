@@ -3,6 +3,11 @@
     dc2URL Root Staging Loader & Eclipse Gate (Graphical Progress Bar Edition)
 #>
 
+[CmdletBinding()]
+param(
+    [string]$sound = "off"
+)
+
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::InputEncoding  = [System.Text.Encoding]::UTF8
@@ -19,6 +24,18 @@ try {
     # Non-critical if running in hosts without window geometry access
 }
 
+# --- Registry Persistence for Sound Argument ---
+$regPath = "HKCU:\Software\Eclipse\Launcher"
+if (!(Test-Path $regPath)) {
+    New-Item -Path $regPath -Force | Out-Null
+}
+
+$soundState = "off"
+if ($sound -eq "on" -or $sound -eq "true" -or $sound -eq "1") {
+    $soundState = "on"
+}
+Set-ItemProperty -Path $regPath -Name "SoundArg" -Value $soundState -Type String
+
 # Configuration Constants
 $RepoUrl        = "https://raw.githubusercontent.com/mercwar/dc2url/main"
 $LauncherFile   = "launcher.bat"
@@ -29,15 +46,17 @@ $TempInstaller  = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
     Clear-Host
-    Write-Host " ___   ___  ___  _   _ ___  _     " -ForegroundColor DarkYellow
+    Write-Host " ___   ___  ___  _   _ ___  _      " -ForegroundColor DarkYellow
     Write-Host "|  _ \ / __||__ \| | | |  _ \| |    " -ForegroundColor DarkYellow
     Write-Host "| |_) | (__  / / | |_| | |_) | |__  " -ForegroundColor Yellow
-    Write-Host "|____/ \___||____|\___/|_|_\/|____|" -ForegroundColor Yellow
+    Write-Host "|____/ \___||____|\___/|_|\/|____|" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "        [E C L I P S E]   I N S T A L L E R   K E R N E L" -ForegroundColor Yellow
+    Write-Host "        [E C L I P S E]    I N S T A L L E R    K E R N E L" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Stargate Subsystem : " -NoNewline -ForegroundColor DarkYellow
     Write-Host "ONLINE" -ForegroundColor White
+    Write-Host "Sound Configuration: " -NoNewline -ForegroundColor DarkYellow
+    Write-Host "$soundState" -ForegroundColor Cyan
     Write-Host "Status             : " -NoNewline -ForegroundColor DarkYellow
     Write-Host "$StatusText" -ForegroundColor White
     Write-Host ""
@@ -66,7 +85,7 @@ function Show-GraphicalProgress {
         for ($i = 1; $i -le $totalBars; $i++) {
             Start-Sleep -Milliseconds $steptime
             
-            $percent = [int](($i / $totalBars) * 100)
+            $percent = [int]($i / $totalBars * 100)
             
             Write-Host -NoNewline "`r  [" -ForegroundColor DarkYellow
             
@@ -196,7 +215,7 @@ if ($isInstalled) {
             }
             exit 0
         }
-"3" {
+        "3" {
             Write-Host ""
             Write-Host "  [AVIS] Initializing dc2URL system purge protocol..." -ForegroundColor DarkYellow
             Show-GraphicalProgress -TaskTitle "Executing Purge Sequence" -DurationMs 1000
@@ -204,7 +223,6 @@ if ($isInstalled) {
             $purgePath = Join-Path $dc2urlRoot $PurgeFile
             if (Test-Path $purgePath) {
                 try {
-                    # FIXED: Use start /wait in a new window so purge.bat's ANSI/codepage resets don't corrupt this PowerShell session
                     Start-Process -FilePath "cmd.exe" -ArgumentList "/c start /wait cmd.exe /k `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
                     Write-Host "  [AVIS SUCCESS] Purge execution completed." -ForegroundColor White
                 } catch {
