@@ -74,9 +74,9 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 echo.
 
 :: =========================================================================
-:: 2. REGISTRY & DOS STUB CLEANUP
+:: 2. REGISTRY, WINDOWS APP PATHS & DOS COMMAND PATH PURGE
 :: =========================================================================
-echo %O2%        [*] Removing Windows Registry, App Paths, and DOS command stubs...%RESET%%BG_GLASS%
+echo %O2%        [*] Removing Windows Registry, App Paths, and DOS command registrations...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 reg delete "HKCU\Software\dc2url" /f >nul 2>&1
@@ -92,13 +92,14 @@ for %%H in (HKLM HKCU) do (
     )
 )
 
+:: Explicitly purge all registered DOS command stubs, batch wrappers, and WindowsApps aliases
 if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
 if exist "%SYSTEMROOT%\system32\dc2url.bat" del /f /q "%SYSTEMROOT%\system32\dc2url.bat" >nul 2>&1
 if exist "%SYSTEMROOT%\dc2url.bat" del /f /q "%SYSTEMROOT%\dc2url.bat" >nul 2>&1
 
-echo                      [SUCCESS] Windows Registry and DOS stubs cleared.
+echo                      [SUCCESS] Windows Registry and DOS command path registrations cleared.
 echo.
 
 :: =========================================================================
@@ -119,29 +120,24 @@ echo                      [SUCCESS] System environment updated.
 echo.
 
 :: =========================================================================
-:: 4. SAFE DECOUPLED FILESYSTEM CLEANUP
+:: 4. TARGETED FILE-ONLY CLEANUP (PRESERVING DIRECTORY STRUCTURE)
 :: =========================================================================
-echo %O2%        [*] Purging application directory structure...%RESET%%BG_GLASS%
+echo %O2%        [*] Removing installed application binaries only...%RESET%%BG_GLASS%
 
-if exist "%BASE_DIR%" (
-    set "CLEANUP_SCRIPT=%TEMP%\dc2url_cleanup_%RANDOM%.bat"
-    (
-        echo @echo off
-        echo ping 127.0.0.1 -n 2 >nul
-        echo rmdir /s /q "%BASE_DIR%"
-        echo del /f /q "%%~f0"
-    ) > "%CLEANUP_SCRIPT%"
-    
-    start /b "" cmd /c "%CLEANUP_SCRIPT%"
-    echo                      [SUCCESS] File deletion routine dispatched.
-)
+if exist "%FINAL_EXEC_DIR%\dc2url.exe" del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
+if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
+if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
+if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >nul 2>&1
+if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nul 2>&1
+
+echo                      [SUCCESS] Installed binaries purged successfully.
 
 echo.
 echo %O3%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y1%                             UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %O3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
-echo %TXT%        dc2url and all associated DOS command stubs have been successfully removed.%RESET%
+echo %TXT%        dc2url and all associated DOS command registrations have been successfully removed.%RESET%
 echo.
 pause
 exit /b 0
