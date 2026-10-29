@@ -86,14 +86,12 @@ reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe"
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
-:: Sweep and destroy all Uninstall entries across HKLM/HKCU hives and Wow6432Node
 for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
         reg delete "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
     )
 )
 
-:: Aggressively purge all DOS command stubs and batch wrappers
 if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
@@ -121,15 +119,21 @@ echo                      [SUCCESS] System environment updated.
 echo.
 
 :: =========================================================================
-:: 4. FILESYSTEM CLEANUP
+:: 4. SAFE DECOUPLED FILESYSTEM CLEANUP
 :: =========================================================================
-echo %O2%        [*] Deleting application files and folders...%RESET%%BG_GLASS%
-
-cd /d "%TEMP%"
+echo %O2%        [*] Purging application directory structure...%RESET%%BG_GLASS%
 
 if exist "%BASE_DIR%" (
-    rmdir /s /q "%BASE_DIR%" >nul 2>&1
-    echo                      [SUCCESS] Base directory completely purged.
+    set "CLEANUP_SCRIPT=%TEMP%\dc2url_cleanup_%RANDOM%.bat"
+    (
+        echo @echo off
+        echo ping 127.0.0.1 -n 2 >nul
+        echo rmdir /s /q "%BASE_DIR%"
+        echo del /f /q "%%~f0"
+    ) > "%CLEANUP_SCRIPT%"
+    
+    start /b "" cmd /c "%CLEANUP_SCRIPT%"
+    echo                      [SUCCESS] File deletion routine dispatched.
 )
 
 echo.
