@@ -37,21 +37,21 @@ if ($sound -eq "on" -or $sound -eq "true" -or $sound -eq "1") {
 Set-ItemProperty -Path $regPath -Name "SoundArg" -Value $soundState -Type String
 
 # Configuration Constants
-$RepoUrl        = "https://raw.githubusercontent.com/mercwar/dc2url/main"
-$LauncherFile   = "launcher.bat"
-$EclipseFile    = "setup.bat"
-$PurgeFile      = "purge.bat"
-$TempInstaller  = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
+$RepoUrl      = "https://raw.githubusercontent.com/mercwar/dc2url/main"
+$LauncherFile = "launcher.bat"
+$EclipseFile  = "setup.bat"
+$PurgeFile    = "purge.bat"
+$TempInstaller = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
     Clear-Host
-    Write-Host " ___   ___  ___  _   _ ___  _      " -ForegroundColor DarkYellow
-    Write-Host "|  _ \ / __||__ \| | | |  _ \| |    " -ForegroundColor DarkYellow
-    Write-Host "| |_) | (__  / / | |_| | |_) | |__  " -ForegroundColor Yellow
+    Write-Host " ___   ___  ___  _   _ ___  _       " -ForegroundColor DarkYellow
+    Write-Host "|  _ \ / __||__ \| | | |  _ \| |     " -ForegroundColor DarkYellow
+    Write-Host "| |_) | (__  / / | |_| | |_) | |__   " -ForegroundColor Yellow
     Write-Host "|____/ \___||____|\___/|_|\/|____|" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "        [E C L I P S E]    I N S T A L L E R    K E R N E L" -ForegroundColor Yellow
+    Write-Host "        [E C L I P S E]   I N S T A L L E R   K E R N E L" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Stargate Subsystem : " -NoNewline -ForegroundColor DarkYellow
     Write-Host "ONLINE" -ForegroundColor White
@@ -159,10 +159,10 @@ if ($isInstalled) {
     Write-Header -StatusText "dc2URL command detected at: $dc2urlSource"
     
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
-    Write-Host "    [1] Install Eclipse"                     -ForegroundColor White
-    Write-Host "    [2] Reinstall dc2URL"                    -ForegroundColor White
-    Write-Host "    [3] Purge dc2URL"                        -ForegroundColor White
-    Write-Host "    [4] Exit"                                -ForegroundColor White
+    Write-Host "    [1] Install Eclipse"                         -ForegroundColor White
+    Write-Host "    [2] Reinstall dc2URL (Pull Fresh Binaries)"   -ForegroundColor White
+    Write-Host "    [3] Purge dc2URL"                            -ForegroundColor White
+    Write-Host "    [4] Exit"                                    -ForegroundColor White
     Write-Host ""
     
     $rawInput = Read-Host "  [AVIS INPUT] Enter selection [1-4]"
@@ -181,6 +181,14 @@ if ($isInstalled) {
             Show-GraphicalProgress -TaskTitle "Deploying Eclipse Gate" -DurationMs 1200
             
             $setupPath = Join-Path $dc2urlRoot $EclipseFile
+            
+            # FORCE FRESH DOWNLOAD OF SETUP.BAT
+            try {
+                Invoke-WebRequest -Uri "$RepoUrl/$EclipseFile" -OutFile $setupPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
+            } catch {
+                Write-Host "  [WARNING] Could not pull fresh $EclipseFile from remote repo, falling back to local." -ForegroundColor DarkGray
+            }
+
             if (Test-Path $setupPath) {
                 try {
                     Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$setupPath`"" -Wait -NoNewWindow -ErrorAction Stop
@@ -197,14 +205,27 @@ if ($isInstalled) {
         }
         "2" {
             Write-Host ""
-            Write-Host "  [AVIS] Proceeding with dc2URL reinstallation..." -ForegroundColor DarkYellow
-            Show-GraphicalProgress -TaskTitle "Preparing Core Rebuild" -DurationMs 1000
+            Write-Host "  [AVIS] Pulling fresh core binaries from repository..." -ForegroundColor DarkYellow
+            Show-GraphicalProgress -TaskTitle "Downloading Fresh Reinstall Packages" -DurationMs 1200
             
             $launcherLocalPath = Join-Path $dc2urlRoot $LauncherFile
+            $setupLocalPath    = Join-Path $dc2urlRoot $EclipseFile
+            $purgeLocalPath    = Join-Path $dc2urlRoot $PurgeFile
+
+            # FORCE FRESH DOWNLOADS OF ALL 3 FILES
+            try {
+                Invoke-WebRequest -Uri "$RepoUrl/$LauncherFile" -OutFile $launcherLocalPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
+                Invoke-WebRequest -Uri "$RepoUrl/$EclipseFile"  -OutFile $setupLocalPath    -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
+                Invoke-WebRequest -Uri "$RepoUrl/$PurgeFile"    -OutFile $purgeLocalPath    -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
+            } catch {
+                Write-Host "  [ERROR] Failed to download fresh packages from repository: $_" -ForegroundColor Red
+                exit 1
+            }
+
             if (Test-Path $launcherLocalPath) {
                 try {
                     Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$launcherLocalPath`"" -Wait -NoNewWindow -ErrorAction Stop
-                    Write-Host "  [AVIS SUCCESS] Reinstallation completed." -ForegroundColor White
+                    Write-Host "  [AVIS SUCCESS] Reinstallation completed with fresh binaries." -ForegroundColor White
                 } catch {
                     Write-Host "  [ERROR] Reinstallation was cancelled or failed: $_" -ForegroundColor Red
                     exit 1
@@ -221,6 +242,14 @@ if ($isInstalled) {
             Show-GraphicalProgress -TaskTitle "Executing Purge Sequence" -DurationMs 1000
             
             $purgePath = Join-Path $dc2urlRoot $PurgeFile
+            
+            # FORCE FRESH DOWNLOAD OF PURGE.BAT
+            try {
+                Invoke-WebRequest -Uri "$RepoUrl/$PurgeFile" -OutFile $purgePath -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
+            } catch {
+                Write-Host "  [WARNING] Could not pull fresh $PurgeFile from remote repo, falling back to local." -ForegroundColor DarkGray
+            }
+
             if (Test-Path $purgePath) {
                 try {
                     Start-Process -FilePath "cmd.exe" -ArgumentList "/c start /wait cmd.exe /k `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
@@ -243,24 +272,24 @@ if ($isInstalled) {
     }
 }
 
-Write-Header -StatusText "Contacting server..."
+Write-Header -StatusText "Contacting server for fresh installer..."
 
 $TargetUrl = "$RepoUrl/$LauncherFile"
 Write-Host "    [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
 Write-Host "    [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
-Write-Host "$TargetUrl"                                    -ForegroundColor White
+Write-Host "$TargetUrl"                                      -ForegroundColor White
 Write-Host "    [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
 Write-Host "$TempInstaller"                                -ForegroundColor White
 Write-Host ""
 
-# Play custom progress bar while downloading silently in the background
+# Play custom progress bar while downloading a FRESH copy with anti-cache headers
 $downloadJob = Start-Job -ScriptBlock {
     param($url, $output)
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing
+    Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
 } -ArgumentList $TargetUrl, $TempInstaller
 
-Show-GraphicalProgress -TaskTitle "Connecting to Gateway & Downloading Payload" -DurationMs 2000
+Show-GraphicalProgress -TaskTitle "Connecting & Pulling Fresh Payload" -DurationMs 2000
 
 # Ensure download is fully completed before moving on
 Wait-Job $downloadJob | Out-Null
@@ -274,7 +303,7 @@ if (-not (Test-Path $TempInstaller)) {
     exit 1
 }
 
-Write-Host "  [AVIS SUCCESS] Payload secured on disk." -ForegroundColor White
+Write-Host "  [AVIS SUCCESS] Fresh payload secured on disk." -ForegroundColor White
 Write-Host ""
 
 Write-Host "  [AVIS ECLIPSE] Searching for Cyborg Launcher..." -ForegroundColor Gray
