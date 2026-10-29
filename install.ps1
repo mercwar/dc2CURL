@@ -202,9 +202,9 @@ Write-Header -StatusText "Contacting server..."
 
 $TargetUrl = "$RepoUrl/$LauncherFile"
 Write-Host "  [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
-Write-Host "  [AVIS] » Target Source : " -NoNewline        -ForegroundColor Gray
+Write-Host "  [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
 Write-Host "$TargetUrl"                                   -ForegroundColor White
-Write-Host "  [AVIS] » Target Output : " -NoNewline        -ForegroundColor Gray
+Write-Host "  [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
 Write-Host "$TempInstaller"                             -ForegroundColor White
 Write-Host ""
 
@@ -227,7 +227,7 @@ Show-GraphicalProgress -TaskTitle "Initializing Cyborg Subsystems" -DurationMs 1
 
 Write-Host ""
 Write-Host "  [AVIS] Calling Portal Installer"          -ForegroundColor DarkYellow
-Write-Host "  [ECLIPSE] » AVIS REPORTED SUCCESS..."     -ForegroundColor Gray
+Write-Host "  [ECLIPSE] AVIS REPORTED SUCCESS..."     -ForegroundColor Gray
 Write-Footer
 Write-Host ""
 
