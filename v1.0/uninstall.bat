@@ -6,7 +6,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstaller )
 
 :RequestUAC
     powershell -Command "Start-Process '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
-    exit /b
+    exit
 
 :ExecuteUninstaller
 setlocal DisableDelayedExpansion
@@ -51,7 +51,7 @@ echo %Y1%        ██╔══╝  ██║     ██║     ██║██
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                            dc2url Uninstaller%RESET%%BG_GLASS%
+echo %Y2%                             dc2url Uninstaller%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -111,13 +111,10 @@ echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_
 
 cd /d "%TEMP%"
 
-:: Schedule a background task to completely clean the installation directory after exit
-ping 127.0.0.1 -n 2 >nul 2>&1
-
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y1%                        UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
+echo %Y1%                             UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
