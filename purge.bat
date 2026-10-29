@@ -32,12 +32,13 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %R1%        ███████╗ ██████╗██╗    ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
-echo %R2%        ██╔════╝██╔════╝██║    ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
-echo %R1%        █████╗  ██║     ██║    ██║██████╔╝███████╗███████╗%RESET%%BG_GLASS%
-echo %Y1%        ██╔══╝  ██║     ██║    ██║██╔═══╝ ╚════██║╚════██║%RESET%%BG_GLASS%
-echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████║%RESET%%BG_GLASS%
+echo %R1%        ███████╗ ██████╗██╗     ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
+echo %R2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
+echo %R1%        █████╗  ██║     ██║     ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
+echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
+echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
+
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%          DEEP SYSTEM PURGE :: Removing Eclipse Tray, Fake Variants & All Traces%RESET%%BG_GLASS%
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
@@ -80,7 +81,7 @@ for %%D in (
     if exist "%%~D" (
         attrib -h -s -r "%%~D\*.*" /s /d >nul 2>&1
         rmdir /s /q "%%~D" >nul 2>&1
-        echo                     [PURGED] %%~D
+        echo                      [PURGED] %%~D
     )
 )
 
@@ -138,7 +139,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 echo.
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                       COMPLETE ECOSYSTEM & FAKE VARIANT PURGE SUCCESSFUL%RESET%%BG_GLASS%
+echo %Y2%                        COMPLETE ECOSYSTEM & FAKE VARIANT PURGE SUCCESSFUL%RESET%%BG_GLASS%
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 echo %TXT%        All traces of Eclipse, Eclipse Tray, fake binaries, registry entries, and paths are gone.%RESET%
