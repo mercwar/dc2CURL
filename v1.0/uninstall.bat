@@ -74,9 +74,9 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 echo.
 
 :: =========================================================================
-:: 2. REGISTRY CLEANUP
+:: 2. REGISTRY & DOS STUB CLEANUP
 :: =========================================================================
-echo %O2%        [*] Removing Windows Registry entries, App Paths, and Uninstall keys...%RESET%%BG_GLASS%
+echo %O2%        [*] Removing Windows Registry, App Paths, and DOS command stubs...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 reg delete "HKCU\Software\dc2url" /f >nul 2>&1
@@ -93,12 +93,14 @@ for %%H in (HKLM HKCU) do (
     )
 )
 
+:: Aggressively purge all DOS command stubs and batch wrappers
+if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
 if exist "%SYSTEMROOT%\system32\dc2url.bat" del /f /q "%SYSTEMROOT%\system32\dc2url.bat" >nul 2>&1
 if exist "%SYSTEMROOT%\dc2url.bat" del /f /q "%SYSTEMROOT%\dc2url.bat" >nul 2>&1
 
-echo                      [SUCCESS] Windows Registry cleared.
+echo                      [SUCCESS] Windows Registry and DOS stubs cleared.
 echo.
 
 :: =========================================================================
@@ -135,7 +137,7 @@ echo %O3%    ===================================================================
 echo %Y1%                             UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %O3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
-echo %TXT%        dc2url and all associated components have been successfully removed.%RESET%
+echo %TXT%        dc2url and all associated DOS command stubs have been successfully removed.%RESET%
 echo.
 pause
 exit /b 0
