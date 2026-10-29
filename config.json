@@ -6,6 +6,7 @@
   "manifest_layout": {
     "root_files": [
       {"source": "favi-con.ico", "target": "favi-con.ico"},
+      {"source": "eclipse", "target": "eclipse.ico"},
       {"source": "echo.bat", "target": "echo.bat"},
       {"source": "README.md", "target": "README.md"},
       {"source": "setup.bat", "target": "setup.bat"},
