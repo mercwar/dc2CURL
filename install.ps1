@@ -24,17 +24,17 @@ $RepoUrl        = "https://raw.githubusercontent.com/mercwar/dc2url/main"
 $LauncherFile   = "launcher.bat"
 $EclipseFile    = "setup.bat"
 $PurgeFile      = "purge.bat"
-$TempInstaller  = Join-Path $env:TEMP "dc_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
+$TempInstaller  = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
     Clear-Host
-    Write-Host " ___   ___  ___  _   _ ___  _       " -ForegroundColor DarkYellow
-    Write-Host "| \ \ / __||_  || | | | _ \| |     " -ForegroundColor DarkYellow
-    Write-Host "| |) | (__  _|_ | |_| |   /| |__   " -ForegroundColor Yellow
+    Write-Host " ___   ___  ___  _   _ ___  _      " -ForegroundColor DarkYellow
+    Write-Host "| \ \ / __||_  || | | | _ \| |    " -ForegroundColor DarkYellow
+    Write-Host "| |) | (__  _|_ | |_| |   /| |__  " -ForegroundColor Yellow
     Write-Host "|___/ \___||___| \___/|_|_\ |____|" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "        [E C L I P S E]    I N S T A L L E R    K E R N E L" -ForegroundColor Yellow
+    Write-Host "        [E C L I P S E]   I N S T A L L E R   K E R N E L" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Stargate Subsystem : " -NoNewline -ForegroundColor DarkYellow
     Write-Host "ONLINE" -ForegroundColor White
@@ -57,7 +57,7 @@ function Show-GraphicalProgress {
     $totalBars = 36
     $steptime  = [Math]::Max(10, [int]($DurationMs / $totalBars))
     
-    Write-Host "  #$TaskTitle" -ForegroundColor Yellow
+    Write-Host "  [#] $TaskTitle" -ForegroundColor Yellow
     
     # Hide the terminal cursor to prevent blinking/flashing artifacts
     try { [Console]::CursorVisible = $false } catch {}
@@ -66,15 +66,15 @@ function Show-GraphicalProgress {
         for ($i = 1; $i -le $totalBars; $i++) {
             Start-Sleep -Milliseconds $steptime
             
-            $percent = [int]($i / $totalBars * 100)
+            $percent = [int](($i / $totalBars) * 100)
             
             Write-Host -NoNewline "`r  [" -ForegroundColor DarkYellow
             
             for ($j = 1; $j -le $totalBars; $j++) {
                 if ($j -le $i) {
-                    if ($j -lt $totalBars * 0.4) {
+                    if ($j -lt ($totalBars * 0.4)) {
                         Write-Host -NoNewline "#" -ForegroundColor DarkYellow
-                    } elseif ($j -lt $totalBars * 0.8) {
+                    } elseif ($j -lt ($totalBars * 0.8)) {
                         Write-Host -NoNewline "#" -ForegroundColor Yellow
                     } else {
                         Write-Host -NoNewline "#" -ForegroundColor White
@@ -146,7 +146,14 @@ if ($isInstalled) {
     Write-Host "    [4] Exit"                                -ForegroundColor White
     Write-Host ""
     
-    $choice = (Read-Host "  [AVIS INPUT] Enter selection [1-4]").Trim()
+    $rawInput = Read-Host "  [AVIS INPUT] Enter selection [1-4]"
+    $choice = if ($null -ne $rawInput) { $rawInput.Trim() } else { "" }
+
+    if ([string]::IsNullOrWhiteSpace($choice)) {
+        Write-Host ""
+        Write-Host "  [AVIS] No selection made. Exiting." -ForegroundColor Gray
+        exit 0
+    }
     
     switch ($choice) {
         "1" {
@@ -189,7 +196,7 @@ if ($isInstalled) {
             }
             exit 0
         }
-        "3" {
+"3" {
             Write-Host ""
             Write-Host "  [AVIS] Initializing dc2URL system purge protocol..." -ForegroundColor DarkYellow
             Show-GraphicalProgress -TaskTitle "Executing Purge Sequence" -DurationMs 1000
@@ -197,7 +204,8 @@ if ($isInstalled) {
             $purgePath = Join-Path $dc2urlRoot $PurgeFile
             if (Test-Path $purgePath) {
                 try {
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
+                    # FIXED: Use start /wait in a new window so purge.bat's ANSI/codepage resets don't corrupt this PowerShell session
+                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c start /wait cmd.exe /k `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
                     Write-Host "  [AVIS SUCCESS] Purge execution completed." -ForegroundColor White
                 } catch {
                     Write-Host "  [ERROR] Purge operation was cancelled or failed: $_" -ForegroundColor Red
@@ -221,10 +229,10 @@ Write-Header -StatusText "Contacting server..."
 
 $TargetUrl = "$RepoUrl/$LauncherFile"
 Write-Host "    [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
-Write-Host "    [AVIS] Target Source : " -NoNewline         -ForegroundColor Gray
-Write-Host "$TargetUrl"                                     -ForegroundColor White
-Write-Host "    [AVIS] Target Output : " -NoNewline         -ForegroundColor Gray
-Write-Host "$TempInstaller"                                 -ForegroundColor White
+Write-Host "    [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
+Write-Host "$TargetUrl"                                    -ForegroundColor White
+Write-Host "    [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
+Write-Host "$TempInstaller"                                -ForegroundColor White
 Write-Host ""
 
 # Play custom progress bar while downloading silently in the background
