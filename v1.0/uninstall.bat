@@ -72,9 +72,9 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 )
 
 :: =========================================================================
-:: 2. REGISTRY CLEANUP (CORRECTED TO dc2url SCHEMA)
+:: 2. REGISTRY & DOS COMMAND REGISTRATION CLEANUP
 :: =========================================================================
-echo %R2%        [*] Removing Windows Registry entries and shortcuts...%RESET%%BG_GLASS%
+echo %R2%        [*] Removing Windows Registry entries, App Paths, and DOS command registrations...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 
@@ -86,7 +86,15 @@ reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-echo                      [OK] Windows Registry cleared.
+:: Purge DOS command aliases / command shell linkage keys
+reg delete "HKCU\Software\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
+
+:: Remove any command stubs or execution redirection links in user path directories
+if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
+if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
+
+echo                      [OK] Windows Registry & DOS command linkages cleared.
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
