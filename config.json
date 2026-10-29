@@ -8,7 +8,8 @@
       {"source": "favi-con.ico", "target": "favi-con.ico"},
       {"source": "echo.bat", "target": "echo.bat"},
       {"source": "README.md", "target": "README.md"},
-      {"source": "setup.bat", "target": "setup.bat"}
+      {"source": "setup.bat", "target": "setup.bat"},
+      {"source": "uninstall.bat", "target": "uninstall.bat"}
     ],
     "branch_files": [
       {"source": "install.bat", "target": "install.bat"},
