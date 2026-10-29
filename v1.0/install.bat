@@ -129,5 +129,5 @@ echo.
 :finish
 echo %TXT%        Please restart your command window to begin using dc2url...%RESET%
 echo.
-pause
+echo.
 exit /b 0
