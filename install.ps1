@@ -197,7 +197,6 @@ if ($isInstalled) {
     }
 }
 
-# --- Flow B: Clean Installation Payload Download ---
 Write-Header -StatusText "Contacting server..."
 
 $TargetUrl = "$RepoUrl/$LauncherFile"
@@ -207,6 +206,7 @@ Write-Host "$TargetUrl"                                   -ForegroundColor White
 Write-Host "    [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
 Write-Host "$TempInstaller"                             -ForegroundColor White
 Write-Host ""
+
 
 Show-GraphicalProgress -TaskTitle "Connecting to Gateway & Downloading Payload" -DurationMs 1500
 
