@@ -32,23 +32,18 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %R1%        ███████╗ ██████╗██╗     ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
-echo %R2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
-echo %R1%        █████╗  ██║     ██║     ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
-echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
-echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
-
-echo %R1%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%          REMOTE ECOSYSTEM PURGE :: Executing Official Uninstallers%RESET%%BG_GLASS%
-echo %R1%    ====================================================================================%RESET%%BG_GLASS%
+echo %R1%        ====================================================================================%RESET%%BG_GLASS%
+echo %Y2%              REMOTE ECOSYSTEM PURGE :: Executing Official Uninstallers%RESET%%BG_GLASS%
+echo %R1%        ====================================================================================%RESET%%BG_GLASS%
 echo.
 
 set "REPO_URL=https://raw.githubusercontent.com/mercwar/dc2url/main"
 set "TEMP_DC2_UNINSTALL=%TEMP%\dc2url_uninstall_%RANDOM%.bat"
 set "TEMP_ECLIPSE_UNINSTALL=%TEMP%\eclipse_uninstall_%RANDOM%.bat"
 
-
+:: =========================================================================
+:: 1. FETCH & EXECUTE DC2URL UNINSTALLER 
+:: =========================================================================
 echo %R2%        [*] Dispatching download request for dc2URL uninstaller...%RESET%%BG_GLASS%
 
 powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%REPO_URL%/v1.0/uninstall.bat' -OutFile '%TEMP_DC2_UNINSTALL%'" >nul 2>&1
@@ -66,7 +61,7 @@ if exist "%TEMP_DC2_UNINSTALL%" (
 echo.
 
 :: =========================================================================
-:: 2. FETCH EXECUTE ECLIPSE UNINSTALLER 
+:: 2. FETCH & EXECUTE ECLIPSE UNINSTALLER 
 :: =========================================================================
 echo %R2%        [*] Dispatching download request for Eclipse uninstaller...%RESET%%BG_GLASS%
 
@@ -83,9 +78,9 @@ if exist "%TEMP_ECLIPSE_UNINSTALL%" (
 )
 
 echo.
-echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y1%                         REMOTE ECOSYSTEM PURGE COMPLETE%RESET%%BG_GLASS%
-echo %R3%    ====================================================================================%RESET%%BG_GLASS%
+echo %R3%        ====================================================================================%RESET%%BG_GLASS%
+echo %Y1%                            REMOTE ECOSYSTEM PURGE COMPLETE%RESET%%BG_GLASS%
+echo %R3%        ====================================================================================%RESET%%BG_GLASS%
 echo.
 echo %TXT%        All targeted application environments and registry trees have been flushed.%RESET%
 echo.
