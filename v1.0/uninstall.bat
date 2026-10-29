@@ -74,26 +74,27 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 echo.
 
 :: =========================================================================
-:: 2. REGISTRY, WINDOWS APP PATHS & DOS COMMAND PATH PURGE
+:: 2. REGISTRY, WINDOWS APP PATHS & DOS COMMAND STUB PURGE
 :: =========================================================================
 echo %O2%        [*] Removing Windows Registry, App Paths, and DOS command registrations...%RESET%%BG_GLASS%
 
-reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 reg delete "HKCU\Software\dc2url" /f >nul 2>&1
+reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
-for %%H in (HKLM HKCU) do (
-    for %%N in ("" "\Wow6432Node") do (
-        reg delete "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
-    )
-)
+:: Explicitly delete Uninstall keys without fragile token loops
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-:: Explicitly purge all registered DOS command stubs, batch wrappers, and WindowsApps aliases
+:: Purge all DOS command batch stubs and local wrappers
 if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >nul 2>&1
+if exist "%VERSION_DIR%\dc2url.bat" del /f /q "%VERSION_DIR%\dc2url.bat" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
 if exist "%SYSTEMROOT%\system32\dc2url.bat" del /f /q "%SYSTEMROOT%\system32\dc2url.bat" >nul 2>&1
@@ -111,8 +112,8 @@ reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /
 reg delete "HKCU\Environment" /v dc2url_path /f >nul 2>&1
 setx /M dc2url_path "" >nul 2>&1
 
-powershell -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($m -split ';' -contains '%FINAL_EXEC_DIR%'){$new=($m -split ';' | Where-Object {$_ -neq '%FINAL_EXEC_DIR%'}) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'Machine')}" >nul 2>&1
-powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p -split ';' -contains '%FINAL_EXEC_DIR%'){$new=($p -split ';' | Where-Object {$_ -neq '%FINAL_EXEC_DIR%'}) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'User')}" >nul 2>&1
+powershell -Command "$target='%FINAL_EXEC_DIR%'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($m){$new=($m -split ';' | Where-Object { $_.TrimEnd('\') -ne $target.TrimEnd('\') }) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'Machine')}" >nul 2>&1
+powershell -Command "$target='%FINAL_EXEC_DIR%'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p){$new=($p -split ';' | Where-Object { $_.TrimEnd('\') -ne $target.TrimEnd('\') }) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'User')}" >nul 2>&1
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
