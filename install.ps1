@@ -25,24 +25,21 @@ $LauncherFile   = "launcher.bat"
 $EclipseFile    = "setup.bat"
 $TempInstaller  = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 
-
-
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
     Clear-Host
-Write-Host " ___   ___  ___  _   _ ___  _     " -ForegroundColor DarkYellow
-Write-Host "| \ \ / __||_  || | | | _ \| |    " -ForegroundColor DarkYellow
-Write-Host "| |) | (__  _|_ | |_| |   /| |__  " -ForegroundColor Yellow
-Write-Host "|___/ \___||___| \___/|_|_\ |____|" -ForegroundColor Yellow
+    Write-Host " ___   ___  ___  _   _ ___  _      " -ForegroundColor DarkYellow
+    Write-Host "| \ \ / __||_  || | | | _ \| |    " -ForegroundColor DarkYellow
+    Write-Host "| |) | (__  _|_ | |_| |   /| |__  " -ForegroundColor Yellow
+    Write-Host "|___/ \___||___| \___/|_|_\ |____|" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "       [E C L I P S E]   I N S T A L L E R   K E R N E L" -ForegroundColor Yellow
-	 Write-Host ""
+    Write-Host "        [E C L I P S E]   I N S T A L L E R   K E R N E L" -ForegroundColor Yellow
+    Write-Host ""
     Write-Host "Stargate Subsystem : " -NoNewline -ForegroundColor DarkYellow
     Write-Host "ONLINE" -ForegroundColor White
     Write-Host "Status             : " -NoNewline -ForegroundColor DarkYellow
     Write-Host "$StatusText" -ForegroundColor White
     Write-Host ""
-
 }
 
 function Write-Footer {
@@ -97,6 +94,7 @@ function Show-GraphicalProgress {
         try { [Console]::CursorVisible = $true } catch {}
     }
 }
+
 # --- Check Installation Status ---
 $isInstalled  = $false
 $dc2urlSource = $null
@@ -202,19 +200,28 @@ Write-Header -StatusText "Contacting server..."
 $TargetUrl = "$RepoUrl/$LauncherFile"
 Write-Host "    [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
 Write-Host "    [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
-Write-Host "$TargetUrl"                                   -ForegroundColor White
+Write-Host "$TargetUrl"                                    -ForegroundColor White
 Write-Host "    [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
-Write-Host "$TempInstaller"                             -ForegroundColor White
+Write-Host "$TempInstaller"                                -ForegroundColor White
 Write-Host ""
 
+# Play custom progress bar while downloading silently in the background
+$downloadJob = Start-Job -ScriptBlock {
+    param($url, $output)
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing
+} -ArgumentList $TargetUrl, $TempInstaller
 
-Show-GraphicalProgress -TaskTitle "Connecting to Gateway & Downloading Payload" -DurationMs 1500
+Show-GraphicalProgress -TaskTitle "Connecting to Gateway & Downloading Payload" -DurationMs 2000
 
-try {
-    Invoke-WebRequest -Uri $TargetUrl -OutFile $TempInstaller -UseBasicParsing
-} catch {
+# Ensure download is fully completed before moving on
+Wait-Job $downloadJob | Out-Null
+Receive-Job $downloadJob | Out-Null
+Remove-Job $downloadJob
+
+if (-not (Test-Path $TempInstaller)) {
     Write-Host ""
-    Write-Host "  [AVIS ERROR] Download failed: $_" -ForegroundColor Red
+    Write-Host "  [AVIS ERROR] Download failed or file missing." -ForegroundColor Red
     Pause
     exit 1
 }
