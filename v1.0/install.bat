@@ -128,7 +128,7 @@ echo.
 :: =========================================================================
 :: SOUND ARGUMENT REGISTRY CHECK & AUDIO PLAYBACK ROUTINE
 :: =========================================================================
-echo %O2%        [*] Checking Eclipse Launcher sound registry settings...%RESET%%BG_GLASS%
+echo %O2%        [*] Detecting sound settings ...%RESET%%BG_GLASS%
 
 set "SOUND_SETTING=off"
 for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "SoundArg" 2^>nul') do (
@@ -141,30 +141,24 @@ if /i "%SOUND_SETTING%"=="on" (
     cd /d "%VERSION_DIR%"
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%"
     
-    echo ============================================================
-    echo BINARY DOWNLOAD TEST: WEBVIEW2 STREAM
-    echo ============================================================
-    echo Downloading canonical MIDI asset via dc2url -o flag...
+    echo Downloading midi
     "%FINAL_EXE_PATH%" -o "%MIDI_OUTPUT%" "%MIDI_URL%" -v
     
     echo.
     if exist "%MIDI_OUTPUT%" (
         for %%I in ("%MIDI_OUTPUT%") do set "FILESIZE=%%~zI"
-        echo [SUCCESS] Binary download completed successfully!
-        echo [FILE] Target: %MIDI_OUTPUT%
-        echo [SIZE] Bytes transferred: !FILESIZE! bytes
         
         if !FILESIZE! GTR 1000 (
-            echo [VERIFICATION] File size is valid. Launching audio playback test...
+            echo [Transformation] TRANSFORM!
             start "" "%MIDI_OUTPUT%"
         ) else (
-            echo [WARNING] File size is suspiciously small. Verify redirect response stream.
+            echo [AVIS FAILURE] Something went wrong.
         )
     ) else (
-        echo [ERROR] Binary download failed. Output file was not created.
+        echo [AVIS ERROR] No Binary.
     )
 ) else (
-    echo %TXT%        [INFO] SoundArg is disabled or not set. Skipping audio playback.%RESET%%BG_GLASS%
+    echo %TXT%        [INFO] Skipping audio playback.%RESET%%BG_GLASS%
 )
 
 echo.
@@ -172,7 +166,35 @@ echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%
 echo.
 
 :finish
-echo %TXT%        Please restart your command window to begin using dc2url...%RESET%
+echo %TXT%        Your copy of dc2url in now installed cmd:\ dc2url -nojs [curl compat]...%RESET%
+echo.
+
+:: =========================================================================
+:: EXECUTE DEPLOYED SETUP SCRIPT FROM THE FINAL EXEC DIRECTORY
+:: =========================================================================
+if exist "%FINAL_EXEC_DIR%\setup.bat" (
+    echo %O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%
+    choice /c YN /n /m "        Press Y to run setup, or N to skip: "
+    
+    if errorlevel 2 (
+        echo %TXT%        [INFO] Setup bypassed by user.%RESET%%BG_GLASS%
+    ) else (
+        echo %O2%        [*] Launching setup.bat from dc2url directory...%RESET%%BG_GLASS%
+        cd /d "%FINAL_EXEC_DIR%"
+        timeout /t 3 >nul
+        call "setup.bat"
+    )
+) else (
+    echo %TXT%        [INFO] No secondary setup.bat found in %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
+)
+
 echo.
 echo.
+exit /b 0
+
+
+echo.
+echo.
+exit /b 0
+
 exit /b 0
