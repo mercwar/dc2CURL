@@ -72,9 +72,9 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 )
 
 :: =========================================================================
-:: 2. REGISTRY & DOS COMMAND REGISTRATION CLEANUP
+:: 2. REGISTRY & ADD/REMOVE PROGRAMS CLEANUP
 :: =========================================================================
-echo %R2%        [*] Removing Windows Registry entries, App Paths, and DOS command registrations...%RESET%%BG_GLASS%
+echo %R2%        [*] Removing Windows Registry entries, App Paths, and Add/Remove Programs keys...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
 
@@ -83,8 +83,14 @@ reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe"
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
+:: Exhaustive Add/Remove Programs (Uninstall) clean for both HKLM, HKCU, and Wow6432Node
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+
+:: Fallback: PowerShell loop to sweep any matching display name or publisher keys in Uninstall hives
+powershell -Command "$paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'); foreach($p in $paths){ Get-ItemProperty $p -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like '*dc2url*' -or $_.DisplayName -like '*Eclipse*' } | ForEach-Object { Remove-Item $_.PSPath -Recurse -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
 
 :: Purge DOS command aliases / command shell linkage keys
 reg delete "HKCU\Software\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
@@ -94,7 +100,7 @@ reg delete "HKLM\SOFTWARE\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
 
-echo                     [OK] Windows Registry and DOS command linkages cleared.
+echo                     [OK] Windows Registry and Add/Remove Programs entries cleared.
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
