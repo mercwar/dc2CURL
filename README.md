@@ -13,7 +13,7 @@
 
 #####  DARK-COM-2 :: High-Performance  
 
-![dc24](./images/dc2url.png)
+![dc24](images/dc2url.png)
 
 ###  💥 cURL-Compatible Headless Browser Engine
 
