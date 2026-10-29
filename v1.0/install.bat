@@ -61,7 +61,6 @@ echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%B
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: --- FIX: Grant explicit full write permissions to the install directory tree ---
 echo %O2%        [*] Granting full write access permissions to %VERSION_DIR%...%RESET%%BG_GLASS%
 icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 
@@ -88,7 +87,6 @@ echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_
 
 reg add "HKCU\Software\dc2url\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: --- Configure App Paths cleanly ---
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
@@ -177,14 +175,14 @@ if exist "%ROOT_DIR%\setup.bat" (
     echo %O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%
     choice /c YN /n /m "        Press Y to run setup, or N to skip: "
     
+    :: FIX: Check choice result correctly (Errorlevel 1 = Y, Errorlevel 2 = N)
     if errorlevel 2 (
         echo %TXT%        [INFO] Exiting...%RESET%%BG_GLASS%
-    ) else (
+    ) else if errorlevel 1 (
         echo %O2%        [*] Launching setup (Pulling Fresh Copy)...%RESET%%BG_GLASS%
         cd /d "%FINAL_EXEC_DIR%"
         timeout /t 2 >nul
         
-        :: Force pull a fresh copy of setup.bat from remote repo to TEMP before executing
         set "TEMP_SETUP=%TEMP%\dc2_fresh_setup.bat"
         powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/mercwar/dc2url/main/setup.bat' -OutFile '%TEMP_SETUP%' -UseBasicParsing -Headers @{'Cache-Control'='no-cache'}" >nul 2>&1
         
