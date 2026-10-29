@@ -300,16 +300,11 @@ if /i "!RUN_ECLIPSE!"=="y" (
     echo %GRAY%    [!] Root setup.bat skipped by user.%RESET%
 )
 goto :eof
-:: ============================================================
-:: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
-:: ============================================================
+
+
 :download_dc2url
-:: Ensure any old target file is cleanly deleted before downloading
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-
-:: Fixed: Organized arguments strictly to match the tool's required order: [options] <url>
-dc2url -o "%~2" "%~1"
-
+dc2url -nojs -o "%~2" "%~1"
 goto :eof
 
 
