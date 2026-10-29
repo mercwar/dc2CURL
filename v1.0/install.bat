@@ -14,7 +14,8 @@ setlocal EnableDelayedExpansion
 :: =========================================================================
 :: DIRECTORY RESOLUTION MAPPING (MANIFEST LAYOUT)
 :: =========================================================================
-set "VERSION_DIR=%~dp0"
+set "ROOT_DIR=%~dp0"
+set "VERSION_DIR=%ROOT_DIR%"
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
 for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
@@ -136,7 +137,7 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 )
 
 if /i "%SOUND_SETTING%"=="on" (
-    echo %Y1%        [SOUND] SoundArg is enabled. Initiating audio download sequence...%RESET%%BG_GLASS%
+
     
     cd /d "%VERSION_DIR%"
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%"
@@ -172,29 +173,23 @@ echo.
 :: =========================================================================
 :: EXECUTE DEPLOYED SETUP SCRIPT FROM THE FINAL EXEC DIRECTORY
 :: =========================================================================
-if exist "%FINAL_EXEC_DIR%\setup.bat" (
+if exist "%ROOT_DIR%\setup.bat" (
     echo %O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%
     choice /c YN /n /m "        Press Y to run setup, or N to skip: "
     
     if errorlevel 2 (
-        echo %TXT%        [INFO] Setup bypassed by user.%RESET%%BG_GLASS%
+        echo %TXT%        [INFO] Exiting...%RESET%%BG_GLASS%
     ) else (
-        echo %O2%        [*] Launching setup.bat from dc2url directory...%RESET%%BG_GLASS%
+        echo %O2%        [*] Launching setup...%RESET%%BG_GLASS%
         cd /d "%FINAL_EXEC_DIR%"
         timeout /t 3 >nul
-        call "setup.bat"
+        call "%ROOT_DIR%\setup.bat"
     )
 ) else (
-    echo %TXT%        [INFO] No secondary setup.bat found in %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
+    echo %TXT%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
 )
 
 echo.
 echo.
 exit /b 0
 
-
-echo.
-echo.
-exit /b 0
-
-exit /b 0
