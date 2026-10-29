@@ -12,7 +12,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 setlocal DisableDelayedExpansion
 
 :: =========================================================================
-:: DIRECTORY RESOLUTION MAPPING (CRITICAL FIX FOR MANIFEST LAYOUT)
+:: DIRECTORY RESOLUTION MAPPING (MANIFEST LAYOUT)
 :: =========================================================================
 set "VERSION_DIR=%~dp0"
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
@@ -50,11 +50,11 @@ echo.
 echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
 echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
 echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██╗██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
+echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚_╝  ╚_╝╚_╝  ╚_╝ ╚═════╝ ╚═════╝ ╚_╝     ╚_╝╚══════╝%RESET%%BG_GLASS%
+echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %Y2%                            dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -66,22 +66,22 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                     [SUCCESS] DarkComHeadless.dll registration.
+    echo                      [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                     [SUCCESS] WebView2Loader.dll registration.
+    echo                      [SUCCESS] WebView2Loader.dll registration.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                     [SUCCESS] installed 'dc2url.bat' successfully.
+echo                      [SUCCESS] installed 'dc2url.bat' successfully.
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
-reg add "HKCU\Software\Eclipse\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+reg add "HKCU\Software\dc2url\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: --- Configure App Paths cleanly from system root / program files paths ---
+:: --- Configure App Paths cleanly ---
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
@@ -92,29 +92,23 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-echo %O2%        [*] Auto Registering dc2url into Windows...%RESET%%BG_GLASS%
+echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%%BG_GLASS%
 
-set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-
-set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+:: Register in both HKLM and HKCU Uninstall hives for robust visibility in Control Panel / Settings
+for %%H in (HKLM HKCU) do (
+    for %%N in ("" "\Wow6432Node") do (
+        set "UNINSTALL_KEY=%%H~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+    )
+)
 
 echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
 
@@ -127,12 +121,13 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                     [SUCCESS] dc2url is now fully installed and at your command!
+echo                      [SUCCESS] dc2url is now fully installed and at your command!
 echo.
-echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
+echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%%BG_GLASS%
 echo.
 
 :finish
-echo %TXT%        Please Restart your command window to begin to use dc2url...%RESET%
-
+echo %TXT%        Please restart your command window to begin using dc2url...%RESET%
+echo.
+pause
 exit /b 0
