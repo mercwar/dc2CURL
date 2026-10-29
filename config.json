@@ -11,6 +11,7 @@
       {"source": "README.md", "target": "README.md"},
       {"source": "setup.bat", "target": "setup.bat"},
       {"source": "uninstall.bat", "target": "uninstall.bat"}
+      {"source": "launcher.bat", "target": "launcher.bat"}
     ],
     "branch_files": [
       {"source": "install.bat", "target": "install.bat"},
