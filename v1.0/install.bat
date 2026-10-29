@@ -69,16 +69,16 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                      [SUCCESS] DarkComHeadless.dll registration.
+    echo                     [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                      [SUCCESS] WebView2Loader.dll registration.
+    echo                     [SUCCESS] WebView2Loader.dll registration.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                      [SUCCESS] installed 'dc2url.bat' successfully.
+echo                     [SUCCESS] installed 'dc2url.bat' successfully.
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
@@ -99,7 +99,6 @@ echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESE
 
 for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
-        set "UNINSTALL_KEY=%%H~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" >nul 2>&1
@@ -123,7 +122,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                      [SUCCESS] dc2url is now fully installed and at your command!
+echo                     [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 
 :: =========================================================================
@@ -137,13 +136,12 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 )
 
 if /i "%SOUND_SETTING%"=="on" (
-
-    
     cd /d "%VERSION_DIR%"
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%"
     
-    echo Downloading midi
-    "%FINAL_EXE_PATH%" -o "%MIDI_OUTPUT%" "%MIDI_URL%"
+    echo Downloading midi via dc2url [-nojs]...
+    :: Call executable with URL first, then -o flag (or use curl fallback if preferred)
+    "%FINAL_EXE_PATH%" "%MIDI_URL% -nojs" -o "%MIDI_OUTPUT%"
     
     echo.
     if exist "%MIDI_OUTPUT%" (
@@ -153,10 +151,10 @@ if /i "%SOUND_SETTING%"=="on" (
             echo [Transformation] TRANSFORM!
             start "" "%MIDI_OUTPUT%"
         ) else (
-            echo [AVIS FAILURE] Something went wrong.
+            echo [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or proxy.
         )
     ) else (
-        echo [AVIS ERROR] No Binary.
+        echo [AVIS ERROR] Binary download failed.
     )
 ) else (
     echo %TXT%        [INFO] Skipping audio playback.%RESET%%BG_GLASS%
@@ -192,4 +190,3 @@ if exist "%ROOT_DIR%\setup.bat" (
 echo.
 echo.
 exit /b 0
-
