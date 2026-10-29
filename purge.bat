@@ -139,7 +139,7 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 echo.
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                        COMPLETE ECOSYSTEM & FAKE VARIANT PURGE SUCCESSFUL%RESET%%BG_GLASS%
+echo %Y2%                        COMPLETE ECOSYSTEM VARIANT PURGE SUCCESSFUL%RESET%%BG_GLASS%
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 echo %TXT%        All traces of Eclipse, Eclipse Tray, fake binaries, registry entries, and paths are gone.%RESET%
