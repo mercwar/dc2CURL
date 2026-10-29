@@ -40,7 +40,7 @@ echo %Y2%        ███████╗╚██████╗█████
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%          DEEP SYSTEM PURGE :: Removing Eclipse Tray, Fake Variants & All Traces%RESET%%BG_GLASS%
+echo %Y2%          DEEP SYSTEM PURGE  Removing Eclipse Tray, Fake Variants  All Traces%RESET%%BG_GLASS%
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -62,7 +62,7 @@ for %%P in (
 )
 
 :: =========================================================================
-:: 2. TARGET DIRECTORY & FILE SWEEP (Program Files, Program Files (x86), AppData)
+:: 2. TARGET DIRECTORY  FILE SWEEP (Program Files, Program Files (x86), AppData)
 :: =========================================================================
 echo %R2%        [*] Sweeping and deleting directories across Program Files and system paths...%RESET%%BG_GLASS%
 
@@ -127,7 +127,7 @@ reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
 
 :: =========================================================================
-:: 5. ENVIRONMENT VARIABLE PURGE & BROADCAST
+:: 5. ENVIRONMENT VARIABLE PURGE BROADCAST
 :: =========================================================================
 echo %R2%        [*] Clearing global and user environment variables...%RESET%%BG_GLASS%
 reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v "eclipse_path" /f >nul 2>&1
