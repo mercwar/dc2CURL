@@ -80,10 +80,6 @@ reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
 
-:: FIXED: Added User-scoped Uninstall keys (this is where Windows reads 'Programs and Features' for user installs)
-reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
-reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
-
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
 
@@ -133,3 +129,4 @@ if /i "%REINSTALL%"=="y" (
 
 
 exit /b 0
+
