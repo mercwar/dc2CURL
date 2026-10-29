@@ -114,29 +114,18 @@ echo %Y1%                        UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: =========================================================================
-:: 5. REINSTALL PROMPT
-:: =========================================================================
+
 echo %TXT%        Eclipse has been removed from your computer.%RESET%
 echo.
+
 
 set "REINSTALL="
 set /p "REINSTALL=%Y2%        Would you like to reinstall Eclipse now? (Y/N): %RESET%"
 
-if /i "%REINSTALL%"=="Y" (
-    if exist "%TARGET%\setup.bat" (
-        echo %Y1%        [*] Running setup script (%TARGET%\setup.bat)...%RESET%
-        call "%TARGET%\setup.bat"
-    ) else if exist "%TARGET_BASE%\setup.bat" (
-        echo %Y1%        [*] Running setup script (%TARGET_BASE%\setup.bat)...%RESET%
-        call "%TARGET_BASE%\setup.bat"
-    ) else if exist "%SCRIPT_DIR%setup.bat" (
-        echo %Y1%        [*] Running setup script (%SCRIPT_DIR%setup.bat)...%RESET%
-        call "%SCRIPT_DIR%setup.bat"
-    ) else (
-        echo %R1%        [!] Error: Could not find setup.bat at %TARGET%\setup.bat, %TARGET_BASE%\setup.bat, or %SCRIPT_DIR%setup.bat%RESET%
-        pause
-    )
+if /i "%REINSTALL%"=="y" (
+    call "%TARGET%\setup.bat"
 )
+
+
 
 exit /b 0
