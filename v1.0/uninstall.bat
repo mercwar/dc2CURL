@@ -51,7 +51,7 @@ echo %Y1%        ██╔══╝  ██║     ██║     ██║██
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                             dc2url Uninstaller%RESET%%BG_GLASS%
+echo %Y2%                            dc2url Uninstaller%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -64,11 +64,11 @@ taskkill /f /im dc2url.exe >nul 2>&1
 echo %R2%        [*] Unhooking system DLL components...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                      [OK] Removed DarkComHeadless.dll registration.
+    echo                     [OK] Removed DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
-    echo                      [OK] Removed WebView2Loader.dll registration.
+    echo                     [OK] Removed WebView2Loader.dll registration.
 )
 
 :: =========================================================================
@@ -94,7 +94,7 @@ reg delete "HKLM\SOFTWARE\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
 
-echo                      [OK] Windows Registry & DOS command linkages cleared.
+echo                     [OK] Windows Registry and DOS command linkages cleared.
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
@@ -110,7 +110,7 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Use
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-echo                      [OK] System environment updated.
+echo                     [OK] System environment updated.
 
 :: =========================================================================
 :: 4. FILESYSTEM CLEANUP (FULL DIRECTORY WIPE)
@@ -122,12 +122,12 @@ cd /d "%TEMP%"
 :: Schedule a background task to completely clean the installation directory after exit
 if exist "%BASE_DIR%" (
     start /b "" cmd /c "ping 127.0.0.1 -n 3 > nul & rmdir /s /q "%BASE_DIR%"" >nul 2>&1
-    echo                      [OK] Deletion scheduled for base directory.
+    echo                     [OK] Deletion scheduled for base directory.
 )
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y1%                             UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
+echo %Y1%                            UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
