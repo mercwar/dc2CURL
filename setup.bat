@@ -127,7 +127,7 @@ echo %O2%        [*] Auto Registering eclipse into Windows Uninstall tree...%RES
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
 reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "Eclipse" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "\"%TARGET%\eclipse\"" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "\"%TARGET%\eclipse.ico\"" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "1.0" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 2048 >nul 2>&1
