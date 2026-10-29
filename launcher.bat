@@ -65,11 +65,7 @@ set "count=0"
 for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winget) do (
     set "VALID=0"
     
-    if /i "%%T"=="dc2url" (
-        :: Forces an execution test to verify dc2url is fully operational
-        dc2url >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="python" (
+    if /i "%%T"=="python" (
         :: Bypasses the Microsoft Store execution alias trap by forcing an execution test
         python -c "import sys" >nul 2>&1
         if !errorlevel! equ 0 set "VALID=1"
@@ -81,6 +77,7 @@ for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winge
         powershell -NoProfile -Command "exit 0" >nul 2>&1
         if !errorlevel! equ 0 set "VALID=1"
     ) else if /i "%%T"=="mshta" (
+        :: Verifies that mshta hasn't been decoupled or restricted by modern policy engines
         where mshta >nul 2>&1
         if !errorlevel! equ 0 (
             mshta "javascript:close();" >nul 2>&1
@@ -93,6 +90,7 @@ for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winge
             if !errorlevel! equ 0 set "VALID=1"
         )
     ) else (
+        :: Standard static command tools checked securely via pathing bounds
         where %%T >nul 2>&1
         if !errorlevel! equ 0 set "VALID=1"
     )
@@ -102,7 +100,6 @@ for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winge
         set "tool_!count!=%%T"
     )
 )
-    
 
 
 if !count! equ 0 (
@@ -300,11 +297,16 @@ if /i "!RUN_ECLIPSE!"=="y" (
     echo %GRAY%    [!] Root setup.bat skipped by user.%RESET%
 )
 goto :eof
-
-
+:: ============================================================
+:: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
+:: ============================================================
 :download_dc2url
+:: Ensure any old target file is cleanly deleted before downloading
 if exist "%~2" del /f /q "%~2" >nul 2>&1
+
+:: Fixed: Organized arguments strictly to match the tool's required order: [options] <url>
 dc2url -o "%~2" "%~1"
+
 goto :eof
 
 
