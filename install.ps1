@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader (Flicker-Free with Readable Delays & Detection)
+    dc2URL Root Staging Loader (Strict dc2url Detection & Interactive Menu)
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -26,23 +26,20 @@ Write-Host "  Status: System scan initialized..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
-# Check if dc2url is installed (via registry uninstall keys or program files path)
-$dc2urlInstalled = $false
-$regPaths = @(
-    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url",
-    "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-)
-foreach ($rPath in $regPaths) {
-    if (Test-Path $rPath) { $dc2urlInstalled = $true; break }
-}
-if (-not $dc2urlInstalled -and (Test-Path "$env:ProgramFiles\dc2url")) {
-    $dc2urlInstalled = $true
+# Strict check for dc2url using 'where.exe'
+$dc2urlDetected = $false
+foreach ($t in @("dc2url")) {
+    $null = where.exe $t 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        $dc2urlDetected = $true
+        break
+    }
 }
 
 $targetUrl = $RepoUrl
 $modeType = "Launcher"
 
-if ($dc2urlInstalled) {
+if ($dc2urlDetected) {
     Write-Host "  [AVIS DETECT] dc2url is currently installed on this system." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  Select an option:" -ForegroundColor White
