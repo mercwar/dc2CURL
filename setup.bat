@@ -83,7 +83,7 @@ echo %O2%        [*] Acquiring eclipse.exe and menu.json via dc2url downlink eng
 if exist "%FINAL_EXE_PATH%" del /f /q "%FINAL_EXE_PATH%" >nul 2>&1
 dc2url "%DOWNLOAD_URL%" -o "%FINAL_EXE_PATH%"
 
-if not exist "%TARGET%\menu.json" (
+if not exist "%FINAL_EXEC_DIR%\menu.json" (
     dc2url "%MENU_URL%" -o "%FINAL_EXEC_DIR%\menu.json"
 )
 
@@ -126,7 +126,7 @@ echo %O2%        [*] Auto Registering eclipse into Windows Uninstall tree...%RES
 set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
 reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "Eclipse" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "\"%TARGET%\favi-con.ico\"" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "\"%TARGET%\eclipse\"" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "1.0" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 2048 >nul 2>&1
