@@ -23,8 +23,8 @@ for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
 set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
-set "MIDI_OUTPUT=transformers.mid"
-set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/%MIDI_OUTPUT%"
+set "MIDI_OUTPUT=%TEMP%\transformers.mid"
+set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transformers.mid"
 
 cd /d "%FINAL_EXEC_DIR%"
 
@@ -60,6 +60,10 @@ echo %O2%    ===================================================================
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
+
+:: --- FIX: Grant explicit full write permissions to the install directory tree ---
+echo %O2%        [*] Granting full write access permissions to %VERSION_DIR%...%RESET%%BG_GLASS%
+icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 
 if not exist "%FINAL_EXE_PATH%" (
     echo %O1%        [AVIS FAILED] Execution binaries are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
@@ -136,11 +140,9 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 )
 
 if /i "%SOUND_SETTING%"=="on" (
-    cd /d "%VERSION_DIR%"
-    if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%"
+    if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%" >nul 2>&1
     
-    echo Downloading midi via dc2url [-nojs]...
-    :: Call executable with URL first, then -o flag (or use curl fallback if preferred)
+    echo Downloading midi via dc2url [-nojs] to TEMP...
     "%FINAL_EXE_PATH%" "%MIDI_URL% -nojs" -o "%MIDI_OUTPUT%"
     
     echo.
@@ -178,10 +180,19 @@ if exist "%ROOT_DIR%\setup.bat" (
     if errorlevel 2 (
         echo %TXT%        [INFO] Exiting...%RESET%%BG_GLASS%
     ) else (
-        echo %O2%        [*] Launching setup...%RESET%%BG_GLASS%
+        echo %O2%        [*] Launching setup (Pulling Fresh Copy)...%RESET%%BG_GLASS%
         cd /d "%FINAL_EXEC_DIR%"
-        timeout /t 3 >nul
-        call "%ROOT_DIR%\setup.bat"
+        timeout /t 2 >nul
+        
+        :: Force pull a fresh copy of setup.bat from remote repo to TEMP before executing
+        set "TEMP_SETUP=%TEMP%\dc2_fresh_setup.bat"
+        powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/mercwar/dc2url/main/setup.bat' -OutFile '%TEMP_SETUP%' -UseBasicParsing -Headers @{'Cache-Control'='no-cache'}" >nul 2>&1
+        
+        if exist "%TEMP_SETUP%" (
+            call "%TEMP_SETUP%"
+        ) else (
+            call "%ROOT_DIR%\setup.bat"
+        )
     )
 ) else (
     echo %TXT%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
