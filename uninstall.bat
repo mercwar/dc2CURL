@@ -41,14 +41,14 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %R1%        ███████╗ ██████╗██╗     ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
+echo %R1%        ███████╗ ██████╗██╗     ██║██████╗ ███████╗███████╗%RESET%%BG_GLASS%
 echo %R2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
 echo %R1%        █████╗  ██║     ██║     ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
 echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                             Eclipse Uninstaller%RESET%%BG_GLASS%
+echo %Y2%                              Eclipse Uninstaller%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -105,11 +105,12 @@ echo                     [OK] System environment updated.
 echo %R2%        [*] Deleting Eclipse application files...%RESET%%BG_GLASS%
 
 if exist "%FINAL_EXEC_DIR%\eclipse.exe" del /f /q "%FINAL_EXEC_DIR%\eclipse.exe" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\menu.js" del /f /q "%FINAL_EXEC_DIR%\menu.js" >nul 2>&1
+if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nul 2>&1
+if exist "%TARGET%\eclipse.ico" del /f /q "%TARGET%\eclipse.ico" >nul 2>&1
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y1%                         UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
+echo %Y1%                        UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -126,11 +127,14 @@ if /i "%REINSTALL%"=="Y" (
     if exist "%TARGET%\setup.bat" (
         echo %Y1%        [*] Running setup script (%TARGET%\setup.bat)...%RESET%
         call "%TARGET%\setup.bat"
+    ) else if exist "%TARGET_BASE%\setup.bat" (
+        echo %Y1%        [*] Running setup script (%TARGET_BASE%\setup.bat)...%RESET%
+        call "%TARGET_BASE%\setup.bat"
     ) else if exist "%SCRIPT_DIR%setup.bat" (
         echo %Y1%        [*] Running setup script (%SCRIPT_DIR%setup.bat)...%RESET%
         call "%SCRIPT_DIR%setup.bat"
     ) else (
-        echo %R1%        [!] Error: Could not find setup.bat at %TARGET%\setup.bat or %SCRIPT_DIR%setup.bat%RESET%
+        echo %R1%        [!] Error: Could not find setup.bat at %TARGET%\setup.bat, %TARGET_BASE%\setup.bat, or %SCRIPT_DIR%setup.bat%RESET%
         pause
     )
 )
