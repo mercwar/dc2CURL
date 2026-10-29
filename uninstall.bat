@@ -106,7 +106,7 @@ echo %R2%        [*] Deleting Eclipse application files...%RESET%%BG_GLASS%
 
 if exist "%FINAL_EXEC_DIR%\eclipse.exe" del /f /q "%FINAL_EXEC_DIR%\eclipse.exe" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nul 2>&1
-if exist "%TARGET%\eclipse.ico" del /f /q "%TARGET%\eclipse.ico" >nul 2>&1
+
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
