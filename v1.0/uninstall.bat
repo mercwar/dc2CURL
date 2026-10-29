@@ -125,10 +125,14 @@ echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_
 
 cd /d "%TEMP%"
 
-:: Schedule a background task to completely clean the installation directory after exit
-if exist "%BASE_DIR%" (
-    start /b "" cmd /c "ping 127.0.0.1 -n 3 > nul & rmdir /s /q "%BASE_DIR%"" >nul 2>&1
-    echo                     [OK] Deletion scheduled for base directory.
+if exist "%FINAL_EXEC_DIR%\dc2url.exe" (
+    del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
+    echo                     [OK] Removed dc2url.exe.
+)
+
+if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
+    del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
+    echo                     [OK] Removed DarkComHeadless.dll.
 )
 
 echo.
