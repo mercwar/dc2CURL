@@ -44,7 +44,7 @@ echo %Y1%        ██║  ██║██╔══██║██╔══█�
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚_╝  ╚_╝╚_╝  ╚_╝ ╚═════╝ ╚═════╝ ╚_╝     ╚_╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                    dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %Y2%               dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -120,13 +120,14 @@ if not exist "!INSTALL_PATH!" (
 )
 
 :: ============================================================
-:: DOWNLOAD CONFIG.JSON FIRST
+:: DOWNLOAD CONFIG.JSON WITH CACHE-BUSTER TO DISK
 :: ============================================================
-set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/config.json"
+set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/config.json?v=%RANDOM%%RANDOM%"
 set "CONFIG_FILE=!INSTALL_PATH!\config.json"
 
 echo.
-echo %O2%    [*] Downloading config.json using !SELECTED_TOOL!...%RESET%
+echo %O2%    [*] Downloading fresh config.json using !SELECTED_TOOL!...%RESET%
+if exist "!CONFIG_FILE!" del /f /q "!CONFIG_FILE!" >nul 2>&1
 call :download_!SELECTED_TOOL! "!CONFIG_URL!" "!CONFIG_FILE!" 2>error_config.log
 
 if not exist "!CONFIG_FILE!" (
@@ -137,27 +138,35 @@ if not exist "!CONFIG_FILE!" (
     exit /b
 )
 del error_config.log >nul 2>&1
-echo %GREEN%    [+] config.json downloaded successfully.%RESET%
+echo %GREEN%    [+] config.json downloaded successfully to disk.%RESET%
 
 :: ============================================================
-:: PARSE MANIFEST & LOOP NODES (RESPECTING do_not_version)
+:: PARSE MANIFEST & LOOP NODES FROM DISK WITH ABSOLUTE PATH LOCK
 :: ============================================================
-echo %O2%    [*] Parsing manifest layout and streaming payload nodes...%RESET%
+echo %O2%    [*] Parsing manifest layout from disk...%RESET%
 
-set "PS_CMD=$cfg = Get-Content '!CONFIG_FILE!' -Raw | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }"
+for %%f in ("!CONFIG_FILE!") do set "ABS_CONFIG_FILE=%%~ff"
+echo %GRAY%    [DEBUG] Absolute Target: !ABS_CONFIG_FILE!%RESET%
 
-for /f "delims=" %%i in ('powershell -NoProfile -Command "try { !PS_CMD! } catch { $_.Exception.Message | Out-File error_manifest.log }"') do (
+if exist error_manifest.log del /f /q error_manifest.log >nul 2>&1
+if exist manifest_stream.tmp del /f /q manifest_stream.tmp >nul 2>&1
+
+powershell -NoProfile -Command "$path = '%ABS_CONFIG_FILE%'; $jsonText = [System.IO.File]::ReadAllText($path); $cfg = $jsonText | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }" > manifest_stream.tmp 2>error_manifest.log
+
+if exist error_manifest.log for %%A in (error_manifest.log) do if %%~zA gtr 0 (
+    echo.
+    echo %O1%    === CRITICAL MANIFEST PARSING ERROR DETECTED ===%RESET%
+    type error_manifest.log
+    echo ================================================
+    del manifest_stream.tmp >nul 2>&1
+    del error_manifest.log >nul 2>&1
+    pause
+    exit /b 1
+)
+
+for /f "delims=" %%i in (manifest_stream.tmp) do (
     set "LINE=%%i"
     
-    if exist error_manifest.log (
-        echo.
-        echo %O1%    === CRITICAL MANIFEST PARSING ERROR DETECTED ===%RESET%
-        type error_manifest.log
-        echo ================================================
-        pause
-        exit /b 1
-    )
-
     for /f "tokens=1,2,3 delims=|" %%a in ("!LINE!") do (
         set "NODE_NAME=%%a"
         set "REMOTE_REL=%%b"
@@ -181,6 +190,9 @@ for /f "delims=" %%i in ('powershell -NoProfile -Command "try { !PS_CMD! } catch
         del error_download.log >nul 2>&1
     )
 )
+
+del manifest_stream.tmp >nul 2>&1
+del error_manifest.log >nul 2>&1
 
 echo.
 echo %GREEN%    [+] Processing completed to destination target path: !INSTALL_PATH!%RESET%
