@@ -142,7 +142,7 @@ if /i "%SOUND_SETTING%"=="on" (
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%"
     
     echo Downloading midi
-    "%FINAL_EXE_PATH%" -o "%MIDI_OUTPUT%" "%MIDI_URL%" -v
+    "%FINAL_EXE_PATH%" -o "%MIDI_OUTPUT%" "%MIDI_URL%"
     
     echo.
     if exist "%MIDI_OUTPUT%" (
