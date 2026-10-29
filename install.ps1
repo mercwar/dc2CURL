@@ -201,10 +201,10 @@ if ($isInstalled) {
 Write-Header -StatusText "Contacting server..."
 
 $TargetUrl = "$RepoUrl/$LauncherFile"
-Write-Host "  [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
-Write-Host "  [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
+Write-Host "    [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
+Write-Host "    [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
 Write-Host "$TargetUrl"                                   -ForegroundColor White
-Write-Host "  [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
+Write-Host "    [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
 Write-Host "$TempInstaller"                             -ForegroundColor White
 Write-Host ""
 
