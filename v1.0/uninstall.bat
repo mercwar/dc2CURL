@@ -20,7 +20,13 @@ if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
 for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
-set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+if exist "%VERSION_DIR%\exec" (
+    set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+) else if exist "%BASE_DIR%\exec" (
+    set "FINAL_EXEC_DIR=%BASE_DIR%\exec"
+) else (
+    set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+)
 
 title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Removal Engine
 mode con: cols=120 lines=34
@@ -44,15 +50,9 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
-echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
-echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
-echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %O1%        ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                            dc2url Core Cyborg Ecosystem Uninstaller%RESET%%BG_GLASS%
-echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %O2%        ====================================================================================%RESET%%BG_GLASS%
 echo.
 
 :: Terminate running instances to release locks
