@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader (Clean Command Detection)
+    dc2URL Root Staging Loader (Strict Command Detection via Get-Command)
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -26,7 +26,7 @@ Write-Host "  Status: System scan initialized..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
-# Clean check for dc2url command availability
+# Strict check for dc2url command availability using Get-Command without triggering native error streams
 $dc2urlDetected = $false
 $cmdCheck = Get-Command dc2url -ErrorAction SilentlyContinue
 if ($null -ne $cmdCheck) {
