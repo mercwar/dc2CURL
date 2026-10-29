@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader (Strict Conditional Flow)
+    dc2URL Root Staging Loader (Clean Command Detection)
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -26,21 +26,18 @@ Write-Host "  Status: System scan initialized..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
-# Strict check for dc2url using 'where'
+# Clean check for dc2url command availability
 $dc2urlDetected = $false
-foreach ($t in @("dc2url")) {
-    $null = where.exe $t 2>&1
-    if ($LASTEXITCODE -eq 0) {
-        $dc2urlDetected = $true
-        break
-    }
+$cmdCheck = Get-Command dc2url -ErrorAction SilentlyContinue
+if ($null -ne $cmdCheck) {
+    $dc2urlDetected = $true
 }
 
 $targetUrl = $RepoUrl
 $modeType = "Launcher"
 
 if ($dc2urlDetected) {
-    Write-Host "  [AVIS DETECT] dc2url is currently installed on this system." -ForegroundColor Yellow
+    Write-Host "  [AVIS DETECT] dc2url command detected on system." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  Select an option:" -ForegroundColor White
     Write-Host "    [1] Setup Eclipse (Run setup.bat)" -ForegroundColor Cyan
