@@ -12,28 +12,36 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 setlocal DisableDelayedExpansion
 
 :: =========================================================================
-:: DIRECTORY RESOLUTION MAPPING
+:: DIRECTORY RESOLUTION MAPPING (CRITICAL FIX FOR MANIFEST LAYOUT)
 :: =========================================================================
 set "VERSION_DIR=%~dp0"
 if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
 
 for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
 for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
+set "TARGET=%ProgramFiles%\dc2url"
+:: Target ProgramFiles setup matching the absolute layout structure
+if exist "%ProgramFiles%" (
+    set "TARGET_BASE=%ProgramFiles%\dc2url\v1.0"
+) else (
+    set "TARGET_BASE=C:\Program Files\dc2url\v1.0"
+)
 
-set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
+set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\eclipse.exe"
+set "DOWNLOAD_URL=https://mercwar01.byethost3.com/darkcom2/downlink.php?file=eclipse/eclipse.exe"
 
+if not exist "%FINAL_EXEC_DIR%" mkdir "%FINAL_EXEC_DIR%"
 cd /d "%FINAL_EXEC_DIR%"
 
 title InstallShield (R) Setup Launcher v1.0 :: Eclipse Tray Master Deployment Engine
-mode con: cols=120 lines=34
+mode con: cols=120 lines=36
 
 chcp 65001 >nul 2>&1
 color 0E
 
-:: Force TrueColor Console Canvas Context Allocation
 reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
-for /f %%a in ('echo prompt $E^|cmd') do set "E=%ESC%"
+for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
 set "RESET=%E%[0m"
 set "BG_GLASS=%E%[48;2;10;10;12m"
 set "O1=%E%[38;2;255;68;0m"
@@ -48,82 +56,79 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %O1%        ███████╗ ██████╗██╗     ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
-echo %O2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
-echo %O3%        █████╗  ██║     ██║     ██║██████╔3███████╗███████╗%RESET%%BG_GLASS%
-echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║╚════██║%RESET%%BG_GLASS%
+echo %O1%        ███████╗ ██████╗██╗    ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
+echo %O2%        ██╔════╝██╔════╝██║    ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
+echo %O3%        █████╗  ██║     ██║    ██║██████╔╝███████╗███████╗%RESET%%BG_GLASS%
+echo %Y1%        ██╔══╝  ██║     ██║    ██║██╔═══╝ ╚════██║╚════██║%RESET%%BG_GLASS%
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████║%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                Eclipse Tray Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %Y2%                Eclipse Tray Cyborg Ecosystem Installer :: Mercwar AI%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: 1. VERIFY FILE ASSETS
-if not exist "%FINAL_EXE_PATH%" (
-    echo %O1%        [AVIS FAILED] eclipse.exe binaries are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
-    goto :finish
-)
+:: =========================================================================
+:: PROCESS TERMINATION & DOWNLINK ACQUISITION VIA DC2URL
+:: =========================================================================
+echo %O2%        [*] Checking for active instances of eclipse.exe...%RESET%%BG_GLASS%
+taskkill /f /im eclipse.exe >nul 2>&1
 
-:: 2. COM SUBSYSTEM SELF-REGISTRATION PIPELINE
-echo %O2%        [*] Processing OLE/COM & WebView2 Registrations...%RESET%%BG_GLASS%
+echo %O2%        [*] Acquiring eclipse.exe directly via dc2url downlink engine...%RESET%%BG_GLASS%
+if exist "%FINAL_EXE_PATH%" del /f /q "%FINAL_EXE_PATH%" >nul 2>&1
+
+:: Force direct invocation using dc2url command line tool
+dc2url "%DOWNLOAD_URL%" -o "%FINAL_EXE_PATH%"
+
+:: =========================================================================
+:: OLE/COM REGISTRATIONS & APP PATHS CONFIGURATION
+:: =========================================================================
+echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                  [SUCCESS] DarkComHeadless.dll registration.
+    echo                     [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                  [SUCCESS] WebView2Loader.dll registration.
+    echo                     [SUCCESS] WebView2Loader.dll registration.
 )
 
-:: 3. GENERATE COMMAND ROUTER ABSTRACTION WRAPPER
 echo @echo off > "%FINAL_EXEC_DIR%\eclipse.bat"
 echo "%FINAL_EXEC_DIR%\eclipse.exe" %%* >> "%FINAL_EXEC_DIR%\eclipse.bat"
-echo                  [SUCCESS] installed 'eclipse.bat' successfully.
+echo                     [SUCCESS] installed 'eclipse.bat' successfully.
 
-:: 4. SYSTEM PATH & ECLIPSE LAUNCHER REGISTRY MAPS
-echo %O2%        [*] Auto Configuring Eclipse Launcher for Windows...%RESET%%BG_GLASS%
+echo %O2%        [*] Auto Configuring eclipse for Windows App Paths...%RESET%%BG_GLASS%
 
-:: --- System Loader Registry Integration ---
 reg add "HKCU\Software\Eclipse\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: --- App Paths Integration ---
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: --- WoW6432Node Redirector Mappings ---
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-:: 5. ADD/REMOVE PROGRAMS CONTROL PANEL METADATA REGISTRATION
-echo %O2%        [*] Auto Registering Eclipse into Windows Control Panel...%RESET%%BG_GLASS%
+:: =========================================================================
+:: WINDOWS UNINSTALLER REGISTRY REGISTRATION
+:: =========================================================================
+echo %O2%        [*] Auto Registering eclipse into Windows Uninstall tree...%RESET%%BG_GLASS%
 
-set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\eclipse"
-reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "Eclipse Tray" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
+set "UNINSTALL_KEY=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\EclipseTray"
+reg add "%UNINSTALL_KEY%" /f /v "DisplayName" /t REG_SZ /d "Eclipse" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayIcon" /t REG_SZ /d "%TARGET%" >nul 2>&1
+reg add "%UNINSTALL_KEY%" /f /v "DisplayVersion" /t REG_SZ /d "1.0" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "EstimatedSize" /t REG_DWORD /d 2048 >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%UNINSTALL_KEY%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
-set "UNINSTALL_KEY_32=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\eclipse"
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayName" /t REG_SZ /d "Eclipse Tray" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "EstimatedSize" /t REG_DWORD /d 2048 >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "%UNINSTALL_KEY_32%" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-
-:: 6. ENVIRONMENT VARIABLE INJECTION
-echo %O2%        [AVIS] Saving environment configurations...%RESET%%BG_GLASS%
+:: =========================================================================
+:: ENVIRONMENT PATH & BROADCAST UPDATES
+:: =========================================================================
+echo %O2%        [AVIS] Saving config and completing Windows 11 registration...%RESET%%BG_GLASS%
 
 setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
@@ -134,14 +139,40 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-echo                  [SUCCESS] Eclipse is now fully installed and operational!
+:: =========================================================================
+:: DIAGNOSTIC POST-DOWNLOAD PERFORMANCE REPORT
+:: =========================================================================
 echo.
-echo %Y2%        [To uninstall, go to Windows Add/Remove Programs]%RESET%%BG_GLASS%
-echo.
+echo %O3%    ====================================================================================%RESET%%BG_GLASS%
+echo %Y1%                        DOWNLINK DEPLOYMENT REPORT%RESET%%BG_GLASS%
+echo %O3%    ====================================================================================%RESET%%BG_GLASS%
 
-:finish
-echo %TXT%        Setup complete. Launching eclipse.exe tray module...%RESET%
-start "" "%FINAL_EXE_PATH%"
+set "FILE_SIZE=0"
+if exist "%FINAL_EXE_PATH%" (
+    for %%A in ("%FINAL_EXE_PATH%") do set "FILE_SIZE=%%~zA"
+)
+
+echo %TXT%        [+] Target Directory:  %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
+echo %TXT%        [+] Destination Path:  %FINAL_EXE_PATH%%RESET%%BG_GLASS%
+
+if %FILE_SIZE% GTR 0 (
+    echo %Y2%         [SUCCESS] Executable detected on disk.%RESET%%BG_GLASS%
+    echo %TXT%        [+] Allocated Size:    %FILE_SIZE% bytes%RESET%%BG_GLASS%
+    
+    if %FILE_SIZE% LSS 10240 (
+        echo %O1%        [!] Warning: Payload size falls below normal executable metrics. Verify server source contents.%RESET%%BG_GLASS%
+    ) else (
+        echo %Y2%        [+] Verification:    Binary pass. Size metrics within operating parameters.%RESET%%BG_GLASS%
+        echo %O2%        [*] Launching Eclipse Tray Master service...%RESET%%BG_GLASS%
+        start "" "%FINAL_EXE_PATH%"
+    )
+) else (
+    echo %O1%[FAILURE] File missing or zero allocation footprint found on local target paths.%RESET%%BG_GLASS%
+    echo %O1%        [!] Warning: Check server routing rules or client write permissions for Program Files.%RESET%%BG_GLASS%
+)
+
+echo %O3%    ====================================================================================%RESET%%BG_GLASS%
+echo.
+echo %TXT%        Full Windows 11 installation routine complete. Press any key to exit...%RESET%
 pause >nul
-
 exit /b 0
