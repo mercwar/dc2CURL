@@ -9,7 +9,7 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
     exit /b
 
 :ExecuteSetup
-setlocal DisableDelayedExpansion
+setlocal EnableDelayedExpansion
 
 :: =========================================================================
 :: DIRECTORY RESOLUTION MAPPING (MANIFEST LAYOUT)
@@ -22,6 +22,8 @@ for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
 set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
+set "MIDI_OUTPUT=transformers.mid"
+set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/%MIDI_OUTPUT%"
 
 cd /d "%FINAL_EXEC_DIR%"
 
@@ -54,7 +56,7 @@ echo %Y1%        ██║  ██║██╔══██║██╔══█�
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                            dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
@@ -94,7 +96,6 @@ reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 
 echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%%BG_GLASS%
 
-:: Register in both HKLM and HKCU Uninstall hives for robust visibility in Control Panel / Settings
 for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
         set "UNINSTALL_KEY=%%H~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
@@ -122,6 +123,50 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
 echo                      [SUCCESS] dc2url is now fully installed and at your command!
+echo.
+
+:: =========================================================================
+:: SOUND ARGUMENT REGISTRY CHECK & AUDIO PLAYBACK ROUTINE
+:: =========================================================================
+echo %O2%        [*] Checking Eclipse Launcher sound registry settings...%RESET%%BG_GLASS%
+
+set "SOUND_SETTING=off"
+for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "SoundArg" 2^>nul') do (
+    set "SOUND_SETTING=%%B"
+)
+
+if /i "%SOUND_SETTING%"=="on" (
+    echo %Y1%        [SOUND] SoundArg is enabled. Initiating audio download sequence...%RESET%%BG_GLASS%
+    
+    cd /d "%VERSION_DIR%"
+    if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%"
+    
+    echo ============================================================
+    echo BINARY DOWNLOAD TEST: WEBVIEW2 STREAM
+    echo ============================================================
+    echo Downloading canonical MIDI asset via dc2url -o flag...
+    "%FINAL_EXE_PATH%" -o "%MIDI_OUTPUT%" "%MIDI_URL%" -v
+    
+    echo.
+    if exist "%MIDI_OUTPUT%" (
+        for %%I in ("%MIDI_OUTPUT%") do set "FILESIZE=%%~zI"
+        echo [SUCCESS] Binary download completed successfully!
+        echo [FILE] Target: %MIDI_OUTPUT%
+        echo [SIZE] Bytes transferred: !FILESIZE! bytes
+        
+        if !FILESIZE! GTR 1000 (
+            echo [VERIFICATION] File size is valid. Launching audio playback test...
+            start "" "%MIDI_OUTPUT%"
+        ) else (
+            echo [WARNING] File size is suspiciously small. Verify redirect response stream.
+        )
+    ) else (
+        echo [ERROR] Binary download failed. Output file was not created.
+    )
+) else (
+    echo %TXT%        [INFO] SoundArg is disabled or not set. Skipping audio playback.%RESET%%BG_GLASS%
+)
+
 echo.
 echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%%BG_GLASS%
 echo.
