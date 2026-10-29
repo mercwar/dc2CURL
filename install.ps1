@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader & Eclipse Gate (Graphical Progress Bar Edition)
+    dc2URL Root Staging Loader & Eclipse Gate (Fresh Remote Pull Edition)
 #>
 
 [CmdletBinding()]
@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::InputEncoding  = [System.Text.Encoding]::UTF8
 
-# Modern TLS configuration (covers TLS 1.2 & TLS 1.3)
+# TLS configuration (TLS 1.2 & TLS 1.3)
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
 # Clean presentation setup
@@ -20,9 +20,7 @@ $host.UI.RawUI.WindowTitle = "MERCWAR dc2URL & Eclipse Launcher v1.0"
 try {
     $host.UI.RawUI.BufferSize = [System.Management.Automation.Host.Size]::new(100, 40)
     $host.UI.RawUI.WindowSize = [System.Management.Automation.Host.Size]::new(100, 40)
-} catch {
-    # Non-critical if running in hosts without window geometry access
-}
+} catch {}
 
 # --- Registry Persistence for Sound Argument ---
 $regPath = "HKCU:\Software\Eclipse\Launcher"
@@ -41,7 +39,6 @@ $RepoUrl      = "https://raw.githubusercontent.com/mercwar/dc2url/main"
 $LauncherFile = "launcher.bat"
 $EclipseFile  = "setup.bat"
 $PurgeFile    = "purge.bat"
-$TempInstaller = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
@@ -66,7 +63,6 @@ function Write-Footer {
     Write-Host "====================================================================================" -ForegroundColor DarkYellow
 }
 
-# --- Graphical ASCII Progress Bar Engine with Cursor Suppression ---
 function Show-GraphicalProgress {
     param (
         [string]$TaskTitle = "PROCESSING",
@@ -77,18 +73,14 @@ function Show-GraphicalProgress {
     $steptime  = [Math]::Max(10, [int]($DurationMs / $totalBars))
     
     Write-Host "  [#] $TaskTitle" -ForegroundColor Yellow
-    
-    # Hide the terminal cursor to prevent blinking/flashing artifacts
     try { [Console]::CursorVisible = $false } catch {}
     
     try {
         for ($i = 1; $i -le $totalBars; $i++) {
             Start-Sleep -Milliseconds $steptime
-            
             $percent = [int]($i / $totalBars * 100)
             
             Write-Host -NoNewline "`r  [" -ForegroundColor DarkYellow
-            
             for ($j = 1; $j -le $totalBars; $j++) {
                 if ($j -le $i) {
                     if ($j -lt ($totalBars * 0.4)) {
@@ -102,7 +94,6 @@ function Show-GraphicalProgress {
                     Write-Host -NoNewline "-" -ForegroundColor DarkGray
                 }
             }
-            
             Write-Host -NoNewline "] " -ForegroundColor DarkYellow
             Write-Host ("{0,3}%" -f $percent) -ForegroundColor White -NoNewline
         }
@@ -110,8 +101,32 @@ function Show-GraphicalProgress {
         Write-Host ""
     }
     finally {
-        # Always restore the cursor visibility even if interrupted
         try { [Console]::CursorVisible = $true } catch {}
+    }
+}
+
+# --- Force Download Helper Function ---
+function Get-FreshScript {
+    param (
+        [string]$FileName,
+        [string]$DestinationPath
+    )
+    
+    $remoteUrl = "$RepoUrl/$FileName"
+    Write-Host "  [PULL] Fetching fresh copy of $FileName from remote repository..." -ForegroundColor DarkYellow
+    
+    if (Test-Path $DestinationPath) {
+        Remove-Item -Path $DestinationPath -Force -ErrorAction SilentlyContinue
+    }
+    
+    try {
+        # Cache-Control no-cache header ensures GitHub raw proxies deliver fresh code
+        Invoke-WebRequest -Uri $remoteUrl -OutFile $DestinationPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache, no-store, must-revalidate"}
+        Write-Host "  [PULL SUCCESS] Fresh copy of $FileName saved to disk." -ForegroundColor White
+        return $true
+    } catch {
+        Write-Host "  [PULL ERROR] Failed to download fresh copy of $FileName from $remoteUrl : $_" -ForegroundColor Red
+        return $false
     }
 }
 
@@ -143,7 +158,6 @@ try {
     $isInstalled = $false
 }
 
-# --- Flow A: System Already Installed ---
 if ($isInstalled) {
     $parts = $dc2urlSource -split '\\'
     for ($i = 0; $i -lt $parts.Length; $i++) {
@@ -159,10 +173,10 @@ if ($isInstalled) {
     Write-Header -StatusText "dc2URL command detected at: $dc2urlSource"
     
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
-    Write-Host "    [1] Install Eclipse"                         -ForegroundColor White
-    Write-Host "    [2] Reinstall dc2URL (Pull Fresh Binaries)"   -ForegroundColor White
-    Write-Host "    [3] Purge dc2URL"                            -ForegroundColor White
-    Write-Host "    [4] Exit"                                    -ForegroundColor White
+    Write-Host "    [1] Install Eclipse (Pull Fresh setup.bat)"    -ForegroundColor White
+    Write-Host "    [2] Reinstall dc2URL (Pull Fresh launcher.bat)" -ForegroundColor White
+    Write-Host "    [3] Purge dc2URL (Pull Fresh purge.bat)"       -ForegroundColor White
+    Write-Host "    [4] Exit"                                     -ForegroundColor White
     Write-Host ""
     
     $rawInput = Read-Host "  [AVIS INPUT] Enter selection [1-4]"
@@ -177,158 +191,95 @@ if ($isInstalled) {
     switch ($choice) {
         "1" {
             Write-Host ""
-            Write-Host "  [ECLIPSE] Initializing Eclipse installation protocol..." -ForegroundColor DarkYellow
-            Show-GraphicalProgress -TaskTitle "Deploying Eclipse Gate" -DurationMs 1200
+            Write-Host "  [ECLIPSE] Initializing fresh Eclipse installation..." -ForegroundColor DarkYellow
+            Show-GraphicalProgress -TaskTitle "Connecting to Remote Stargate" -DurationMs 1000
             
             $setupPath = Join-Path $dc2urlRoot $EclipseFile
             
-            # FORCE FRESH DOWNLOAD OF SETUP.BAT
-            try {
-                Invoke-WebRequest -Uri "$RepoUrl/$EclipseFile" -OutFile $setupPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
-            } catch {
-                Write-Host "  [WARNING] Could not pull fresh $EclipseFile from remote repo, falling back to local." -ForegroundColor DarkGray
+            if (-not (Get-FreshScript -FileName $EclipseFile -DestinationPath $setupPath)) {
+                Write-Host "  [FATAL] Aborting execution due to missing remote package." -ForegroundColor Red
+                exit 1
             }
 
-            if (Test-Path $setupPath) {
-                try {
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$setupPath`"" -Wait -NoNewWindow -ErrorAction Stop
-                    Write-Host "  [ECLIPSE SUCCESS] Eclipse deployment sequence completed." -ForegroundColor White
-                } catch {
-                    Write-Host "  [ERROR] Eclipse installation was cancelled or failed: $_" -ForegroundColor Red
-                    exit 1
-                }
-            } else {
-                Write-Host "  [ERROR] $EclipseFile not found at: $setupPath" -ForegroundColor Red
+            try {
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$setupPath`"" -Wait -NoNewWindow -ErrorAction Stop
+                Write-Host "  [ECLIPSE SUCCESS] Eclipse deployment completed." -ForegroundColor White
+            } catch {
+                Write-Host "  [ERROR] Execution failed: $_" -ForegroundColor Red
                 exit 1
             }
             exit 0
         }
         "2" {
             Write-Host ""
-            Write-Host "  [AVIS] Pulling fresh core binaries from repository..." -ForegroundColor DarkYellow
-            Show-GraphicalProgress -TaskTitle "Downloading Fresh Reinstall Packages" -DurationMs 1200
+            Write-Host "  [AVIS] Initializing fresh dc2URL reinstallation..." -ForegroundColor DarkYellow
+            Show-GraphicalProgress -TaskTitle "Connecting to Remote Stargate" -DurationMs 1000
             
             $launcherLocalPath = Join-Path $dc2urlRoot $LauncherFile
-            $setupLocalPath    = Join-Path $dc2urlRoot $EclipseFile
-            $purgeLocalPath    = Join-Path $dc2urlRoot $PurgeFile
 
-            # FORCE FRESH DOWNLOADS OF ALL 3 FILES
-            try {
-                Invoke-WebRequest -Uri "$RepoUrl/$LauncherFile" -OutFile $launcherLocalPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
-                Invoke-WebRequest -Uri "$RepoUrl/$EclipseFile"  -OutFile $setupLocalPath    -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
-                Invoke-WebRequest -Uri "$RepoUrl/$PurgeFile"    -OutFile $purgeLocalPath    -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
-            } catch {
-                Write-Host "  [ERROR] Failed to download fresh packages from repository: $_" -ForegroundColor Red
+            if (-not (Get-FreshScript -FileName $LauncherFile -DestinationPath $launcherLocalPath)) {
+                Write-Host "  [FATAL] Aborting execution due to missing remote package." -ForegroundColor Red
                 exit 1
             }
 
-            if (Test-Path $launcherLocalPath) {
-                try {
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$launcherLocalPath`"" -Wait -NoNewWindow -ErrorAction Stop
-                    Write-Host "  [AVIS SUCCESS] Reinstallation completed with fresh binaries." -ForegroundColor White
-                } catch {
-                    Write-Host "  [ERROR] Reinstallation was cancelled or failed: $_" -ForegroundColor Red
-                    exit 1
-                }
-            } else {
-                Write-Host "  [ERROR] $LauncherFile not found at: $launcherLocalPath" -ForegroundColor Red
+            try {
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$launcherLocalPath`"" -Wait -NoNewWindow -ErrorAction Stop
+                Write-Host "  [AVIS SUCCESS] Reinstallation completed." -ForegroundColor White
+            } catch {
+                Write-Host "  [ERROR] Execution failed: $_" -ForegroundColor Red
                 exit 1
             }
             exit 0
         }
         "3" {
             Write-Host ""
-            Write-Host "  [AVIS] Initializing dc2URL system purge protocol..." -ForegroundColor DarkYellow
-            Show-GraphicalProgress -TaskTitle "Executing Purge Sequence" -DurationMs 1000
+            Write-Host "  [AVIS] Initializing fresh system purge..." -ForegroundColor DarkYellow
+            Show-GraphicalProgress -TaskTitle "Connecting to Remote Stargate" -DurationMs 1000
             
             $purgePath = Join-Path $dc2urlRoot $PurgeFile
-            
-            # FORCE FRESH DOWNLOAD OF PURGE.BAT
-            try {
-                Invoke-WebRequest -Uri "$RepoUrl/$PurgeFile" -OutFile $purgePath -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
-            } catch {
-                Write-Host "  [WARNING] Could not pull fresh $PurgeFile from remote repo, falling back to local." -ForegroundColor DarkGray
+
+            if (-not (Get-FreshScript -FileName $PurgeFile -DestinationPath $purgePath)) {
+                Write-Host "  [FATAL] Aborting execution due to missing remote package." -ForegroundColor Red
+                exit 1
             }
 
-            if (Test-Path $purgePath) {
-                try {
-                    Start-Process -FilePath "cmd.exe" -ArgumentList "/c start /wait cmd.exe /k `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
-                    Write-Host "  [AVIS SUCCESS] Purge execution completed." -ForegroundColor White
-                } catch {
-                    Write-Host "  [ERROR] Purge operation was cancelled or failed: $_" -ForegroundColor Red
-                    exit 1
-                }
-            } else {
-                Write-Host "  [ERROR] $PurgeFile not found at: $purgePath" -ForegroundColor Red
+            try {
+                Start-Process -FilePath "cmd.exe" -ArgumentList "/c start /wait cmd.exe /k `"$purgePath`"" -Wait -NoNewWindow -ErrorAction Stop
+                Write-Host "  [AVIS SUCCESS] Purge execution completed." -ForegroundColor White
+            } catch {
+                Write-Host "  [ERROR] Execution failed: $_" -ForegroundColor Red
                 exit 1
             }
             exit 0
         }
         default {
             Write-Host ""
-            Write-Host "  [AVIS] Operation aborted by user. Exiting." -ForegroundColor Gray
+            Write-Host "  [AVIS] Operation aborted. Exiting." -ForegroundColor Gray
             exit 0
         }
     }
 }
 
+# Initial installation path when dc2url is not detected
 Write-Header -StatusText "Contacting server for fresh installer..."
 
-$TargetUrl = "$RepoUrl/$LauncherFile"
-Write-Host "    [AVIS] Searching for installation gateway" -ForegroundColor DarkYellow
-Write-Host "    [AVIS] Target Source : " -NoNewline        -ForegroundColor Gray
-Write-Host "$TargetUrl"                                      -ForegroundColor White
-Write-Host "    [AVIS] Target Output : " -NoNewline        -ForegroundColor Gray
-Write-Host "$TempInstaller"                                -ForegroundColor White
-Write-Host ""
-
-# Play custom progress bar while downloading a FRESH copy with anti-cache headers
-$downloadJob = Start-Job -ScriptBlock {
-    param($url, $output)
-    $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}
-} -ArgumentList $TargetUrl, $TempInstaller
-
-Show-GraphicalProgress -TaskTitle "Connecting & Pulling Fresh Payload" -DurationMs 2000
-
-# Ensure download is fully completed before moving on
-Wait-Job $downloadJob | Out-Null
-Receive-Job $downloadJob | Out-Null
-Remove-Job $downloadJob
-
-if (-not (Test-Path $TempInstaller)) {
-    Write-Host ""
-    Write-Host "  [AVIS ERROR] Download failed or file missing." -ForegroundColor Red
+$TempInstaller = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
+if (-not (Get-FreshScript -FileName $LauncherFile -DestinationPath $TempInstaller)) {
+    Write-Host "  [FATAL] Initial download failed." -ForegroundColor Red
     Pause
     exit 1
 }
 
-Write-Host "  [AVIS SUCCESS] Fresh payload secured on disk." -ForegroundColor White
-Write-Host ""
-
-Write-Host "  [AVIS ECLIPSE] Searching for Cyborg Launcher..." -ForegroundColor Gray
-Show-GraphicalProgress -TaskTitle "Initializing Cyborg Subsystems" -DurationMs 1800
-
-Write-Host ""
-Write-Host "  [AVIS] Calling Portal Installer"          -ForegroundColor DarkYellow
-Write-Host "  [ECLIPSE] AVIS REPORTED SUCCESS..."     -ForegroundColor Gray
-Write-Footer
-Write-Host ""
-
-Start-Sleep -Milliseconds 600
+Show-GraphicalProgress -TaskTitle "Initializing Subsystems" -DurationMs 1800
 
 try {
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`"" -Wait -NoNewWindow -ErrorAction Stop
 } catch {
-    Write-Host "  [ERROR] Installer execution was cancelled or failed: $_" -ForegroundColor Red
+    Write-Host "  [ERROR] Execution failed: $_" -ForegroundColor Red
+} finally {
+    if (Test-Path $TempInstaller) {
+        Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
+    }
 }
 
-# Local workspace dynamic garbage clean-up
-if (Test-Path $TempInstaller) {
-    Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
-}
-
-Write-Host ""
-Write-Host "  [ECLIPSE] dc2url will be visible in your add/remove programs after the registration." -ForegroundColor White
-Write-Host "  [ECLIPSE] Auto updates are not supported at this time, you may run this irm or launcher at any time to update dc2url." -ForegroundColor White
 Write-Footer
