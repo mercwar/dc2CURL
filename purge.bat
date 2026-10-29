@@ -32,12 +32,12 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %R1%        ███████╗ ██████╗██╗     ██╗██████╗ ███████╗███████╗%RESET%%BG_GLASS%
-echo %R2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
-echo %R1%        █████╗  ██║     ██║     ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
-echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
-echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
+echo %R1%        ______   ______  __       __  _______   ______  ______%RESET%%BG_GLASS%
+echo %R2%       / ____/  / ____/ / /      / / / ____  / / ____/ / ____/%RESET%%BG_GLASS%
+echo %R1%      / /___   / /      / /      / / / /___/ / / /___  / /___  %RESET%%BG_GLASS%
+echo %Y1%     / ____/  / /      / /      / / / ____  / /___  / / ____/  %RESET%%BG_GLASS%
+echo %Y2%    / /______/ /______/ /______/ / / /      /____/ / / /______ %RESET%%BG_GLASS%
+echo %Y2%   /________/________/________/_/ /_/      /______/ /________/%RESET%%BG_GLASS%
 
 echo %R1%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%          REMOTE ECOSYSTEM PURGE :: Executing Official Uninstallers%RESET%%BG_GLASS%
