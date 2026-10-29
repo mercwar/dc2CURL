@@ -66,16 +66,16 @@ if not exist "%FINAL_EXE_PATH%" (
 echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-                     [SUCCESS] DarkComHeadless.dll registration.
+    echo                     [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-                     [SUCCESS] WebView2Loader.dll registration.
+    echo                     [SUCCESS] WebView2Loader.dll registration.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-                     [SUCCESS] installed 'dc2url.bat' successfully.
+echo                     [SUCCESS] installed 'dc2url.bat' successfully.
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
@@ -127,13 +127,12 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 set "PATH=%FINAL_EXEC_DIR%;%PATH%"
 
-                     [SUCCESS] dc2url is now fully installed and at your command!
+echo                     [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 echo %Y2%        [To uninstall, goto add/remove programs]%RESET%%BG_GLASS%
 echo.
 
 :finish
 echo %TXT%        Please Restart your command window to begin to use dc2url...%RESET%
-
 
 exit /b 0
