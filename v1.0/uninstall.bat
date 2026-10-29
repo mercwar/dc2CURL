@@ -124,9 +124,10 @@ echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_
 cd /d "%TEMP%"
 
 if exist "%BASE_DIR%" (
-    start /b "" cmd /c "ping 127.0.0.1 -n 3 > nul & rmdir /s /q "%BASE_DIR%"" >nul 2>&1
-    echo                      [OK] Deletion scheduled for base directory.
+    start /b "" cmd /c "ping 127.0.0.1 -n 3 > nul & (for /d %%p in ("%BASE_DIR%\*") do rmdir /s /q "%%p") & (for %%f in ("%BASE_DIR%\*") do if /i not "%%~nxf"=="eclipse.ico" del /f /q "%%f")" >nul 2>&1
+    echo                      [OK] Deletion scheduled for base directory (keeping eclipse.ico).
 )
+
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
