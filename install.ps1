@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    dc2URL Root Staging Loader (Strict dc2url Detection & Interactive Menu)
+    dc2URL Root Staging Loader (Strict Conditional Flow)
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -26,7 +26,7 @@ Write-Host "  Status: System scan initialized..." -ForegroundColor Gray
 Write-Host "====================================================================================" -ForegroundColor DarkGray
 Write-Host ""
 
-# Strict check for dc2url using 'where.exe'
+# Strict check for dc2url using 'where'
 $dc2urlDetected = $false
 foreach ($t in @("dc2url")) {
     $null = where.exe $t 2>&1
@@ -43,9 +43,9 @@ if ($dc2urlDetected) {
     Write-Host "  [AVIS DETECT] dc2url is currently installed on this system." -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  Select an option:" -ForegroundColor White
-    Write-Host "    [1] Install Eclipse (Downloads & runs setup.bat directly)" -ForegroundColor Cyan
-    Write-Host "    [2] Continue (Proceeds with standard dc2url launcher update)" -ForegroundColor Gray
-    Write-Host "    [3] Exit (Abort installation)" -ForegroundColor Red
+    Write-Host "    [1] Setup Eclipse (Run setup.bat)" -ForegroundColor Cyan
+    Write-Host "    [2] Reinstall dc2url (Run launcher.bat)" -ForegroundColor Gray
+    Write-Host "    [3] Exit (Abort)" -ForegroundColor Red
     Write-Host ""
     
     $choice = Read-Host "  >>> SELECT OPTION [1-3]"
@@ -55,15 +55,21 @@ if ($dc2urlDetected) {
         $modeType = "Eclipse Setup"
         $TempInstaller = "$env:TEMP\eclipse_setup_$([Guid]::NewGuid().ToString().Substring(0,8)).bat"
         Write-Host ""
-        Write-Host "  [AVIS] Eclipse mode selected. Bypassing launcher..." -ForegroundColor Cyan
-    } elseif ($choice -eq "3" -or $choice -eq "ext" -or $choice -eq "exit") {
+        Write-Host "  [AVIS] Eclipse setup selected..." -ForegroundColor Cyan
+    } elseif ($choice -eq "2") {
+        $targetUrl = $RepoUrl
+        $modeType = "dc2url Reinstall"
+        Write-Host ""
+        Write-Host "  [AVIS] Reinstalling dc2url..." -ForegroundColor Yellow
+    } else {
         Write-Host ""
         Write-Host "  [AVIS] Operation aborted by user. Exiting." -ForegroundColor Red
         exit 0
-    } else {
-        Write-Host ""
-        Write-Host "  [AVIS] Continuing with standard launcher update..." -ForegroundColor Yellow
     }
+} else {
+    Write-Host "  [AVIS DETECT] dc2url is not installed. Installing dc2url now..." -ForegroundColor Green
+    $targetUrl = $RepoUrl
+    $modeType = "dc2url Installation"
 }
 
 Write-Host ""
