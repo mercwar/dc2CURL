@@ -234,12 +234,13 @@ if exist "!EXPECTED_INSTALL_BAT!" (
 
 goto :finish
 
+
 :: ============================================================
 :: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS (FIXED)
 :: ============================================================
 :download_dc2url
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-dc2url -o "%~2" "%~1"
+dc2url -l "%~1" -nojs -o "%~2" >nul 2>&1
 goto :eof
 
 :download_python
