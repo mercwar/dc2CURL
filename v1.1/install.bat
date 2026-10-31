@@ -179,7 +179,7 @@ if errorlevel 1 goto :run_setup
 :run_setup
 echo %O2%        [*] Launching local setup...%RESET%%BG_GLASS%
 cd /d "%BASE_DIR%"
-timeout /t 2 >nul
+timeout /t 1 >nul
 call "%BASE_DIR%\setup.bat"
 goto :setup_end
 
@@ -188,7 +188,7 @@ echo %Y2%        [INFO] Exiting...%RESET%%BG_GLASS%
 goto :setup_end
 
 :no_setup
-echo %TXT%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
+echo %Y2%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
 
 :setup_end
 echo.
