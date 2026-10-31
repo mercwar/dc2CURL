@@ -68,17 +68,19 @@ echo %O2%    [*] Granting write permissions to target directories...%RESET%
 icacls "%TARGET%" /grant Users:(OI)(CI)F /t >nul 2>&1
 
 :: =========================================================================
-:: PROCESS TERMINATION & DOWNLINK ACQUISITION VIA DC2URL
+:: PROCESS TERMINATION & DOWNLINK ACQUISITION VIA DC2URL (-nojs Fast Path)
 :: =========================================================================
 echo %O2%    [*] Checking for active instances of eclipse.exe...%RESET%
 taskkill /f /im eclipse.exe >nul 2>&1
 
 echo %O2%    [*] Acquiring eclipse.exe and menu.json via dc2url downlink engine...%RESET%
 if exist "%FINAL_EXE_PATH%" del /f /q "%FINAL_EXE_PATH%" >nul 2>&1
-dc2url -o "%FINAL_EXE_PATH%" "%DOWNLOAD_URL%"
+
+:: Corrected flag syntax matching dc2url specification (-nojs and -l)
+dc2url -l "%DOWNLOAD_URL%" -nojs -o "%FINAL_EXE_PATH%"
 
 if not exist "%FINAL_EXEC_DIR%\menu.json" (
-    dc2url -o "%FINAL_EXEC_DIR%\menu.json" "%MENU_URL%"
+    dc2url -l "%MENU_URL%" -nojs -o "%FINAL_EXEC_DIR%\menu.json"
 )
 
 :: =========================================================================
@@ -87,30 +89,30 @@ if not exist "%FINAL_EXEC_DIR%\menu.json" (
 echo %O2%    [*] Processing OLE/COM Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                     [SUCCESS] DarkComHeadless.dll registration.
+    echo                      [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                     [SUCCESS] WebView2Loader.dll registration.
+    echo                      [SUCCESS] WebView2Loader.dll registration.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\eclipse.bat"
 echo "%FINAL_EXEC_DIR%\eclipse.exe" %%* >> "%FINAL_EXEC_DIR%\eclipse.bat"
-echo                     [SUCCESS] installed 'eclipse.bat' successfully.
+echo                      [SUCCESS] installed 'eclipse.bat' successfully.
 
 echo %O2%    [*] Auto Configuring eclipse for Windows App Paths...%RESET%
 
 reg add "HKCU\Software\Eclipse\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-for %%K in (
-    "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe"
-    "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe"
-    "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe"
-    "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe"
-) do (
-    reg add %%K /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
-    reg add %%K /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
-)
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+
+reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
 :: =========================================================================
 :: WINDOWS UNINSTALLER REGISTRY REGISTRATION
