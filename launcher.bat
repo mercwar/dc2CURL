@@ -14,7 +14,7 @@ if %errorlevel% neq 0 (
 cd /d "%~dp0"
 
 :: InstallShield Setup Configuration Properties: Title Block & Bounds
-title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Deployment Engine
+title InstallShield (R) Setup Launcher v1.1 :: dc2url Master Deployment Engine
 mode con: cols=120 lines=34
 color 0E
 
