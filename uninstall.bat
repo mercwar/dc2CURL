@@ -118,7 +118,7 @@ for %%U in (
     "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
     "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
 ) do (
-    reg add %%U /f /v "DisplayName" /t REG_SZ /d "Eclipse (%VERSION_TAG%)" >nul 2>&1
+    reg add %%U /f /v "DisplayName" /t REG_SZ /d "Eclipse %VERSION_TAG%" >nul 2>&1
     reg add %%U /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
     reg add %%U /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
     reg add %%U /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
