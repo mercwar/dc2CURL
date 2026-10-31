@@ -71,21 +71,18 @@ if not exist "%FINAL_EXE_PATH%" (
 
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
-    regsvr32.exe /s "%FINAL_EXEC_DIR%\dc2ws2.dll"
-    echo                      [SUCCESS] dc2ws2.dll network subsystem registered.
+    echo                     [SUCCESS] dc2ws2.dll network subsystem ready.
 )
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                      [SUCCESS] DarkComHeadless.dll registration.
+    echo                     [SUCCESS] DarkComHeadless.dll ready.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
-    regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                      [SUCCESS] WebView2Loader.dll registration.
+    echo                     [SUCCESS] WebView2Loader.dll ready.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                      [SUCCESS] installed 'dc2url.bat' successfully.
+echo                     [SUCCESS] installed 'dc2url.bat' successfully.
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
@@ -174,7 +171,7 @@ echo.
 
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 
-choice /c YN /n /m "%O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%"
+choice /c YN /n /m "%O2%        [?] Update/install Eclipse for dc2url v1.1 ? (Y/N)%RESET%%BG_GLASS%"
 
 if errorlevel 2 goto :skip_setup
 if errorlevel 1 goto :run_setup
