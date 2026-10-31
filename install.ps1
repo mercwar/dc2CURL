@@ -173,9 +173,9 @@ if ($isInstalled) {
     Write-Header -StatusText "dc2URL command detected at: $dc2urlSource"
     
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
-    Write-Host "    [1] Install Eclipse (Pull Fresh setup.bat)"    -ForegroundColor White
-    Write-Host "    [2] Reinstall dc2URL (Pull Fresh launcher.bat)" -ForegroundColor White
-    Write-Host "    [3] Purge dc2URL (Pull Fresh purge.bat)"       -ForegroundColor White
+    Write-Host "    [1] Install/Reinstall Eclipse (Fresh setup)"    -ForegroundColor White
+    Write-Host "    [2] Reinstall dc2URL (Fresh launcher)" -ForegroundColor White
+    Write-Host "    [3] Purge dc2url/ECLIPSE (Use Windows add/remove First!)"       -ForegroundColor White
     Write-Host "    [4] Exit"                                     -ForegroundColor White
     Write-Host ""
     
