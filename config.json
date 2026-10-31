@@ -1,7 +1,7 @@
 {
   "repo_owner": "mercwar",
   "repo_name": "dc2url",
-  "version": "v1.0",
+  "version": "v1.1",
   "do_not_version": "root_files",
   "manifest_layout": {
     "root_files": [
@@ -19,6 +19,7 @@
     ],
     "binary_exec": [
       {"source": "exec/dc2url.exe", "target": "exec/dc2url.exe"},
+      {"source": "exec/dc2ws2.dll", "target": "exec/dc2ws2.dll"},
       {"source": "exec/DarkComHeadless.dll", "target": "exec/DarkComHeadless.dll"},
       {"source": "exec/WebView2Loader.dll", "target": "exec/WebView2Loader.dll"}
     ]
