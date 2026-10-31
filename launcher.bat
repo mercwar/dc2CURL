@@ -171,7 +171,6 @@ if not exist "!CONFIG_FILE!" (
 )
 del error_config.log >nul 2>&1
 echo %GREEN%    [*] config.json downloaded successfully to disk.%RESET%
-
 :: ============================================================
 :: PARSE MANIFEST & LOOP NODES FROM DISK WITH ABSOLUTE PATH LOCK
 :: ============================================================
@@ -181,6 +180,9 @@ for %%f in ("!CONFIG_FILE!") do set "ABS_CONFIG_FILE=%%~ff"
 
 if exist error_manifest.log del /f /q error_manifest.log >nul 2>&1
 if exist manifest_stream.tmp del /f /q manifest_stream.tmp >nul 2>&1
+
+:: Extract the version field directly from the JSON into the VERSION variable before running the loops
+for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "(Get-Content '!ABS_CONFIG_FILE!' | ConvertFrom-Json).version"`) do set "VERSION=%%v"
 
 powershell -NoProfile -Command "$path = '%ABS_CONFIG_FILE%'; $jsonText = [System.IO.File]::ReadAllText($path); $cfg = $jsonText | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }" > manifest_stream.tmp 2>error_manifest.log
 
@@ -214,18 +216,22 @@ echo %GREEN%    [*] Processing completed to destination target path: !INSTALL_PA
 :: ============================================================
 :: POST-DOWNLOAD AUTOMATIC EXECUTION OF INSTALL.BAT
 :: ============================================================
-set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\v1.0\install.bat"
+set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\!VERSION!\install.bat"
 
-echo %O2%    [*] Validating and executing install.bat automatically...%RESET%
+echo.
+echo %GREEN%    [*] Target Path: !INSTALL_PATH!%RESET%
+echo %GREEN%    [*] Script Path: !EXPECTED_INSTALL_BAT!%RESET%
+echo %O2%    [*] Validating installer ...%RESET%
+
 if exist "!EXPECTED_INSTALL_BAT!" (
-    echo %GREEN%    [*] Success: Running install.bat...%RESET%
+    echo %GREEN%    [*] Success: Running dc2url installer...%RESET%
     echo.
-    pushd "!INSTALL_PATH!\v1.0"
-    call "install.bat"
-    popd
+    call "!EXPECTED_INSTALL_BAT!"
+	
 ) else (
     echo %O1%    [-] Warning: install.bat could not be verified at expected location.%RESET%
 )
+
 goto :finish
 
 :: ============================================================
