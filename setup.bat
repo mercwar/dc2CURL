@@ -18,9 +18,22 @@ set "ROOT_DIR=%~dp0"
 set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/config.json"
 set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
-cls
+for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
+set "RESET=%E%[0m"
+set "BG_GLASS=%E%[48;2;10;10;12m"
+set "O1=%E%[38;2;255;68;0m"
+set "O2=%E%[38;2;255;110;0m"
+set "O3=%E%[38;2;255;153;0m"
+set "Y1=%E%[38;2;255;200;0m"
+set "Y2=%E%[38;2;255;235;0m"
+set "TXT=%E%[38;2;240;240;240m"
 
-echo [Eclipse] Downloading version, please wait...
+cls
+echo %BG_GLASS%
+cls
+echo.
+echo. 
+echo  %O2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
 
 if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
 dc2url -l "%CONFIG_URL%" -nojs -o "%TEMP_CONFIG%"
@@ -33,7 +46,7 @@ if exist "%TEMP_CONFIG%" (
     del /f /q "%TEMP_CONFIG%" >nul 2>&1
 )
 
-echo [+] Discovered Version Path Mapping: %VERSION_TAG%
+echo [+] Discovered Version Path Mapping: %VERSION_TAG% 
 
 set "TARGET=%ProgramFiles%\dc2url"
 set "TARGET_BASE=%TARGET%\%VERSION_TAG%"
@@ -55,15 +68,6 @@ chcp 65001 >nul 2>&1
 color 0E
 
 reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
-for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
-set "RESET=%E%[0m"
-set "BG_GLASS=%E%[48;2;10;10;12m"
-set "O1=%E%[38;2;255;68;0m"
-set "O2=%E%[38;2;255;110;0m"
-set "O3=%E%[38;2;255;153;0m"
-set "Y1=%E%[38;2;255;200;0m"
-set "Y2=%E%[38;2;255;235;0m"
-set "TXT=%E%[38;2;240;240;240m"
 
 cls
 echo %BG_GLASS%
