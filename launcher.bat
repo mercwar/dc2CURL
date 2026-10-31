@@ -237,7 +237,7 @@ if exist "!EXPECTED_INSTALL_BAT!" (
 ) else (
     echo %O1%    [-] Warning: install.bat could not be verified at expected location.%RESET%
 )
-
+goto :finish
 :: ============================================================
 :: ECLIPSE & ROOT SETUP PROMPT
 :: ============================================================
