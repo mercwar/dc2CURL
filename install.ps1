@@ -43,7 +43,7 @@ $PurgeFile    = "purge.bat"
 function Write-Header {
     param ([string]$StatusText = "Contacting server...")
     Clear-Host
-    Write-Host " ___   ___  ___  _   _ ___  _       " -ForegroundColor DarkYellow
+    Write-Host " ___    ___  ___  _   _ ___   _       " -ForegroundColor DarkYellow
     Write-Host "|  _ \ / __||__ \| | | |  _ \| |     " -ForegroundColor DarkYellow
     Write-Host "| |_) | (__  / / | |_| | |_) | |__   " -ForegroundColor Yellow
     Write-Host "|____/ \___||____|\___/|_|\/|____|" -ForegroundColor Yellow
