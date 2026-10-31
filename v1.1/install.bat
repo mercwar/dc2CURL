@@ -69,7 +69,7 @@ if not exist "%FINAL_EXE_PATH%" (
     goto :finish
 )
 
-echo %O2%        [*] Processing OLE/COM & System DLL Registrations...%RESET%%BG_GLASS%
+echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\dc2ws2.dll"
     echo                      [SUCCESS] dc2ws2.dll network subsystem registered.
