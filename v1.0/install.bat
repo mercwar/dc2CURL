@@ -1,4 +1,5 @@
 @echo off
+
 :: InstallShield Subsystem: Force Elevated Administrative Token Context
 :: -----------------------------------------------------------------------------
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
@@ -23,7 +24,7 @@ for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
 set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\dc2url.exe"
-set "MIDI_OUTPUT=%TEMP%\transformers.mid"
+
 set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transformers.mid"
 
 cd /d "%FINAL_EXEC_DIR%"
@@ -122,14 +123,20 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Use
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-set "PATH=%FINAL_EXEC_DIR%;%PATH%"
+
+set "MIDI_OUTPUT=%PROGRAM_FILES%\%FINAL_EXEC_DIR%\transformers.mid"
 
 echo                     [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 
+:: Ensure the root sound directory exists
+set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
+if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
+
 :: =========================================================================
 :: SOUND ARGUMENT REGISTRY CHECK & AUDIO PLAYBACK ROUTINE
 :: =========================================================================
+echo.
 echo %O2%        [*] Detecting sound settings ...%RESET%%BG_GLASS%
 
 set "SOUND_SETTING=off"
@@ -140,53 +147,70 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 if /i "%SOUND_SETTING%"=="on" (
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%" >nul 2>&1
     
-    echo Downloading midi via dc2url [-nojs] to TEMP...
-    dc2url.exe -o "%MIDI_OUTPUT%" "%MIDI_URL%"
+    rem echo Downloading midi via dc2url [-nojs] to TEMP...
+    dc2url -o "%MIDI_OUTPUT%" "%MIDI_URL%"
     
     echo.
     if exist "%MIDI_OUTPUT%" (
         for %%I in ("%MIDI_OUTPUT%") do set "FILESIZE=%%~zI"
         
-        if !FILESIZE! GTR 1000 (
-            echo [Transformation] TRANSFORM!
-            start "" "%MIDI_OUTPUT%"
-        ) else (
-            echo [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or proxy.
-        )
+        :: FIXED: Changed GTR to LSS (Less Than) to match your "too small" error description
+        if !FILESIZE! LSS 1000 goto bad_file
+        echo.
+echo %Y2%        [Transformation] TRANSFORM... %RESET%%BG_GLASS%
+        start "" "%MIDI_OUTPUT%"
+        
     ) else (
         echo [AVIS ERROR] Binary download failed.
     )
 ) else (
     echo %TXT%        [INFO] Skipping audio playback.%RESET%%BG_GLASS%
 )
+goto finish
 
+:bad_file
+:: FIXED: Delayed expansion will now properly display the actual byte number here
+echo [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or proxy.
+
+:finish
 echo.
 echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%%BG_GLASS%
 echo.
 
-:finish
 echo %TXT%        Your copy of dc2url in now installed cmd:\ dc2url -nojs [curl compat]...%RESET%
 echo.
 
 :: =========================================================================
 :: EXECUTE EXISTING LOCAL SETUP SCRIPT DIRECTLY
 :: =========================================================================
-if exist "%ROOT_DIR%\setup.bat" (
-    echo %O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%
-    choice /c YN /n /m "        Press Y to run setup, or N to skip: "
-    
-    if errorlevel 2 (
-        echo %TXT%        [INFO] Exiting...%RESET%%BG_GLASS%
-    ) else if errorlevel 1 (
-        echo %O2%        [*] Launching local setup...%RESET%%BG_GLASS%
-        cd /d "%FINAL_EXEC_DIR%"
-        timeout /t 2 >nul
-        call "%ROOT_DIR%\setup.bat"
-    )
-) else (
-    echo %TXT%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
-)
+if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 
+choice /c YN /n /m "%O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%"
+
+
+:: choice returns errorlevel 2 for 'N' and 1 for 'Y'
+if errorlevel 2 goto :skip_setup
+if errorlevel 1 goto :run_setup
+
+:run_setup
+echo %O2%        [*] Launching local setup...%RESET%%BG_GLASS%
+cd /d "%BASE_DIR%"
+timeout /t 2 >nul
+call "%BASE_DIR%\setup.bat"
+goto :setup_end
+
+:skip_setup
+echo %Y2%        [INFO] Exiting...%RESET%%BG_GLASS%
+goto :setup_end
+
+:no_setup
+echo %TXT%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
+
+:setup_end
+:: Script continues normally here...
+echo.
+echo.
+pause
 echo.
 echo.
 endlocal
