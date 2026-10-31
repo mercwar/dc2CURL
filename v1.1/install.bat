@@ -51,12 +51,11 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
-echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
-echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+echo %O1%      ######   #####  ######  ##  ##  #####  ######  ###   ### ###### %RESET%%BG_GLASS%
+echo %O2%      ##   ## ##   ## ##   ## ## ##   ##     ##   ## #### ####     ## %RESET%%BG_GLASS%
+echo %O3%      ##   ## ####### ######  #####   ##     ##   ## ## ### ##  ##### %RESET%%BG_GLASS%
+echo %Y1%      ##   ## ##   ## ##   ## ##  ##  ##     ##   ## ##     ##      ## %RESET%%BG_GLASS%
+echo %Y2%      ######  ##   ## ##   ## ##  ##   #####  #####  ##     ## ####### %RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
@@ -70,19 +69,23 @@ if not exist "%FINAL_EXE_PATH%" (
     goto :finish
 )
 
-echo %O2%        [*] Processing OLE/COM Registrations...%RESET%%BG_GLASS%
+echo %O2%        [*] Processing OLE/COM & System DLL Registrations...%RESET%%BG_GLASS%
+if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
+    regsvr32.exe /s "%FINAL_EXEC_DIR%\dc2ws2.dll"
+    echo                      [SUCCESS] dc2ws2.dll network subsystem registered.
+)
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll"
-    echo                     [SUCCESS] DarkComHeadless.dll registration.
+    echo                      [SUCCESS] DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /s "%FINAL_EXEC_DIR%\WebView2Loader.dll"
-    echo                     [SUCCESS] WebView2Loader.dll registration.
+    echo                      [SUCCESS] WebView2Loader.dll registration.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                     [SUCCESS] installed 'dc2url.bat' successfully.
+echo                      [SUCCESS] installed 'dc2url.bat' successfully.
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
@@ -123,19 +126,12 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Use
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-
-set "MIDI_OUTPUT=%PROGRAM_FILES%\%FINAL_EXEC_DIR%\transformers.mid"
-
 echo                     [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 
-:: Ensure the root sound directory exists
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
 
-:: =========================================================================
-:: SOUND ARGUMENT REGISTRY CHECK & AUDIO PLAYBACK ROUTINE
-:: =========================================================================
 echo.
 echo %O2%        [*] Detecting sound settings ...%RESET%%BG_GLASS%
 
@@ -147,17 +143,15 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 if /i "%SOUND_SETTING%"=="on" (
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%" >nul 2>&1
     
-    rem echo Downloading midi via dc2url [-nojs] to TEMP...
     dc2url -o "%MIDI_OUTPUT%" "%MIDI_URL%"
     
     echo.
     if exist "%MIDI_OUTPUT%" (
         for %%I in ("%MIDI_OUTPUT%") do set "FILESIZE=%%~zI"
         
-        :: FIXED: Changed GTR to LSS (Less Than) to match your "too small" error description
         if !FILESIZE! LSS 1000 goto bad_file
         echo.
-echo %Y2%        [Transformation] TRANSFORM... %RESET%%BG_GLASS%
+        echo %Y2%        [Transformation] TRANSFORM... %RESET%%BG_GLASS%
         start "" "%MIDI_OUTPUT%"
         
     ) else (
@@ -169,26 +163,19 @@ echo %Y2%        [Transformation] TRANSFORM... %RESET%%BG_GLASS%
 goto finish
 
 :bad_file
-:: FIXED: Delayed expansion will now properly display the actual byte number here
 echo [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or proxy.
 
 :finish
 echo.
 echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%%BG_GLASS%
 echo.
-
 echo %TXT%        Your copy of dc2url in now installed cmd:\ dc2url -nojs [curl compat]...%RESET%
 echo.
 
-:: =========================================================================
-:: EXECUTE EXISTING LOCAL SETUP SCRIPT DIRECTLY
-:: =========================================================================
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 
 choice /c YN /n /m "%O2%        [?] Install Eclipse for MS Windows 11 ? (Y/N)%RESET%%BG_GLASS%"
 
-
-:: choice returns errorlevel 2 for 'N' and 1 for 'Y'
 if errorlevel 2 goto :skip_setup
 if errorlevel 1 goto :run_setup
 
