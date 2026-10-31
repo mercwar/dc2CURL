@@ -15,7 +15,7 @@ setlocal EnableDelayedExpansion
 :: DIRECTORY RESOLUTION MAPPING & CONFIG.JSON VERSION DISCOVERY
 :: =========================================================================
 set "ROOT_DIR=%~dp0"
-set "CONFIG_URL=https://githubusercontent.com"
+set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main"
 set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
 for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
