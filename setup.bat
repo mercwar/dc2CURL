@@ -18,12 +18,13 @@ set "ROOT_DIR=%~dp0"
 set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/config.json"
 set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
-echo [*] Downloading root config.json to resolve deployment version...
-powershell -Command "try { Invoke-WebRequest -Uri '%CONFIG_URL%' -OutFile '%TEMP_CONFIG%' -UseBasicParsing } catch { }"
+echo [*] Downloading root config.json to resolve deployment version via dc2url...
+if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
+dc2url -l "%CONFIG_URL%" -nojs -o "%TEMP_CONFIG%"
 
 set "VERSION_TAG=v1.0"
 if exist "%TEMP_CONFIG%" (
-    for /f "delims=" %%v in ('powershell -Command "$json = Get-Content '%TEMP_CONFIG%' -Raw | ConvertFrom-Json; if($json.version) { output $json.version }" 2^>nul') do (
+    for /f "delims=" %%v in ('powershell -Command "$json = Get-Content '%TEMP_CONFIG%' -Raw | ConvertFrom-Json; if($json.version) { Write-Output $json.version }" 2^>nul') do (
         set "VERSION_TAG=%%v"
     )
     del /f /q "%TEMP_CONFIG%" >nul 2>&1
