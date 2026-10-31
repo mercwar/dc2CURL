@@ -2,39 +2,28 @@
 :: InstallShield Subsystem: Force Elevated Administrative Token Context
 :: -----------------------------------------------------------------------------
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
-if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstaller )
+if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 
 :RequestUAC
     powershell -Command "Start-Process '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
     exit /b
 
-:ExecuteUninstaller
-setlocal DisableDelayedExpansion
+:ExecuteSetup
+setlocal EnableDelayedExpansion
 
 :: =========================================================================
-:: DIRECTORY RESOLUTION MAPPING (MATCHING INSTALLER SCHEMA)
+:: DIRECTORY RESOLUTION MAPPING & CONFIG.JSON VERSION DISCOVERY
 :: =========================================================================
-set "VERSION_DIR=%~dp0"
-if "%VERSION_DIR:~-1%"=="\" set "VERSION_DIR=%VERSION_DIR:~0,-1%"
+set "ROOT_DIR=%~dp0"
+set "CONFIG_URL=https://githubusercontent.com"
+set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
-for %%I in ("%VERSION_DIR%") do set "VERSION_NAME=%%~nxI"
-for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
-
-set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
-
-title InstallShield Uninstaller :: dc2url Master Deployment Engine
-
-mode con: cols=120 lines=36
-chcp 65001 >nul 2>&1
-color 0E
-
-reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
 set "RESET=%E%[0m"
 set "BG_GLASS=%E%[48;2;10;10;12m"
-set "R1=%E%[38;2;255;68;0m"
-set "R2=%E%[38;2;255;110;0m"
-set "R3=%E%[38;2;255;153;0m"
+set "O1=%E%[38;2;255;68;0m"
+set "O2=%E%[38;2;255;110;0m"
+set "O3=%E%[38;2;255;153;0m"
 set "Y1=%E%[38;2;255;200;0m"
 set "Y2=%E%[38;2;255;235;0m"
 set "TXT=%E%[38;2;240;240;240m"
@@ -42,107 +31,103 @@ set "TXT=%E%[38;2;240;240;240m"
 cls
 echo %BG_GLASS%
 cls
-
 echo.
-echo %R1%        ███████╗ ██████╗██╗     ██║██████╗ ███████╗███████╗%RESET%%BG_GLASS%
-echo %R2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
-echo %R1%        █████╗  ██║     ██║     ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
-echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
-echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
-echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                            dc2url Uninstaller%RESET%%BG_GLASS%
-echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo.
+echo. 
+echo  %O2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
 
-:: =========================================================================
-:: 1. PROCESS TERMINATION & DLL UNREGISTRATION
-:: =========================================================================
-echo %R2%        [*] Closing active dc2url processes...%RESET%%BG_GLASS%
-taskkill /f /im dc2url.exe >nul 2>&1
+if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
+dc2url -l "%CONFIG_URL%" -nojs -o "%TEMP_CONFIG%"
 
-echo %R2%        [*] Unhooking system DLL components...%RESET%%BG_GLASS%
-if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                     [OK] Removed DarkComHeadless.dll registration.
-)
-if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
-    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
-    echo                     [OK] Removed WebView2Loader.dll registration.
+set "VERSION_TAG=v1.0"
+if exist "%TEMP_CONFIG%" (
+    for /f "delims=" %%v in ('powershell -Command "$json = Get-Content '%TEMP_CONFIG%' -Raw | ConvertFrom-Json; if($json.version) { Write-Output $json.version }" 2^>nul') do (
+        set "VERSION_TAG=%%v"
+    )
+    del /f /q "%TEMP_CONFIG%" >nul 2>&1
 )
 
-:: =========================================================================
-:: 2. REGISTRY & ADD/REMOVE PROGRAMS CLEANUP
-:: =========================================================================
-echo %R2%        [*] Removing Windows Registry entries, App Paths, and Add/Remove Programs keys...%RESET%%BG_GLASS%
+echo [+] Discovered Version Path Mapping: %VERSION_TAG% 
 
-reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
+set "TARGET=%ProgramFiles%\dc2url"
+set "TARGET_BASE=%TARGET%\%VERSION_TAG%"
+set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
+set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\eclipse.exe"
+set "DOWNLOAD_URL=https://byethost3.com"
+set "MENU_URL=https://byethost3.com"
 
-reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
-reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
-reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
-reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+if not exist "%TARGET%" mkdir "%TARGET%"
+if not exist "%TARGET_BASE%" mkdir "%TARGET_BASE%"
+if not exist "%FINAL_EXEC_DIR%" mkdir "%FINAL_EXEC_DIR%"
 
-:: Exhaustive Add/Remove Programs (Uninstall) clean for both HKLM, HKCU, and Wow6432Node
-reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
-reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
-reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
-reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+cd /d "%FINAL_EXEC_DIR%"
 
-:: Fallback: PowerShell loop to sweep any matching display name or publisher keys in Uninstall hives
-powershell -Command "$paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'); foreach($p in $paths){ Get-ItemProperty $p -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like '*dc2url*' -or $_.DisplayName -like '*Eclipse*' } | ForEach-Object { Remove-Item $_.PSPath -Recurse -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
+title InstallShield (R) Setup Launcher :: Eclipse Master Deployment Engine (%VERSION_TAG%)
+mode con: cols=120 lines=36
 
-:: Purge DOS command aliases / command shell linkage keys
-reg delete "HKCU\Software\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
+chcp 65001 >nul 2>&1
+color 0E
 
-:: Remove any command stubs or execution redirection links in user path directories
-if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
-if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
+reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 
-echo                     [OK] Windows Registry and Add/Remove Programs entries cleared.
+cls
+echo %BG_GLASS%
+cls
 
-:: =========================================================================
-:: 3. ENVIRONMENT PATH PURGE & BROADCAST
-:: =========================================================================
-echo %R2%        [*] Removing dc2url from system environment variables...%RESET%%BG_GLASS%
+echo.
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %Y2%                        Eclipse Ecosystem Installer :: Version %VERSION_TAG%%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo.
 
-reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v dc2url_path /f >nul 2>&1
-reg delete "HKCU\Environment" /v dc2url_path /f >nul 2>&1
-setx /M dc2url_path "" >nul 2>&1
-
-powershell -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); if($m -split ';' -contains '%FINAL_EXEC_DIR%'){$new=($m -split ';' | Where-Object {$_ -neq '%FINAL_EXEC_DIR%'}) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'Machine')}" >nul 2>&1
-powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); if($p -split ';' -contains '%FINAL_EXEC_DIR%'){$new=($p -split ';' | Where-Object {$_ -neq '%FINAL_EXEC_DIR%'}) -join ';'; [System.Environment]::SetEnvironmentVariable('PATH',$new,'User')}" >nul 2>&1
-
-powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
-
-echo                     [OK] System environment updated.
+:: --- Ensure Full Write Permissions ---
+echo %O2%    [*] Granting write permissions to target directories...%RESET%
+icacls "%TARGET%" /grant Users:(OI)(CI)F /t >nul 2>&1
 
 :: =========================================================================
-:: 4. FILESYSTEM CLEANUP (FULL DIRECTORY WIPE)
+:: DOWNLINK ACQUISITION VIA DC2URL (-nojs Fast Path)
 :: =========================================================================
-echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_GLASS%
+echo %O2%    [*] Checking for active instances of eclipse.exe...%RESET%
+taskkill /f /im eclipse.exe >nul 2>&1
 
-cd /d "%TEMP%"
+echo %O2%    [*] Acquiring eclipse.exe and menu.json via dc2url downlink engine...%RESET%
+if exist "%FINAL_EXE_PATH%" del /f /q "%FINAL_EXE_PATH%" >nul 2>&1
 
-if exist "%FINAL_EXEC_DIR%\dc2url.exe" (
-    del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
-    echo                     [OK] Removed dc2url.exe.
+dc2url -l "%DOWNLOAD_URL%" -o "%FINAL_EXE_PATH%"
+
+if not exist "%FINAL_EXEC_DIR%\menu.json" (
+    dc2url -l "%MENU_URL%"  -o "%FINAL_EXEC_DIR%\menu.json"
 )
 
-if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                     [OK] Removed DarkComHeadless.dll.
+:: =========================================================================
+:: ICON DETECTION AND HANDLING
+:: =========================================================================
+if exist "%TARGET%\eclipse.ico" (
+    echo %O2%    [*] Copying eclipse.ico resources into exec tree...%RESET%
+    copy /y "%TARGET%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
+) else if exist "%ROOT_DIR%\eclipse.ico" (
+    echo %O2%    [*] Staging eclipse.ico resources from working archive...%RESET%
+    copy /y "%ROOT_DIR%\eclipse.ico" "%TARGET%\eclipse.ico" >nul 2>&1
+    copy /y "%ROOT_DIR%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
 )
 
-echo.
-echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y1%                            UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
-echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo.
+:: =========================================================================
+:: WINDOWS REGISTRATION & ADD/REMOVE PROGRAMS SEEDING
+:: =========================================================================
+echo %O2%    [*] Injecting uninstaller context tokens to system tree...%RESET%
+for %%U in (
+    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
+    "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
+) do (
+    reg add %%U /f /v "DisplayName" /t REG_SZ /d "Eclipse (%VERSION_TAG%)" >nul 2>&1
+    reg add %%U /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
+    reg add %%U /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
+    reg add %%U /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+    if exist "%FINAL_EXEC_DIR%\eclipse.ico" reg add %%U /f /v "DisplayIcon" /t REG_SZ /d "\"%FINAL_EXEC_DIR%\eclipse.ico\"" >nul 2>&1
+)
 
-echo %TXT%        dc2url has been completely removed from your computer.%RESET%
+setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
+
 echo.
-echo.
+echo %Y2%    [SUCCESS] Eclipse %VERSION_TAG% successfully deployed and configured!%RESET%
 pause
 exit /b 0
