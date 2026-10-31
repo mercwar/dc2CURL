@@ -18,7 +18,10 @@ set "ROOT_DIR=%~dp0"
 set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/config.json"
 set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
-echo [*] Downloading root config.json to resolve deployment version via dc2url...
+cls
+
+echo [Eclipse] Downloading version, please wait...
+
 if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
 dc2url -l "%CONFIG_URL%" -nojs -o "%TEMP_CONFIG%"
 
