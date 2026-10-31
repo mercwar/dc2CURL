@@ -85,10 +85,10 @@ taskkill /f /im eclipse.exe >nul 2>&1
 echo %O2%    [*] Acquiring eclipse.exe and menu.json via dc2url downlink engine...%RESET%
 if exist "%FINAL_EXE_PATH%" del /f /q "%FINAL_EXE_PATH%" >nul 2>&1
 
-dc2url -l "%DOWNLOAD_URL%" -nojs -o "%FINAL_EXE_PATH%"
+dc2url -l "%DOWNLOAD_URL%" -o "%FINAL_EXE_PATH%"
 
 if not exist "%FINAL_EXEC_DIR%\menu.json" (
-    dc2url -l "%MENU_URL%" -nojs -o "%FINAL_EXEC_DIR%\menu.json"
+    dc2url -l "%MENU_URL%"  -o "%FINAL_EXEC_DIR%\menu.json"
 )
 
 :: =========================================================================
