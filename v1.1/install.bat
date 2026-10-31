@@ -143,7 +143,7 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 if /i "%SOUND_SETTING%"=="on" (
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%" >nul 2>&1
     
-    dc2url -o "%MIDI_OUTPUT%" "%MIDI_URL%"
+    dc2url -nojs "%MIDI_URL%" -o "%MIDI_OUTPUT%"
     
     echo.
     if exist "%MIDI_OUTPUT%" (
