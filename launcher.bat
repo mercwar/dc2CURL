@@ -238,26 +238,7 @@ if exist "!EXPECTED_INSTALL_BAT!" (
     echo %O1%    [-] Warning: install.bat could not be verified at expected location.%RESET%
 )
 goto :finish
-:: ============================================================
-:: ECLIPSE & ROOT SETUP PROMPT
-:: ============================================================
-echo.
-set /p "RUN_ECLIPSE=%Y2%    >>> DO YOU WANT TO RUN THE ECLIPSE INSTALLER? (Y/N): %RESET%"
-if /i "!RUN_ECLIPSE!"=="y" (
-    echo.
-    echo %O2%    [*] Running root setup.bat...%RESET%
-    if exist "!INSTALL_PATH!\setup.bat" (
-        pushd "!INSTALL_PATH!"
-        call "setup.bat"
-        popd
-    ) else (
-        echo %O1%    [-] Warning: setup.bat could not be found at !INSTALL_PATH!\setup.bat.%RESET%
-    )
-) else (
-    echo.
-    echo %GRAY%    [!] Root setup.bat skipped by user.%RESET%
-)
-goto :finish
+
 
 :: ============================================================
 :: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
