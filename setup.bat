@@ -178,6 +178,6 @@ if %FILE_SIZE% GTR 0 (
 
 echo %O3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
-echo %TXT%    Full Windows 11 installation routine complete. Press any key to exit...%RESET%
+echo %Y2%    [Eclipse] Now running in your system tray next to your clock. Press any key to exit...%RESET%
 pause >nul
 exit /b 0
