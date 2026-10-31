@@ -117,5 +117,5 @@ setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
 echo.
 echo %Y2%    [SUCCESS] Eclipse %VERSION_TAG% successfully deployed and configured!%RESET%
-pause >nul
+pause
 exit /b 0
