@@ -44,12 +44,11 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %R1%        ███████╗ ██████╗██╗     ██║██████╗ ███████╗███████╗%RESET%%BG_GLASS%
-echo %R2%        ██╔════╝██╔════╝██║     ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
-echo %R1%        █████╗  ██║     ██║     ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
-echo %Y1%        ██╔══╝  ██║     ██║     ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
-echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
+echo %R1%      ######   #####  ######  ##  ##  #####  ######  ###   ### ###### %RESET%%BG_GLASS%
+echo %R2%      ##   ## ##   ## ##   ## ## ##   ##     ##   ## #### ####     ## %RESET%%BG_GLASS%
+echo %R1%      ##   ## ####### ######  #####   ##     ##   ## ## ### ##  ##### %RESET%%BG_GLASS%
+echo %Y1%      ##   ## ##   ## ##   ## ##  ##  ##     ##   ## ##     ##      ## %RESET%%BG_GLASS%
+echo %Y2%      ######  ##   ## ##   ## ##  ##   #####  #####  ##     ## ####### %RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                            dc2url Uninstaller%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
@@ -62,13 +61,17 @@ echo %R2%        [*] Closing active dc2url processes...%RESET%%BG_GLASS%
 taskkill /f /im dc2url.exe >nul 2>&1
 
 echo %R2%        [*] Unhooking system DLL components...%RESET%%BG_GLASS%
+if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
+    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
+    echo                      [OK] Unregistered dc2ws2.dll network subsystem.
+)
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                     [OK] Removed DarkComHeadless.dll registration.
+    echo                      [OK] Removed DarkComHeadless.dll registration.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
-    echo                     [OK] Removed WebView2Loader.dll registration.
+    echo                      [OK] Removed WebView2Loader.dll registration.
 )
 
 :: =========================================================================
@@ -77,30 +80,24 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 echo %R2%        [*] Removing Windows Registry entries, App Paths, and Add/Remove Programs keys...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
+reg delete "HKCU\Software\dc2url" /f >nul 2>&1
 
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
-:: Exhaustive Add/Remove Programs (Uninstall) clean for both HKLM, HKCU, and Wow6432Node
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-:: Fallback: PowerShell loop to sweep any matching display name or publisher keys in Uninstall hives
 powershell -Command "$paths = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'); foreach($p in $paths){ Get-ItemProperty $p -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like '*dc2url*' -or $_.DisplayName -like '*Eclipse*' } | ForEach-Object { Remove-Item $_.PSPath -Recurse -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
 
-:: Purge DOS command aliases / command shell linkage keys
-reg delete "HKCU\Software\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Microsoft\Command Processor" /v AutoRun /f >nul 2>&1
-
-:: Remove any command stubs or execution redirection links in user path directories
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.exe" >nul 2>&1
 if exist "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" del /f /q "%LocalAppData%\Microsoft\WindowsApps\dc2url.bat" >nul 2>&1
 
-echo                     [OK] Windows Registry and Add/Remove Programs entries cleared.
+echo                      [OK] Windows Registry and Add/Remove Programs entries cleared.
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
@@ -116,7 +113,7 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Use
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-echo                     [OK] System environment updated.
+echo                      [OK] System environment updated.
 
 :: =========================================================================
 :: 4. FILESYSTEM CLEANUP (FULL DIRECTORY WIPE)
@@ -125,19 +122,14 @@ echo %R2%        [*] Deleting dc2url application files and folders...%RESET%%BG_
 
 cd /d "%TEMP%"
 
-if exist "%FINAL_EXEC_DIR%\dc2url.exe" (
-    del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
-    echo                     [OK] Removed dc2url.exe.
-)
-
-if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                     [OK] Removed DarkComHeadless.dll.
+if exist "%VERSION_DIR%" (
+    rmdir /s /q "%VERSION_DIR%" >nul 2>&1
+    echo                      [OK] Removed version directory %VERSION_NAME%.
 )
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y1%                            UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
+echo %Y1%                        UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
