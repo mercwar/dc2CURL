@@ -207,10 +207,6 @@ goto :setup_end
 echo %TXT%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
 
 :setup_end
-:: Script continues normally here...
-echo.
-echo.
-pause
 echo.
 echo.
 endlocal
