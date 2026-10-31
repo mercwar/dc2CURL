@@ -15,7 +15,7 @@ setlocal EnableDelayedExpansion
 :: DIRECTORY RESOLUTION MAPPING & CONFIG.JSON VERSION DISCOVERY
 :: =========================================================================
 set "ROOT_DIR=%~dp0"
-set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/config.json"
+set "CONFIG_URL=https://githubusercontent.com"
 set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
 for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
@@ -52,8 +52,8 @@ set "TARGET=%ProgramFiles%\dc2url"
 set "TARGET_BASE=%TARGET%\%VERSION_TAG%"
 set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\eclipse.exe"
-set "DOWNLOAD_URL=https://mercwar01.byethost3.com/darkcom2/downlink.php?file=eclipse/eclipse.exe"
-set "MENU_URL=https://mercwar01.byethost3.com/darkcom2/downlink.php?file=eclipse/menu.json"
+set "DOWNLOAD_URL=https://byethost3.com"
+set "MENU_URL=https://byethost3.com"
 
 if not exist "%TARGET%" mkdir "%TARGET%"
 if not exist "%TARGET_BASE%" mkdir "%TARGET_BASE%"
@@ -99,20 +99,20 @@ if not exist "%FINAL_EXEC_DIR%\menu.json" (
 )
 
 :: =========================================================================
-:: WINDOWS REGISTRATION & UNINSTALLER METADATA
+:: ICON DETECTION AND HANDLING
 :: =========================================================================
-echo %O2%    [*] Auto Registering eclipse into Windows Uninstall tree...%RESET%
-
-for %%U in (
-    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
-    "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
-) do (
-    reg add %%U /f /v "DisplayName" /t REG_SZ /d "Eclipse %VERSION_TAG%" >nul 2>&1
-    reg add %%U /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
-    reg add %%U /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
-    reg add %%U /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+if exist "%TARGET%\eclipse.ico" (
+    echo %O2%    [*] Copying eclipse.ico resources into exec tree...%RESET%
+    copy /y "%TARGET%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
+) else if exist "%ROOT_DIR%\eclipse.ico" (
+    echo %O2%    [*] Staging eclipse.ico resources from working archive...%RESET%
+    copy /y "%ROOT_DIR%\eclipse.ico" "%TARGET%\eclipse.ico" >nul 2>&1
+    copy /y "%ROOT_DIR%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
 )
 
+:: =========================================================================
+:: WORKSPACE SHELL GLOBAL PATH REGISTRATION
+:: =========================================================================
 setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
 echo.
